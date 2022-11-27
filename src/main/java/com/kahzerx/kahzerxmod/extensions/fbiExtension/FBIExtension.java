@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FBIExtension extends GenericExtension implements Extensions {
-    public static List<ServerPlayerEntity> hiddenPlayers = new ArrayList<>();
+    private static final List<ServerPlayerEntity> hiddenPlayers = new ArrayList<>();
     public FBIExtension(ExtensionSettings settings) {
         super(settings);
     }

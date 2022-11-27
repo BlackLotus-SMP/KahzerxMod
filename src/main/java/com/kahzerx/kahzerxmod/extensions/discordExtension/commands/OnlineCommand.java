@@ -11,6 +11,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import java.util.List;
 import java.util.Objects;
 
+import static com.kahzerx.kahzerxmod.extensions.fbiExtension.FBIExtension.getHiddenPlayers;
+
 public class OnlineCommand extends GenericCommand {
     public OnlineCommand(String prefix) {
         super("online", DiscordPermission.ALLOWED_CHAT, prefix + "online");
@@ -24,6 +26,9 @@ public class OnlineCommand extends GenericCommand {
         StringBuilder msg = new StringBuilder();
         int n = server.getPlayerManager().getPlayerList().size();
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+            if (getHiddenPlayers().contains(player)) {
+                continue;
+            }
             boolean isBot = player.getClass() == KlonePlayerEntity.class;
             msg.append(player.getName().getString().replace("_", "\\_")).append(isBot ? " [Bot]" : "").append("\n");
         }
