@@ -3,10 +3,11 @@ package com.kahzerx.kahzerxmod.extensions.permsExtension;
 import java.util.Locale;
 
 public enum PermsLevels {
-    MEMBER(1, "MIEMBRO"),
-    HELPER(2, "HELPER"),
-    MOD(3, "MOD"),
-    ADMIN(4, "ADMIN");
+    TEST_MEMBER(1, "TEST_MEMBER"),
+    MEMBER(2, "MEMBER"),
+    HELPER(3, "HELPER"),
+    MOD(4, "MOD"),
+    ADMIN(5, "ADMIN");
 
     private final int id;
     private final String name;
@@ -26,24 +27,26 @@ public enum PermsLevels {
 
     public static PermsLevels getValue(int l) {
         return switch (l) {
-            case 2 -> HELPER;
-            case 3 -> MOD;
-            case 4 -> ADMIN;
-            default -> MEMBER;
+            case 2 -> MEMBER;
+            case 3 -> HELPER;
+            case 4 -> MOD;
+            case 5 -> ADMIN;
+            default -> TEST_MEMBER;
         };
     }
 
     public static String[] permNames() {
-        return new String[]{"MIEMBRO", "HELPER", "MOD", "ADMIN"};
+        return new String[]{"TEST_MEMBER", "MEMBER", "HELPER", "MOD", "ADMIN"};
     }
 
     public static int getLevel(String name) {
         String upName = name.toUpperCase(Locale.ROOT);
         return switch (upName) {
-            case "MIEMBRO" -> 1;
-            case "HELPER" -> 2;
-            case "MOD" -> 3;
-            case "ADMIN" -> 4;
+            case "TEST_MEMBER" -> 1;
+            case "MIEMBRO" -> 2;
+            case "HELPER" -> 3;
+            case "MOD" -> 4;
+            case "ADMIN" -> 5;
             default -> -1;
         };
     }

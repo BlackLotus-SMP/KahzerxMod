@@ -30,7 +30,7 @@ public class RandomTPExtension extends GenericExtension implements Extensions {
         return this.getSettings();
     }
 
-    public int tpAndSpawnPoint(ServerCommandSource source) throws CommandSyntaxException {
+    public int tpAndSpawnPoint(ServerCommandSource source) {
         ServerPlayerEntity player = source.getPlayer();
         if (player == null) {
             return 1;

@@ -31,7 +31,7 @@ public class MemberExtension extends GenericExtension implements Extensions {
         }
         if (!teamNames.contains("MOD")) {
             Team team = server.getScoreboard().addTeam("MOD");
-            team.setPrefix(Text.literal("[MOD] ").styled(style -> style.withBold(true).withColor(Formatting.DARK_PURPLE)));
+            team.setPrefix(Text.literal("[MOD] ").styled(style -> style.withBold(true).withColor(Formatting.DARK_AQUA)));
             team.setShowFriendlyInvisibles(false);
         }
         if (!teamNames.contains("HELPER")) {
@@ -39,17 +39,22 @@ public class MemberExtension extends GenericExtension implements Extensions {
             team.setPrefix(Text.literal("[HELPER] ").styled(style -> style.withBold(true).withColor(Formatting.AQUA)));
             team.setShowFriendlyInvisibles(false);
         }
-        if (!teamNames.contains("MIEMBRO")) {
-            Team team = server.getScoreboard().addTeam("MIEMBRO");
-            team.setPrefix(Text.literal("[MIEMBRO] ").styled(style -> style.withBold(true).withColor(Formatting.GREEN)));
+        if (!teamNames.contains("MEMBER")) {
+            Team team = server.getScoreboard().addTeam("MEMBER");
+            team.setPrefix(Text.literal("[MEMBER] ").styled(style -> style.withBold(true).withColor(Formatting.DARK_PURPLE)));
             team.setShowFriendlyInvisibles(false);
         }
-        if (teamNames.contains("MIEMBRO")) {
+        if (!teamNames.contains("TEST_MEMBER")) {
+            Team team = server.getScoreboard().addTeam("TEST_MEMBER");
+            team.setPrefix(Text.literal("[TEST_MEMBER] ").styled(style -> style.withBold(true).withColor(Formatting.LIGHT_PURPLE)));
+            team.setShowFriendlyInvisibles(false);
+        }
+        if (teamNames.contains("TEST_MEMBER")) {
             Team playerTeam = server.getScoreboard().getPlayerTeam(player.getName().getString());
             if (playerTeam != null) {
                 return;
             }
-            Team team = server.getScoreboard().getTeam("MIEMBRO");
+            Team team = server.getScoreboard().getTeam("TEST_MEMBER");
             server.getScoreboard().addPlayerToTeam(player.getName().getString(), team);
         }
     }
