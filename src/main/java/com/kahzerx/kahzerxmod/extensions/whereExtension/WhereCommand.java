@@ -1,5 +1,6 @@
 package com.kahzerx.kahzerxmod.extensions.whereExtension;
 
+import com.kahzerx.kahzerxmod.extensions.permsExtension.PermsLevels;
 import com.kahzerx.kahzerxmod.utils.DimUtils;
 import com.kahzerx.kahzerxmod.utils.PlayerUtils;
 import com.mojang.brigadier.CommandDispatcher;
@@ -15,7 +16,12 @@ import static net.minecraft.server.command.CommandManager.literal;
 public class WhereCommand {
     public void register(CommandDispatcher<ServerCommandSource> dispatcher, WhereExtension where) {
         dispatcher.register(literal("where").
-                requires(server -> where.extensionSettings().isEnabled()).
+                requires(server -> {
+                    if (where.extensionSettings().isEnabled() && where.getPermsExtension().extensionSettings().isEnabled()) {
+                        return where.getPermsExtension().getDBPlayerPerms(server.getPlayer().getUuidAsString()).getId() >= PermsLevels.MEMBER.getId();
+                    }
+                    return false;
+                }).
                 then(argument("player", StringArgumentType.word()).
                         suggests((c, b) -> suggestMatching(PlayerUtils.getPlayers(c.getSource()), b)).
                         executes(context -> {

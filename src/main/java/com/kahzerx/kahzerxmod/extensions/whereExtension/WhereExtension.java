@@ -3,12 +3,20 @@ package com.kahzerx.kahzerxmod.extensions.whereExtension;
 import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
+import com.kahzerx.kahzerxmod.extensions.permsExtension.PermsExtension;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.server.command.ServerCommandSource;
 
 public class WhereExtension extends GenericExtension implements Extensions {
-    public WhereExtension(ExtensionSettings settings) {
+    private final PermsExtension permsExtension;
+
+    public WhereExtension(ExtensionSettings settings, PermsExtension perms) {
         super(settings);
+        this.permsExtension = perms;
+    }
+
+    public PermsExtension getPermsExtension() {
+        return this.permsExtension;
     }
 
     @Override
