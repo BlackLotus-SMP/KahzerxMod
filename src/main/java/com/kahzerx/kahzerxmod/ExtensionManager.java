@@ -114,7 +114,7 @@ public class ExtensionManager {
         KahzerxServer.extensions.add(new HereExtension(new ExtensionSettings("here", isEnabled(found, "here"), "/here, print current location + glowing 5 seconds.")));
         KahzerxServer.extensions.add(new DeathMsgExtension(new ExtensionSettings("deathMessage", isEnabled(found, "deathMessage"), "Print death position when player dies.")));
         KahzerxServer.extensions.add(new AFKExtension(new ExtensionSettings("afk", isEnabled(found, "afk"), "/afk idk everyone keeps asking for this thing, it literally kicks you from the server.")));
-        KahzerxServer.extensions.add(new RandomTPExtension(new ExtensionSettings("randomTP", isEnabled(found, "randomTP"), "randomTP in a 10k block radius.")));
+        KahzerxServer.extensions.add(new RandomTPExtension(new ExtensionSettings("randomTP", isEnabled(found, "randomTP"), "randomTP in a 10k block radius."), permsExtension));
         KahzerxServer.extensions.add(new BlockInfoExtension(new ExtensionSettings("blockInfo", isEnabled(found, "blockInfo"), "Player action logging and /blockInfo command.")));
         KahzerxServer.extensions.add(new SeedExtension(new ExtensionSettings("seed", isEnabled(found, "seed"), "Enables seed command for everyone in the server.")));
         KahzerxServer.extensions.add(new FckPrivacyExtension(new ExtensionSettings("fckPrivacy", isEnabled(found, "fckPrivacy"), "Saves every executed command including private messages in the logs file, like /msg name hello.")));

@@ -3,9 +3,9 @@ package com.kahzerx.kahzerxmod.extensions.randomTPExtension;
 import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
+import com.kahzerx.kahzerxmod.extensions.permsExtension.PermsExtension;
 import com.kahzerx.kahzerxmod.utils.MarkEnum;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.Blocks;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -16,13 +16,20 @@ import net.minecraft.world.World;
 import java.util.Random;
 
 public class RandomTPExtension extends GenericExtension implements Extensions {
-    public RandomTPExtension(ExtensionSettings settings) {
+    private final PermsExtension permsExtension;
+
+    public RandomTPExtension(ExtensionSettings settings, PermsExtension perms) {
         super(settings);
+        this.permsExtension = perms;
     }
 
     @Override
     public void onRegisterCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
         new RandomTPCommand().register(dispatcher, this);
+    }
+
+    public PermsExtension getPermsExtension() {
+        return this.permsExtension;
     }
 
     @Override
@@ -50,8 +57,7 @@ public class RandomTPExtension extends GenericExtension implements Extensions {
         player.teleport(x, y, z);
         BlockPos pos1 = source.getWorld().getTopPosition(Heightmap.Type.WORLD_SURFACE, new BlockPos(x, y, z));
         BlockPos posBelow = new BlockPos(pos1.getX(), pos1.getY() - 1, pos1.getZ());
-        if (source.getWorld().getBlockState(posBelow).getBlock().equals(Blocks.WATER) ||
-                source.getWorld().getBlockState(posBelow).getBlock().equals(Blocks.LAVA)) {
+        if (source.getWorld().getBlockState(posBelow).getBlock().equals(Blocks.WATER) || source.getWorld().getBlockState(posBelow).getBlock().equals(Blocks.LAVA)) {
             tpAndSpawnPoint(source);
         } else {
             player.teleport(x, pos1.getY(), z);
