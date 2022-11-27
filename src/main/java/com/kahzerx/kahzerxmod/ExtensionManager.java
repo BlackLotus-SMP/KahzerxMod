@@ -131,7 +131,7 @@ public class ExtensionManager {
         KahzerxServer.extensions.add(new VillagersFollowEmeraldExtension(new ExtensionSettings("villagersFollowEmeralds", isEnabled(found, "villagersFollowEmeralds"), "Villagers will follow any player holding emerald blocks.")));
         KahzerxServer.extensions.add(new XiemarExtension(new ExtensionSettings("xiemar", isEnabled(found, "xiemar"), "Literally kills xiemar if connected.")));
         KahzerxServer.extensions.add(new SolExtension(new ExtensionSettings("sol", isEnabled(found, "sol"), "Waifu!")));
-        KahzerxServer.extensions.add(new KloneExtension(new ExtensionSettings("klone", isEnabled(found, "klone"), "Clones your player to afk (will kick you); the bot will leave once you rejoin.")));
+        KahzerxServer.extensions.add(new KloneExtension(new ExtensionSettings("klone", isEnabled(found, "klone"), "Clones your player to afk (will kick you); the bot will leave once you rejoin."), permsExtension));
         KahzerxServer.extensions.add(new MaintenanceExtension(new ExtensionSettings("maintenance", isEnabled(found, "maintenance"), "Sets your server in maintenance mode so only op players can join.")));
         KahzerxServer.extensions.add(new PrankExtension(new ExtensionSettings("pranks", isEnabled(found, "pranks"), "Sets a prank level on your name.")));
         KahzerxServer.extensions.add(new SkullExtension(new ExtensionSettings("skull", isEnabled(found, "skull"), "Gives player heads.")));
