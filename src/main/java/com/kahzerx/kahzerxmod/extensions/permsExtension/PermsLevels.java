@@ -43,7 +43,7 @@ public enum PermsLevels {
         String upName = name.toUpperCase(Locale.ROOT);
         return switch (upName) {
             case "TEST_MEMBER" -> 1;
-            case "MIEMBRO" -> 2;
+            case "MEMBER" -> 2;
             case "HELPER" -> 3;
             case "MOD" -> 4;
             case "ADMIN" -> 5;
