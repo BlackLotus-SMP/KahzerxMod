@@ -33,7 +33,7 @@ public class KloneExtension extends GenericExtension implements Extensions {
             this.timer.cancel();
             this.timer.purge();
         }
-        this.timer = new Timer("WHITELIST_SYNC");
+        this.timer = new Timer("KLONE_TIMEOUT");
         this.timer.schedule(new KloneTimeout(this), 5_000, 60 * 60 * 1_000);
     }
 
