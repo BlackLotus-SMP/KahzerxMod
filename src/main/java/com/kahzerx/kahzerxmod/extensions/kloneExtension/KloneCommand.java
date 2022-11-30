@@ -19,7 +19,8 @@ public class KloneCommand {
                 }).
                 executes(context -> {
                     ServerPlayerEntity sourcePlayer = context.getSource().getPlayer();
-                    KlonePlayerEntity.createKlone(context.getSource().getServer(), sourcePlayer);
+                    KlonePlayerEntity klonePlayer = KlonePlayerEntity.createKlone(context.getSource().getServer(), sourcePlayer);
+                    klone.addKlone(klonePlayer);
                     return 1;
                 }));
         dispatcher.register(literal("clown").
