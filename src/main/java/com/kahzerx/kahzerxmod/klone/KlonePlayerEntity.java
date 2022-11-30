@@ -21,14 +21,21 @@ import net.minecraft.util.Formatting;
 import net.minecraft.world.GameRules;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class KlonePlayerEntity extends ServerPlayerEntity {
+    private final LocalDateTime timeout;
     public KlonePlayerEntity(MinecraftServer server, ServerWorld world, GameProfile profile, @Nullable PlayerPublicKey publicKey) {
         super(server, world, profile, publicKey);
+        this.timeout = LocalDateTime.now().plusDays(1);
     }
 
-    public static void createKlone(MinecraftServer server, ServerPlayerEntity player) {
+    public boolean isTimeout() {
+        return LocalDateTime.now().isAfter(this.timeout);
+    }
+
+    public static KlonePlayerEntity createKlone(MinecraftServer server, ServerPlayerEntity player) {
         ServerWorld world = player.getWorld();
         GameProfile profile = player.getGameProfile();
 
@@ -55,6 +62,7 @@ public class KlonePlayerEntity extends ServerPlayerEntity {
 
         klonedPlayer.dataTracker.set(PLAYER_MODEL_PARTS, (byte) 0x7f);
         klonedPlayer.getAbilities().flying = player.getAbilities().flying;
+        return klonedPlayer;
     }
 
     private void getOut() {
