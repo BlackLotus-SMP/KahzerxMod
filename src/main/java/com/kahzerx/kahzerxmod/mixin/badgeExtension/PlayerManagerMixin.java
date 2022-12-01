@@ -49,7 +49,6 @@ public class PlayerManagerMixin {
             }
             MutableText display = MutableText.of(sender.getDisplayName().getContent());
             display.setStyle(sender.getDisplayName().getStyle());
-            System.out.println(sender.getDisplayName().getSiblings());
             MutableText m = Text.literal("");
             if (sender.getDisplayName().getSiblings().size() != 0) {
                 display.append(sender.getDisplayName().getSiblings().get(0));
