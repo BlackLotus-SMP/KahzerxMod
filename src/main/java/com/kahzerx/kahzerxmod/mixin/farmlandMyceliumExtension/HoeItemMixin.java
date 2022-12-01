@@ -1,5 +1,6 @@
 package com.kahzerx.kahzerxmod.mixin.farmlandMyceliumExtension;
 
+import com.kahzerx.kahzerxmod.extensions.farmlandMyceliumExtension.FarmlandMyceliumExtension;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -22,7 +23,7 @@ public class HoeItemMixin {
     @Redirect(method = "useOnBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
     private BlockState onGetBlock(World instance, BlockPos pos) {
         Block b = instance.getBlockState(pos).getBlock();
-        if (b == Blocks.MYCELIUM) {
+        if (b == Blocks.MYCELIUM && FarmlandMyceliumExtension.isExtensionEnabled) {
             replaced = true;
             return Blocks.DIRT.getDefaultState();
         }
