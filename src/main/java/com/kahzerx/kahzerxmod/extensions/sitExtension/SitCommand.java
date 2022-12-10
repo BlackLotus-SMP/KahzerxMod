@@ -13,6 +13,9 @@ public class SitCommand {
                 requires(server -> extension.extensionSettings().isEnabled()).
                 executes(context -> {
                     ServerPlayerEntity player = context.getSource().getPlayer();
+                    if (player == null) {
+                        return 1;
+                    }
                     SitEntity sitEntity = new SitEntity(player.getWorld(), player.getX(), player.getY() - 0.16, player.getZ());
                     if (!player.isOnGround()) {
                         return 1;
@@ -21,7 +24,7 @@ public class SitCommand {
                     player.getWorld().spawnEntity(sitEntity);
                     player.setSneaking(false);
                     player.startRiding(sitEntity);
-                    player.networkHandler.sendPacket(new EntityTrackerUpdateS2CPacket(player.getId(), player.getDataTracker(), true));
+                    player.networkHandler.sendPacket(new EntityTrackerUpdateS2CPacket(player.getId(), player.getDataTracker().getChangedEntries()));
                     return 1;
                 }));
     }
