@@ -6,7 +6,6 @@ import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.kahzerx.kahzerxmod.extensions.permsExtension.PermsExtension;
 import com.kahzerx.kahzerxmod.utils.MarkEnum;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 
@@ -22,7 +21,7 @@ public class ModTPExtension extends GenericExtension implements Extensions {
         new ModTPCommand().register(dispatcher, this);
     }
 
-    public int tp(ServerCommandSource source, String playerName) throws CommandSyntaxException {
+    public int tp(ServerCommandSource source, String playerName) {
         ServerPlayerEntity player = source.getServer().getPlayerManager().getPlayer(playerName);
         if (player == null) {
             source.sendFeedback(MarkEnum.CROSS.appendMessage("Not online"), false);

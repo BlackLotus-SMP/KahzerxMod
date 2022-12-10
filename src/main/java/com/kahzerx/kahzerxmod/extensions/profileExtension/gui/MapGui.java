@@ -85,7 +85,7 @@ public class MapGui {
     public void showFrame() {
         player.networkHandler.sendPacket(mapEntity.createSpawnPacket());
         if (!mapEntity.getDataTracker().isEmpty()) {
-            player.networkHandler.sendPacket(new EntityTrackerUpdateS2CPacket(mapEntity.getId(), mapEntity.getDataTracker(), true));
+            player.networkHandler.sendPacket(new EntityTrackerUpdateS2CPacket(mapEntity.getId(), mapEntity.getDataTracker().getChangedEntries()));
         }
     }
 

@@ -10,6 +10,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.sql.*;
+import java.util.Collection;
 import java.util.HashMap;
 
 public class PrankExtension extends GenericExtension implements Extensions {
@@ -120,6 +121,11 @@ public class PrankExtension extends GenericExtension implements Extensions {
     }
 
     private void updatePlayerList() {
-        server.getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.UPDATE_DISPLAY_NAME, server.getPlayerManager().getPlayerList()));
+        // TODO wut
+//        Collection<ServerPlayerEntity> players = server.getPlayerManager().getPlayerList();
+        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+            server.getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.UPDATE_DISPLAY_NAME, player));
+        }
+//        server.getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.UPDATE_DISPLAY_NAME, players));
     }
 }

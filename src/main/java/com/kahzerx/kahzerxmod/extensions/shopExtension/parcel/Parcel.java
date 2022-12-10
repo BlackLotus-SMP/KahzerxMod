@@ -11,7 +11,6 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3f;
 
 import java.awt.*;
 import java.sql.Timestamp;
@@ -158,7 +157,7 @@ public class Parcel {
 
     private static void spawnDustParticle(ServerWorld world, BlockPos pos) {
         world.spawnParticles(
-                new DustParticleEffect(new Vec3f(Vec3d.unpackRgb(new Color(255, 220, 0).getRGB())), 1.0F),
+                new DustParticleEffect(Vec3d.unpackRgb(new Color(255, 220, 0).getRGB()).toVector3f(), 1.0F),
                 pos.getX(),
                 pos.getY(),
                 pos.getZ(),
