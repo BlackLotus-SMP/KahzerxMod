@@ -23,7 +23,6 @@
     "maintenanceExtension.PlayerManagerMixin",
     "noReports.ChatMessagePacketMixin",
     "noReports.DedicatedServerMixin",
-    "noReports.PlayerEntityMixin",
     "noReports.PlayerManagerMixin",
     "noReports.ServerMetadataMixin",
     "noReports.ServerPlayNetworkHandlerMixin",
