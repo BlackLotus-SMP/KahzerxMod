@@ -11,6 +11,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class ChatMessagePacketMixin {
     @Inject(method = "signature", at = @At("HEAD"), cancellable = true)
     private void onSignature(CallbackInfoReturnable<MessageSignatureData> cir) {
-        cir.setReturnValue(MessageSignatureData.EMPTY);
+        cir.setReturnValue(null);
     }
 }
