@@ -18,7 +18,7 @@ public class PlayerManagerMixin {
     @Redirect(method = "onPlayerConnect", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;sendPacket(Lnet/minecraft/network/Packet;)V", ordinal = 7))
     public void onConnect(ServerPlayNetworkHandler instance, Packet<?> packet) {
         PlayerListS2CPacket p = (PlayerListS2CPacket) packet;
-        if (!isHidden(p.getEntries().get(0).getProfile())) {
+        if (!isHidden(p.getEntries().get(0).profile())) {
             instance.sendPacket(packet);
         }
     }
