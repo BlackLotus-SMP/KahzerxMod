@@ -28,8 +28,8 @@ import java.util.UUID;
 public abstract class PlayerMixin extends PlayerEntity {
     @Shadow @Final public MinecraftServer server;
 
-    public PlayerMixin(World world, BlockPos pos, float yaw, GameProfile gameProfile, @Nullable PlayerPublicKey publicKey) {
-        super(world, pos, yaw, gameProfile, publicKey);
+    public PlayerMixin(World world, BlockPos pos, float yaw, GameProfile gameProfile) {
+        super(world, pos, yaw, gameProfile);
     }
 
 
