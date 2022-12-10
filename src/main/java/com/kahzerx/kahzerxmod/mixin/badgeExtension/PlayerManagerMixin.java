@@ -2,7 +2,6 @@ package com.kahzerx.kahzerxmod.mixin.badgeExtension;
 
 import com.kahzerx.kahzerxmod.extensions.badgeExtension.BadgeExtension;
 import com.kahzerx.kahzerxmod.extensions.badgeExtension.BadgeInstance;
-import net.minecraft.network.message.MessageSourceProfile;
 import net.minecraft.network.message.MessageType;
 import net.minecraft.network.message.SentMessage;
 import net.minecraft.network.message.SignedMessage;
@@ -22,8 +21,8 @@ import java.util.function.Predicate;
 
 @Mixin(PlayerManager.class)
 public class PlayerManagerMixin {
-    @Redirect(method = "broadcast(Lnet/minecraft/network/message/SignedMessage;Ljava/util/function/Predicate;Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/network/message/MessageSourceProfile;Lnet/minecraft/network/message/MessageType$Parameters;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;sendChatMessage(Lnet/minecraft/network/message/SentMessage;ZLnet/minecraft/network/message/MessageType$Parameters;)V"))
-    private void onBroadcast(ServerPlayerEntity instance, SentMessage message, boolean bl, MessageType.Parameters parameters, SignedMessage signedMessage, Predicate<ServerPlayerEntity> shouldSendFiltered, @Nullable ServerPlayerEntity sender, MessageSourceProfile messageSourceProfile, MessageType.Parameters parameters2) {
+    @Redirect(method = "broadcast(Lnet/minecraft/network/message/SignedMessage;Ljava/util/function/Predicate;Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/network/message/MessageType$Parameters;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;sendChatMessage(Lnet/minecraft/network/message/SentMessage;ZLnet/minecraft/network/message/MessageType$Parameters;)V"))
+    private void onBroadcast(ServerPlayerEntity instance, SentMessage message, boolean filterMaskEnabled, MessageType.Parameters params, SignedMessage messageFunc, Predicate<ServerPlayerEntity> shouldSendFiltered, @Nullable ServerPlayerEntity sender, MessageType.Parameters paramsFunc) {
         if (BadgeExtension.isExtensionEnabled && sender != null) {
             MutableText t = Text.literal("");
             List<BadgeInstance> badges = BadgeExtension.playerBadges.get(sender.getUuid().toString());
@@ -57,11 +56,11 @@ public class PlayerManagerMixin {
             }
             m.append(t);
             display.append(m);
-            MessageType.Parameters params = MessageType.params(MessageType.CHAT, sender.world.getRegistryManager(), display);
-            instance.sendChatMessage(message, bl, params);
+            MessageType.Parameters par = MessageType.params(MessageType.CHAT, sender.world.getRegistryManager(), display);
+            instance.sendChatMessage(message, filterMaskEnabled, par);
         }
         else {
-            instance.sendChatMessage(message, bl, parameters);
+            instance.sendChatMessage(message, filterMaskEnabled, params);
         }
     }
 }
