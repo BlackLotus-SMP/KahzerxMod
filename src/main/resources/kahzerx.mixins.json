@@ -24,6 +24,7 @@
     "noReports.ChatMessagePacketMixin",
     "noReports.DedicatedServerMixin",
     "noReports.PlayerManagerMixin",
+    "noReports.PlayerSessionC2SPacketMixin",
     "noReports.ServerMetadataMixin",
     "noReports.ServerPlayNetworkHandlerMixin",
     "opOnWhitelistExtension.ServerConfigMixin",
