@@ -19,8 +19,7 @@ public class BlockInfoUtils {
     public static boolean shouldRegisterBlock(Block block, ServerPlayerEntity player) {
         return !player.isInSneakingPose() && (block instanceof BlockWithEntity
                 || block instanceof DoorBlock || block instanceof FenceGateBlock
-                || block instanceof TrapdoorBlock || block instanceof LeverBlock
-                || block instanceof AbstractButtonBlock || block instanceof NoteBlock);
+                || block instanceof TrapdoorBlock || block instanceof WallMountedBlock || block instanceof NoteBlock);
     }
 
     public static boolean shouldRegisterItem(ServerPlayerEntity player, ItemStack itemStack) {

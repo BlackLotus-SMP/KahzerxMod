@@ -82,7 +82,7 @@ public class HereExtension extends GenericExtension implements Extensions {
             }
         }
         player.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 200, 0, false, false));
-        player.getWorld().playSound(null, player.getBlockPos(), Instrument.HARP.getSound(), SoundCategory.RECORDS, 3.0f, (float)Math.pow(2.0, (double)(24 - 12) / 12.0));
+        player.getWorld().playSound(null, player.getBlockPos(), Instrument.HARP.getSound().value(), SoundCategory.RECORDS, 3.0f, (float)Math.pow(2.0, (double)(24 - 12) / 12.0));
         return 1;
     }
 }

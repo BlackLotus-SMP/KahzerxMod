@@ -138,7 +138,7 @@ public class ShopExtension extends GenericExtension implements Extensions {
     private void initBankInstance() {
         String UUID_ = "00000000-0000-0000-0000-000000000000";
         String NAME = "Bank";
-        ServerPlayerEntity bankPlayer = new ServerPlayerEntity(this.server, this.server.getOverworld(), new GameProfile(UUID.fromString(UUID_), NAME), null);
+        ServerPlayerEntity bankPlayer = new ServerPlayerEntity(this.server, this.server.getOverworld(), new GameProfile(UUID.fromString(UUID_), NAME));
         this.onPlayerJoined(bankPlayer);
     }
 

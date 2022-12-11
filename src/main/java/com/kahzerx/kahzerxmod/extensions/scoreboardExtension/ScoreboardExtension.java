@@ -12,6 +12,7 @@ import net.minecraft.command.argument.ItemStackArgument;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ScoreboardCriterion;
 import net.minecraft.scoreboard.ScoreboardObjective;
@@ -111,8 +112,8 @@ public class ScoreboardExtension extends GenericExtension implements Extensions 
         return 1;
     }
 
-    public int startThreadedKilledScoreboard(ServerCommandSource source, Identifier id, String type, boolean persistent) {
-        new Thread(() -> showSideBar(source, id, type, persistent)).start();
+    public int startThreadedKilledScoreboard(ServerCommandSource source, RegistryEntry.Reference<EntityType<?>> id, String type, boolean persistent) {
+        new Thread(() -> showSideBar(source, id.registryKey().getRegistry(), type, persistent)).start();
         return 1;
     }
 

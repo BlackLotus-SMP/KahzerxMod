@@ -29,7 +29,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class ContainerInteractionLoggingMixin {
     @Mixin(ScreenHandler.class)
     public static abstract class ScreenHandlerMixin implements PlayerHandler {
-        @Shadow public ItemStack transferSlot(PlayerEntity player, int index) {
+        @Shadow public ItemStack quickMove(PlayerEntity player, int index) {
             this.player = player;
             return null;
         }

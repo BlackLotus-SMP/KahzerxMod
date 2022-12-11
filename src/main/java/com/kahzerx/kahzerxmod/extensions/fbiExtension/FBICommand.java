@@ -3,6 +3,7 @@ package com.kahzerx.kahzerxmod.extensions.fbiExtension;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
+import net.minecraft.network.packet.s2c.play.PlayerRemoveS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerSpawnS2CPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
@@ -10,6 +11,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.GameMode;
+
+import java.util.List;
 
 import static com.kahzerx.kahzerxmod.extensions.fbiExtension.FBIExtension.getHiddenPlayers;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -43,7 +46,7 @@ public class FBICommand {
                             if (p.equals(player)) {
                                 continue;
                             }
-                            p.networkHandler.sendPacket(new PlayerListS2CPacket(PlayerListS2CPacket.Action.REMOVE_PLAYER, player));
+                            p.networkHandler.sendPacket(new PlayerRemoveS2CPacket(List.of(player.getGameProfile().getId())));
                             p.networkHandler.sendPacket(new EntitiesDestroyS2CPacket(player.getId()));
                         }
                         player.changeGameMode(GameMode.SPECTATOR);
