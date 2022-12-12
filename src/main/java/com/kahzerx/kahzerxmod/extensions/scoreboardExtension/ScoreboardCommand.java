@@ -57,6 +57,8 @@ public class ScoreboardCommand {
                         executes(context -> scoreboard.startThreadedCommandScoreboard("K.killed_mobs", "killed mobs", "scoreboard objectives add K.killed_mobs minecraft.custom:minecraft.mob_kills", context.getSource(), Stats.MOB_KILLS, persistent))).
                 then(literal("cm_aviated").
                         executes(context -> scoreboard.startThreadedCommandScoreboard("K.cm_aviated", "cm aviated", "scoreboard objectives add K.cm_aviated minecraft.custom:minecraft.aviate_one_cm", context.getSource(), Stats.AVIATE_ONE_CM, persistent))).
+                then(literal("trades").
+                        executes(context -> scoreboard.startThreadedCommandScoreboard("K.villager_trades", "villager trades", "scoreboard objectives add K.villager_trades minecraft.custom:minecraft.traded_with_villager", context.getSource(), Stats.TRADED_WITH_VILLAGER, persistent))).
                 then(literal("cm_pig").
                         executes(context -> scoreboard.startThreadedCommandScoreboard("K.cm_pig", "cm pig", "scoreboard objectives add K.cm_pig minecraft.custom:minecraft.pig_one_cm", context.getSource(), Stats.PIG_ONE_CM, persistent))).
                 then(literal("cm_swim").
