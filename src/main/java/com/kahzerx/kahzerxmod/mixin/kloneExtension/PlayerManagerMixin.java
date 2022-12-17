@@ -15,6 +15,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 
+import static com.kahzerx.kahzerxmod.extensions.kloneExtension.KloneExtension.klones;
+
 @Mixin(value = PlayerManager.class, priority = 5000)
 public abstract class PlayerManagerMixin {
     @Shadow public abstract List<ServerPlayerEntity> getPlayerList();
@@ -23,7 +25,8 @@ public abstract class PlayerManagerMixin {
     private void onCreatePlayer(GameProfile profile, PlayerPublicKey publicKey, CallbackInfoReturnable<ServerPlayerEntity> cir) {
         for (ServerPlayerEntity player : getPlayerList()) {
             if (player.getGameProfile().getId().equals(profile.getId()) && player.getClass() == KlonePlayerEntity.class) {
-                 player.kill();
+                player.kill();
+                klones.remove(player);
             }
         }
     }

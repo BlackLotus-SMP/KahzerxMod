@@ -15,7 +15,7 @@ import java.util.Timer;
 
 public class KloneExtension extends GenericExtension implements Extensions {
     private final PermsExtension permsExtension;
-    private final ArrayList<KlonePlayerEntity> klones = new ArrayList<>();
+    public static final ArrayList<KlonePlayerEntity> klones = new ArrayList<>();
     private Timer timer;
 
     public KloneExtension(ExtensionSettings settings, PermsExtension perms) {
@@ -54,7 +54,7 @@ public class KloneExtension extends GenericExtension implements Extensions {
         if (player instanceof KlonePlayerEntity) {
             return;
         }
-        for (KlonePlayerEntity kp : this.klones) {
+        for (KlonePlayerEntity kp : klones) {
             if (player.getUuid() == kp.getUuid()) {
                 klones.remove(kp);
                 return;
