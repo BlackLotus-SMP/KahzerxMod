@@ -15,7 +15,7 @@ import java.util.Timer;
 
 public class KloneExtension extends GenericExtension implements Extensions {
     private final PermsExtension permsExtension;
-    public static final ArrayList<KlonePlayerEntity> klones = new ArrayList<>();
+    private final ArrayList<KlonePlayerEntity> klones = new ArrayList<>();
     private Timer timer;
 
     public KloneExtension(ExtensionSettings settings, PermsExtension perms) {
@@ -46,7 +46,11 @@ public class KloneExtension extends GenericExtension implements Extensions {
     }
 
     public void addKlone(KlonePlayerEntity klonedPlayer) {
-        klones.add(klonedPlayer);
+        this.klones.add(klonedPlayer);
+    }
+
+    public void removeKlone(KlonePlayerEntity klonedPlayer) {
+        this.klones.remove(klonedPlayer);
     }
 
     @Override

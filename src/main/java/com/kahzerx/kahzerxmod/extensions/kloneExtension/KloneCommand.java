@@ -19,7 +19,7 @@ public class KloneCommand {
                 }).
                 executes(context -> {
                     ServerPlayerEntity sourcePlayer = context.getSource().getPlayer();
-                    KlonePlayerEntity klonePlayer = KlonePlayerEntity.createKlone(context.getSource().getServer(), sourcePlayer);
+                    KlonePlayerEntity klonePlayer = KlonePlayerEntity.createKlone(context.getSource().getServer(), sourcePlayer, klone);
                     klone.addKlone(klonePlayer);
                     return 1;
                 }));
@@ -32,7 +32,7 @@ public class KloneCommand {
                 }).
                 executes(context -> {
                     ServerPlayerEntity sourcePlayer = context.getSource().getPlayer();
-                    KlonePlayerEntity.createKlone(context.getSource().getServer(), sourcePlayer);
+                    KlonePlayerEntity.createKlone(context.getSource().getServer(), sourcePlayer, klone);
                     return 1;
                 }));
     }

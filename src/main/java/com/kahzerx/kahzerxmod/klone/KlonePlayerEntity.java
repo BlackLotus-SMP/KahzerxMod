@@ -1,5 +1,6 @@
 package com.kahzerx.kahzerxmod.klone;
 
+import com.kahzerx.kahzerxmod.extensions.kloneExtension.KloneExtension;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.HungerManager;
@@ -26,16 +27,18 @@ import java.util.Objects;
 
 public class KlonePlayerEntity extends ServerPlayerEntity {
     private final LocalDateTime timeout;
-    public KlonePlayerEntity(MinecraftServer server, ServerWorld world, GameProfile profile, @Nullable PlayerPublicKey publicKey) {
+    private final KloneExtension kloneExtension;
+    public KlonePlayerEntity(MinecraftServer server, ServerWorld world, GameProfile profile, @Nullable PlayerPublicKey publicKey, KloneExtension kloneExtension) {
         super(server, world, profile, publicKey);
         this.timeout = LocalDateTime.now().plusDays(1);
+        this.kloneExtension = kloneExtension;
     }
 
     public boolean isTimeout() {
         return LocalDateTime.now().isAfter(this.timeout);
     }
 
-    public static KlonePlayerEntity createKlone(MinecraftServer server, ServerPlayerEntity player) {
+    public static KlonePlayerEntity createKlone(MinecraftServer server, ServerPlayerEntity player, KloneExtension kloneExtension) {
         ServerWorld world = player.getWorld();
         GameProfile profile = player.getGameProfile();
 
@@ -44,7 +47,7 @@ public class KlonePlayerEntity extends ServerPlayerEntity {
         server.getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.REMOVE_PLAYER, player));
         player.networkHandler.disconnect(Text.literal("A clone has been created.\nThe clone will leave once you rejoin.\nHappy AFK!"));
 
-        KlonePlayerEntity klonedPlayer = new KlonePlayerEntity(server, world, profile, player.getPublicKey());
+        KlonePlayerEntity klonedPlayer = new KlonePlayerEntity(server, world, profile, player.getPublicKey(), kloneExtension);
 //        KlonePlayerEntity klonedPlayer = new KlonePlayerEntity(server, world, profile);
 
         klonedPlayer.refreshPositionAndAngles(player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch());
@@ -84,6 +87,7 @@ public class KlonePlayerEntity extends ServerPlayerEntity {
 
     @Override
     public void kill() {
+        this.kloneExtension.removeKlone(this);
         this.kill(Text.literal("Killed"));
     }
 
