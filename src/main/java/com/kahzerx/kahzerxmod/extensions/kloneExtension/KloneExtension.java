@@ -49,17 +49,8 @@ public class KloneExtension extends GenericExtension implements Extensions {
         klones.add(klonedPlayer);
     }
 
-    @Override
-    public void onPlayerJoined(ServerPlayerEntity player) {
-        if (player instanceof KlonePlayerEntity) {
-            return;
-        }
-        for (KlonePlayerEntity kp : this.klones) {
-            if (player.getUuid() == kp.getUuid()) {
-                klones.remove(kp);
-                return;
-            }
-        }
+    public void removeKlone(KlonePlayerEntity klonedPlayer) {
+        klones.remove(klonedPlayer);
     }
 
     @Override
