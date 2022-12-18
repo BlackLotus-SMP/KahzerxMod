@@ -21,7 +21,7 @@ public abstract class PlayerManagerMixin {
     private void onCreatePlayer(GameProfile profile, PlayerPublicKey publicKey, CallbackInfoReturnable<ServerPlayerEntity> cir) {
         for (ServerPlayerEntity player : getPlayerList()) {
             if (player.getGameProfile().getId().equals(profile.getId()) && player.getClass() == KlonePlayerEntity.class) {
-                player.kill();
+                ((KlonePlayerEntity) player).kill();
             }
         }
     }
