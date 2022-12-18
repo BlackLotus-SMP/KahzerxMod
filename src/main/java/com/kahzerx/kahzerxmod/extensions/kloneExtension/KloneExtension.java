@@ -8,7 +8,6 @@ import com.kahzerx.kahzerxmod.klone.KlonePlayerEntity;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.ArrayList;
 import java.util.Timer;
