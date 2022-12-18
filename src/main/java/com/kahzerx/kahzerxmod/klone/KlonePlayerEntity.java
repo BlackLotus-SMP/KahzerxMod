@@ -42,7 +42,6 @@ public class KlonePlayerEntity extends ServerPlayerEntity {
         ServerWorld world = player.getWorld();
         GameProfile profile = player.getGameProfile();
 
-        server.getPlayerManager().saveAllPlayerData();
         server.getPlayerManager().remove(player);
         server.getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.REMOVE_PLAYER, player));
         player.networkHandler.disconnect(Text.literal("A clone has been created.\nThe clone will leave once you rejoin.\nHappy AFK!"));
