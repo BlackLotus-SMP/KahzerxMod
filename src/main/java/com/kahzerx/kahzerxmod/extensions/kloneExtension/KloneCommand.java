@@ -13,7 +13,7 @@ public class KloneCommand {
         dispatcher.register(literal("klone").
                 requires(server -> {
                     if (klone.extensionSettings().isEnabled() && klone.getPermsExtension().extensionSettings().isEnabled()) {
-                        return klone.getPermsExtension().getDBPlayerPerms(server.getPlayer().getUuidAsString()).getId() >= PermsLevels.MEMBER.getId();
+                        return klone.getPermsExtension().getDBPlayerPerms(server.getPlayer().getUuidAsString()).getId() >= PermsLevels.SUB.getId();
                     }
                     return false;
                 }).
@@ -26,7 +26,7 @@ public class KloneCommand {
         dispatcher.register(literal("clown").
                 requires(server -> {
                     if (klone.extensionSettings().isEnabled() && klone.getPermsExtension().extensionSettings().isEnabled()) {
-                        return klone.getPermsExtension().getDBPlayerPerms(server.getPlayer().getUuidAsString()).getId() >= PermsLevels.MEMBER.getId();
+                        return klone.getPermsExtension().getDBPlayerPerms(server.getPlayer().getUuidAsString()).getId() >= PermsLevels.SUB.getId();
                     }
                     return false;
                 }).

@@ -11,7 +11,7 @@ public class RandomTPCommand {
         dispatcher.register(literal("randomTP").
                 requires(server -> {
                     if (rTP.extensionSettings().isEnabled() && rTP.getPermsExtension().extensionSettings().isEnabled()) {
-                        return rTP.getPermsExtension().getDBPlayerPerms(server.getPlayer().getUuidAsString()).getId() >= PermsLevels.MEMBER.getId();
+                        return rTP.getPermsExtension().getDBPlayerPerms(server.getPlayer().getUuidAsString()).getId() >= PermsLevels.SUB.getId();
                     }
                     return false;
                 }).
@@ -19,7 +19,7 @@ public class RandomTPCommand {
         dispatcher.register(literal("rTP").
                 requires(server -> {
                     if (rTP.extensionSettings().isEnabled() && rTP.getPermsExtension().extensionSettings().isEnabled()) {
-                        return rTP.getPermsExtension().getDBPlayerPerms(server.getPlayer().getUuidAsString()).getId() >= PermsLevels.MEMBER.getId();
+                        return rTP.getPermsExtension().getDBPlayerPerms(server.getPlayer().getUuidAsString()).getId() >= PermsLevels.SUB.getId();
                     }
                     return false;
                 }).

@@ -18,7 +18,7 @@ public class WhereCommand {
         dispatcher.register(literal("where").
                 requires(server -> {
                     if (where.extensionSettings().isEnabled() && where.getPermsExtension().extensionSettings().isEnabled()) {
-                        return where.getPermsExtension().getDBPlayerPerms(server.getPlayer().getUuidAsString()).getId() >= PermsLevels.MEMBER.getId();
+                        return where.getPermsExtension().getDBPlayerPerms(server.getPlayer().getUuidAsString()).getId() >= PermsLevels.SUB.getId();
                     }
                     return false;
                 }).

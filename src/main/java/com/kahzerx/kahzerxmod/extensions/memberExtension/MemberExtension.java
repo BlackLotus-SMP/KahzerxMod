@@ -24,14 +24,14 @@ public class MemberExtension extends GenericExtension implements Extensions {
         MinecraftServer server = player.getServer();
         assert server != null;
         Collection<String> teamNames = server.getScoreboard().getTeamNames();
-        if (!teamNames.contains("ADMIN")) {
-            Team team = server.getScoreboard().addTeam("ADMIN");
-            team.setPrefix(Text.literal("[ADMIN] ").styled(style -> style.withBold(true).withColor(Formatting.GOLD)));
+        if (!teamNames.contains("EMSI")) {
+            Team team = server.getScoreboard().addTeam("EMSI");
+            team.setPrefix(Text.literal("[EMSI] ").styled(style -> style.withBold(true).withColor(Formatting.GOLD)));
             team.setShowFriendlyInvisibles(false);
         }
         if (!teamNames.contains("MOD")) {
             Team team = server.getScoreboard().addTeam("MOD");
-            team.setPrefix(Text.literal("[MOD] ").styled(style -> style.withBold(true).withColor(Formatting.DARK_AQUA)));
+            team.setPrefix(Text.literal("[MOD] ").styled(style -> style.withBold(true).withColor(Formatting.DARK_PURPLE)));
             team.setShowFriendlyInvisibles(false);
         }
         if (!teamNames.contains("HELPER")) {
@@ -39,22 +39,17 @@ public class MemberExtension extends GenericExtension implements Extensions {
             team.setPrefix(Text.literal("[HELPER] ").styled(style -> style.withBold(true).withColor(Formatting.AQUA)));
             team.setShowFriendlyInvisibles(false);
         }
-        if (!teamNames.contains("MEMBER")) {
-            Team team = server.getScoreboard().addTeam("MEMBER");
-            team.setPrefix(Text.literal("[MEMBER] ").styled(style -> style.withBold(true).withColor(Formatting.DARK_PURPLE)));
+        if (!teamNames.contains("SUB")) {
+            Team team = server.getScoreboard().addTeam("SUB");
+            team.setPrefix(Text.literal("[SUB] ").styled(style -> style.withBold(true).withColor(Formatting.DARK_BLUE)));
             team.setShowFriendlyInvisibles(false);
         }
-        if (!teamNames.contains("TEST_MEMBER")) {
-            Team team = server.getScoreboard().addTeam("TEST_MEMBER");
-            team.setPrefix(Text.literal("[TEST_MEMBER] ").styled(style -> style.withBold(true).withColor(Formatting.LIGHT_PURPLE)));
-            team.setShowFriendlyInvisibles(false);
-        }
-        if (teamNames.contains("TEST_MEMBER")) {
+        if (teamNames.contains("SUB")) {
             Team playerTeam = server.getScoreboard().getPlayerTeam(player.getName().getString());
             if (playerTeam != null) {
                 return;
             }
-            Team team = server.getScoreboard().getTeam("TEST_MEMBER");
+            Team team = server.getScoreboard().getTeam("SUB");
             server.getScoreboard().addPlayerToTeam(player.getName().getString(), team);
         }
     }

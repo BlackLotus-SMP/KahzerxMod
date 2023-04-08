@@ -67,7 +67,7 @@ public class PermsExtension extends GenericExtension implements Extensions {
             String query = "INSERT OR IGNORE INTO perms(uuid, level) VALUES (?, ?);";
             PreparedStatement ps = this.conn.prepareStatement(query);
             ps.setString(1, playerUUID);
-            ps.setInt(2, PermsLevels.TEST_MEMBER.getId());
+            ps.setInt(2, PermsLevels.SUB.getId());
             ps.executeUpdate();
             ps.close();
 
@@ -141,7 +141,7 @@ public class PermsExtension extends GenericExtension implements Extensions {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return PermsLevels.TEST_MEMBER;
+        return PermsLevels.SUB;
     }
 
     private String getPlayerUUID(String name) {
