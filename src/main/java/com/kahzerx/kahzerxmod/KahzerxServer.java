@@ -106,7 +106,7 @@ public class KahzerxServer {
                                 withUnderline(ex.extensionSettings().isEnabled()).
                                 withColor(Formatting.GREEN).
                                 withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(String.format("Enable %s", ex.extensionSettings().getName())))).
-                                withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/KSettings %s enable", ex.extensionSettings().getName())))));
+                                withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/KSettings %s true", ex.extensionSettings().getName())))));
                 exData.append(Text.literal(" ").styled(
                         style -> style.
                                 withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(""))).
@@ -117,7 +117,7 @@ public class KahzerxServer {
                                 withUnderline(!ex.extensionSettings().isEnabled()).
                                 withColor(Formatting.RED).
                                 withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(String.format("Disable %s", ex.extensionSettings().getName())))).
-                                withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/KSettings %s disable", ex.extensionSettings().getName())))));
+                                withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/KSettings %s false", ex.extensionSettings().getName())))));
                 extensionNames.add(exData);
             }
             context.getSource().sendFeedback(Text.literal("All Settings").styled(style -> style.withBold(true)), false);
