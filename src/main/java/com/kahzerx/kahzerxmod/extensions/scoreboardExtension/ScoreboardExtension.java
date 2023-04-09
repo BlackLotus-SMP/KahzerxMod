@@ -113,7 +113,7 @@ public class ScoreboardExtension extends GenericExtension implements Extensions 
     }
 
     public int startThreadedKilledScoreboard(ServerCommandSource source, RegistryEntry.Reference<EntityType<?>> id, String type, boolean persistent) {
-        new Thread(() -> showSideBar(source, id.registryKey().getRegistry(), type, persistent)).start();
+        new Thread(() -> showSideBar(source, id.registryKey().getValue(), type, persistent)).start();
         return 1;
     }
 
