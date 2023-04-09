@@ -155,7 +155,6 @@ public class ScoreboardExtension extends GenericExtension implements Extensions 
     public void showSideBar(ServerCommandSource source, Identifier id, String type, boolean persistent) {
         Scoreboard scoreboard = source.getServer().getScoreboard();
         Optional<EntityType<?>> optEntity = EntityType.get(id.toString());
-        System.out.println(optEntity);
         if (optEntity.isEmpty()) {
             source.getServer().getPlayerManager().broadcast(MarkEnum.CROSS.appendMessage("Error on get entity!"), false);
             return;
