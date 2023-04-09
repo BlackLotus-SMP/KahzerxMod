@@ -30,6 +30,7 @@ import com.kahzerx.kahzerxmod.extensions.endermanNoGriefExtension.EndermanNoGrie
 import com.kahzerx.kahzerxmod.extensions.farmlandMyceliumExtension.FarmlandMyceliumExtension;
 import com.kahzerx.kahzerxmod.extensions.fbiExtension.FBIExtension;
 import com.kahzerx.kahzerxmod.extensions.fckPrivacyExtension.FckPrivacyExtension;
+import com.kahzerx.kahzerxmod.extensions.gustaExtension.GustaExtension;
 import com.kahzerx.kahzerxmod.extensions.hatExtension.HatExtension;
 import com.kahzerx.kahzerxmod.extensions.helperKickExtension.HelperKickExtension;
 import com.kahzerx.kahzerxmod.extensions.hereExtension.HereExtension;
@@ -123,6 +124,7 @@ public class ExtensionManager {
         KahzerxServer.extensions.add(new SpawnExtension(new ExtensionSettings("spawn", isEnabled(found, "spawn"), "Enables /spawn.")));
         KahzerxServer.extensions.add(new WhereExtension(new ExtensionSettings("where", isEnabled(found, "where"), "Enables /where."), permsExtension));
         KahzerxServer.extensions.add(new BocaExtension(new ExtensionSettings("boca", isEnabled(found, "boca"), "Enables /boca & /boquita command.")));
+        KahzerxServer.extensions.add(new GustaExtension(new ExtensionSettings("gusta", isEnabled(found, "gusta"), "Enables /gusta command.")));
         KahzerxServer.extensions.add(new TotopoExtension(new ExtensionSettings("totopo", isEnabled(found, "totopo"), "Enables /totopo command.")));
         KahzerxServer.extensions.add(new HatExtension(new ExtensionSettings("hat", isEnabled(found, "hat"), "Puts whatever item you have in the main hand on your head.")));
         KahzerxServer.extensions.add(new EndermanNoGriefExtension(new ExtensionSettings("endermanNoGrief", isEnabled(found, "endermanNoGrief"), "Prevents endermans to pickup or place blocks (this will break enderman based farms).")));
