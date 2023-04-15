@@ -7,6 +7,7 @@ import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordCommandsExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordListener;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.commands.AddCommand;
+import com.kahzerx.kahzerxmod.extensions.discordExtension.commands.InfoCommand;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.commands.ListCommand;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.commands.RemoveCommand;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordExtension;
@@ -42,6 +43,7 @@ public class DiscordWhitelistExtension extends GenericExtension implements Exten
     private final AddCommand addCommand = new AddCommand(DiscordListener.commandPrefix);
     private final RemoveCommand removeCommand = new RemoveCommand(DiscordListener.commandPrefix);
     private final ListCommand listCommand = new ListCommand(DiscordListener.commandPrefix);
+    private final InfoCommand infoCommand = new InfoCommand(DiscordListener.commandPrefix);
 
     public DiscordWhitelistExtension(DiscordWhitelistSettings settings, DiscordExtension discordExtension) {
         super(settings);
@@ -216,6 +218,25 @@ public class DiscordWhitelistExtension extends GenericExtension implements Exten
         }
     }
 
+    public String getMinecraftNick(String uuid) {
+        String name = "";
+        try {
+            String getName = "SELECT name  FROM player WHERE uuid = ?;";
+            PreparedStatement ps = conn.prepareStatement(getName);
+            ps.setString(1, uuid);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                name = rs.getString("name");
+            }
+            rs.close();
+            ps.close();
+            return name;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return name;
+        }
+    }
+
     public void banDiscord(long discordID) {
         try {
             String insertPlayer = "INSERT OR IGNORE INTO discord_banned_v2 (discordID) VALUES (?);";
@@ -366,7 +387,8 @@ public class DiscordWhitelistExtension extends GenericExtension implements Exten
         if (!DiscordUtils.isAllowed(event.getChannel().getIdLong(), this.extensionSettings().getWhitelistChats())) {
             if (message.startsWith(DiscordListener.commandPrefix + addCommand.getBody())
                     || message.startsWith(DiscordListener.commandPrefix + removeCommand.getBody())
-                    || message.startsWith(DiscordListener.commandPrefix + listCommand.getBody())) {
+                    || message.startsWith(DiscordListener.commandPrefix + listCommand.getBody())
+                    || message.startsWith(DiscordListener.commandPrefix + infoCommand.getBody())) {
                 EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**This is not the channel!!! >:(**"}, discordExtension.extensionSettings().getPrefix(), true, Color.RED, true, getDiscordExtension().extensionSettings().isShouldFeedback());
                 if (embed != null) {
                     event.getMessage().delete().queueAfter(2, TimeUnit.SECONDS);
@@ -384,6 +406,9 @@ public class DiscordWhitelistExtension extends GenericExtension implements Exten
             return true;
         } else if (message.equals(DiscordListener.commandPrefix + listCommand.getBody())) {
             listCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), this);
+            return true;
+        } else if (message.startsWith(DiscordListener.commandPrefix + infoCommand.getBody())) {
+            infoCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), this);
             return true;
         }
         return false;
