@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.minecraft.client.realms.FileUpload;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.WorldSavePath;
 
@@ -18,6 +19,12 @@ import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
@@ -46,13 +53,15 @@ public class InfoCommand extends GenericCommand {
             if (extension.alreadyAddedBySomeone(playerUuid)) {
                 try {
                     File skinPng = saveImage(playerUuid.toString(), server, serverPrefix, event, feedback);
-                    PlayerData embeDitto = collectData(skinPng, playerUuid.toString(), extension, event.getGuild());
+                    PlayerData embeDitto = collectData(skinPng, playerUuid.toString(), extension, event.getGuild(), server);
                     EmbedBuilder embedFinal = new EmbedBuilder();
                     embedFinal.setTitle(embeDitto.mcNick);
                     embedFinal.setColor(new Color(0xABDED7));
                     embedFinal.setDescription(String.format("Added by: %s", embeDitto.dsNick));
                     embedFinal.setThumbnail("attachment://skin.png");
-                    embedFinal.addField("Uuid: ", embeDitto.playerUuid, true);
+                    embedFinal.addField("Uuid: ", embeDitto.playerUuid, false);
+                    embedFinal.addField("Server Role: ", embeDitto.serverRole, true);
+                    embedFinal.addField("Server Status: ", embeDitto.status, true);
                     event.getChannel().sendMessageEmbeds(embedFinal.build()).addFile(embeDitto.skinPath, "skin.png").queue();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -74,13 +83,15 @@ public class InfoCommand extends GenericCommand {
             for (String uuid: whiteList){
                 try {
                     File skinPng = saveImage(uuid, server, serverPrefix, event, feedback);
-                    PlayerData embeDitto = collectData(skinPng, uuid, extension, event.getGuild());
+                    PlayerData embeDitto = collectData(skinPng, uuid, extension, event.getGuild(), server);
                     EmbedBuilder embedFinal = new EmbedBuilder();
                     embedFinal.setTitle(embeDitto.mcNick);
                     embedFinal.setColor(new Color(0xABDED7));
                     embedFinal.setDescription(String.format("Added by: %s", embeDitto.dsNick));
                     embedFinal.setThumbnail("attachment://skin.png");
-                    embedFinal.addField("Uuid: ", embeDitto.playerUuid, true);
+                    embedFinal.addField("Uuid: ", embeDitto.playerUuid, false);
+                    embedFinal.addField("Server Role: ", embeDitto.serverRole, true);
+                    embedFinal.addField("Server Status: ", embeDitto.status, true);
                     event.getChannel().sendMessageEmbeds(embedFinal.build()).addFile(embeDitto.skinPath, "skin.png").queue();
 
                 } catch (IOException e) {
@@ -116,7 +127,13 @@ public class InfoCommand extends GenericCommand {
         for (File skin: skins) {
             String fileName = skin.getName();
             if (fileName.equals(String.format("%s.png", uuid))){
-                cuteFlag = true;
+                BasicFileAttributes attributes = Files.readAttributes(finalPath.toPath(), BasicFileAttributes.class);
+                boolean dateFlag = checkTime(attributes.creationTime());
+                if(dateFlag){
+                    boolean delete = skin.delete();
+                }else {
+                    cuteFlag = true;
+                }
                 break;
             }
         }
@@ -136,11 +153,22 @@ public class InfoCommand extends GenericCommand {
         }
         return finalPath;
     }
-    public PlayerData collectData(File skinPng, String uuid, DiscordWhitelistExtension extension, Guild guild){
+    public PlayerData collectData(File skinPng, String uuid, DiscordWhitelistExtension extension, Guild guild, MinecraftServer server){
         Long dsId = extension.getDiscordID(uuid);
         Member dsName = guild.retrieveMemberById(dsId).complete();
         String mcName = extension.getMinecraftNick(uuid);
-        return new PlayerData(skinPng, mcName, dsName.getEffectiveName(),uuid);
+        Team serverTeam = server.getScoreboard().getPlayerTeam(mcName);
+        String playerRole = "**Has no role**";
+        if (serverTeam != null){
+            String playerTeam = serverTeam.getName();
+            playerRole = String.format("**%s**", playerTeam);
+
+        }
+        String status = "**ACTIVE**";
+        if (extension.isPlayerBanned(uuid)){
+            status = "**BANNED**";
+        }
+        return new PlayerData(skinPng, mcName, dsName.getEffectiveName(),uuid, status, playerRole);
     }
 
     class PlayerData{
@@ -148,15 +176,23 @@ public class InfoCommand extends GenericCommand {
         public String mcNick;
         public String dsNick;
         public String playerUuid;
-//        public String status;
-//        public String serverRole;
-        public PlayerData(File skinPath, String mcNick, String dsNick, String playerUuid) {
+        public String status;
+        public String serverRole;
+        public PlayerData(File skinPath, String mcNick, String dsNick, String playerUuid, String status, String serverRole) {
             this.skinPath = skinPath;
             this.mcNick = mcNick;
             this.dsNick = dsNick;
             this.playerUuid = playerUuid;
-//            this.status = status;
-//            this.serverRole = serverRole;
+            this.status = status;
+            this.serverRole = serverRole;
         }
     }
+
+    public boolean checkTime(FileTime creacionSkin){
+        LocalDateTime creacionDate = creacionSkin.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        return LocalDateTime.now().isAfter(creacionDate.plusDays(1));
+    }
+
 }
+
+
