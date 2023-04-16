@@ -100,9 +100,6 @@ public class DiscordListener extends ListenerAdapter {
             if (!discordSettings.isCrossServerChat()) {
                 return;
             }
-            if (event.getAuthor().getIdLong() != jda.getSelfUser().getIdLong()) {
-                return;
-            }
         }
 
         String message = event.getMessage().getContentRaw();
@@ -118,7 +115,7 @@ public class DiscordListener extends ListenerAdapter {
         }
 
         if (event.getChannel().getIdLong() == discordSettings.getChatChannelID()) {
-            if (event.getAuthor().getIdLong() == jda.getSelfUser().getIdLong()) {
+            if (event.getAuthor().isBot()) {
                 if (discordSettings.isCrossServerChat()) {
                     DiscordChatUtils.sendMessageCrossServer(event, server, discordSettings.getPrefix());
                 }
@@ -128,22 +125,10 @@ public class DiscordListener extends ListenerAdapter {
         }
     }
 
-    public static void sendDiscordMessage(String msg) {
-        if (!chatbridge) {
-            return;
-        }
-        TextChannel ch = jda.getTextChannelById(channelId);
-        if (ch != null && ch.getGuild().getSelfMember().hasAccess(ch)) {
-            ch.sendMessage(discordSettings.getPrefix() + " " + msg).queue();
-        } else {
-            System.out.println("Unable to find this Text Channel or missing permissions to view/send messages.");
-        }
-    }
-
     public static void sendChatMessage(ServerPlayerEntity player, String msg, String prefix){
         WebhookMessageBuilder builder = new WebhookMessageBuilder();
         String playerName = player.getName().getString();
-        builder.setUsername(String.format("%s [%s]", playerName, prefix));
+        builder.setUsername(String.format("[%s] %s", prefix, playerName));
         String uuid = player.getUuid().toString();
         builder.setAvatarUrl(String.format("https://crafatar.com/avatars/%s?overlay", uuid));
         builder.setContent(msg);
@@ -151,9 +136,8 @@ public class DiscordListener extends ListenerAdapter {
     }
 
     public static void sendSysMessage(String msg, String prefix){
-        URL serverPng = DiscordListener.class.getClassLoader().getResource("serverIcon.png");
         WebhookMessageBuilder builder = new WebhookMessageBuilder();
-        builder.setUsername(String.format("System :D [%s]", prefix));
+        builder.setUsername(String.format("[%s] System :D", prefix));
         builder.setAvatarUrl("https://crafatar.com/avatars/749126bc-4467-41b4-be12-d24f4496cfad?overlay");
         builder.setContent(msg);
         webhookC.send(builder.build());
