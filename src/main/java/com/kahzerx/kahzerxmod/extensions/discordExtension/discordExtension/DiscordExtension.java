@@ -36,7 +36,7 @@ public class DiscordExtension extends GenericExtension implements Extensions {
 
     @Override
     public void onServerStarted(MinecraftServer minecraftServer) {
-        DiscordListener.sendDiscordMessage("\\o/");
+        DiscordListener.sendSysMessage("**Server is ON**", this.extensionSettings().getPrefix());
     }
 
     @Override
@@ -49,31 +49,35 @@ public class DiscordExtension extends GenericExtension implements Extensions {
     @Override
     public void onPlayerJoined(ServerPlayerEntity player) {
         boolean isBot = player.getClass() == KlonePlayerEntity.class;
-        DiscordListener.sendDiscordMessage(":arrow_right: **" + player.getName().getString().replace("_", "\\_") + (isBot ? " [Bot]" : "") + " joined the game!**");
+        String msg = ":arrow_right: **" + player.getName().getString().replace("_", "\\_") + (isBot ? " [Bot]" : "") + " joined the game!**";
+        DiscordListener.sendSysMessage(msg, this.extensionSettings().getPrefix());
     }
 
     @Override
     public void onPlayerLeft(ServerPlayerEntity player) {
         boolean isBot = player.getClass() == KlonePlayerEntity.class;
-        DiscordListener.sendDiscordMessage(":arrow_left: **" + player.getName().getString().replace("_", "\\_") + (isBot ? " [Bot]" : "") + " left the game!**");
+        String msg = ":arrow_left: **" + player.getName().getString().replace("_", "\\_") + (isBot ? " [Bot]" : "") + " left the game!**";
+        DiscordListener.sendSysMessage(msg, this.extensionSettings().getPrefix());
     }
 
     @Override
     public void onPlayerDied(ServerPlayerEntity player) {
         boolean isBot = player.getClass() == KlonePlayerEntity.class;
-        DiscordListener.sendDiscordMessage(":skull_crossbones: **" + player.getDamageTracker().getDeathMessage().getString().replace("_", "\\_") + (isBot ? " [Bot]" : "") + "**");
+        String msg = ":skull_crossbones: **" + player.getDamageTracker().getDeathMessage().getString().replace("_", "\\_") + (isBot ? " [Bot]" : "") + "**";
+        DiscordListener.sendSysMessage(msg, this.extensionSettings().getPrefix());
     }
 
     @Override
     public void onChatMessage(ServerPlayerEntity player, String chatMessage) {
         if (chatMessage.startsWith("/me ") || !chatMessage.startsWith("/")) {
-            DiscordListener.sendDiscordMessage("`<" + player.getName().getString() + ">` " + chatMessage);
+            DiscordListener.sendChatMessage(player, chatMessage, this.extensionSettings().getPrefix());
         }
     }
 
     @Override
     public void onAdvancement(String advancement) {
-        DiscordListener.sendDiscordMessage(":confetti_ball: **" + advancement + "**");
+        String msg = ":confetti_ball: **" + advancement + "**";
+        DiscordListener.sendSysMessage(msg, this.extensionSettings().getPrefix());
     }
 
     @Override
@@ -92,7 +96,7 @@ public class DiscordExtension extends GenericExtension implements Extensions {
             return;
         }
         DiscordListener.start(KahzerxServer.minecraftServer, extensionSettings().getToken(), String.valueOf(extensionSettings().getChatChannelID()), this);
-        DiscordListener.sendDiscordMessage("\\o/");
+        DiscordListener.sendSysMessage("**Server is ON**", this.extensionSettings().getPrefix());
         PlayerUtils.reloadCommands();
     }
 
