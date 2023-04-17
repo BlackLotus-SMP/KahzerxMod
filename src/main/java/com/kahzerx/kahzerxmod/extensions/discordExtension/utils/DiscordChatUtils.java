@@ -93,22 +93,25 @@ public class DiscordChatUtils {
             return;
         }
 
-        Matcher m = Pattern.compile("^(`<|:)(\\w+)(>`|:)").matcher(event.getMessage().getContentDisplay());
-        if (m.find()) {  // El mensaje recibido no tiene prefix.
+        Matcher m = Pattern.compile("^\\[(.+)]\\s(.*)").matcher(event.getAuthor().getName());
+        if (!m.find()) {  // El mensaje recibido no tiene prefix.
             return;
         }
 
-        prefix = prefix.strip();
-        String msg = "[" + prefix + "] " + event.getMessage().getContentDisplay().replace("`", "");
-        msg = msg.substring(msg.indexOf(" ") + 1);
-        if (msg.split(" ")[0].equals(prefix.replace("`", ""))) {
+        String msgPrefix = m.group(1);
+        String authorName = m.group(2);
+        if (msgPrefix.equals(String.format("%s", prefix))) {
             return;  // msg from the same server.
         }
+
+        String msg = event.getMessage().getContentDisplay();
         msg = msg.replaceAll("\\:([^\\}]+)\\:", "");
         msg = msg.replace("*", "");
         msg = msg.replace("\\", "");
         String[] tMsg = Arrays.stream(msg.split(" ")).filter(x -> !x.isEmpty()).toArray(String[]::new);
         msg = String.join(" ", tMsg);
+        msg = String.format("[%s] <%s> %s", msgPrefix, authorName, msg);
+
         finalSendMsg(msg, server, null);
     }
 

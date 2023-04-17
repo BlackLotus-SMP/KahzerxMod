@@ -29,6 +29,7 @@ dependencies {
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
+	implementation 'club.minnced:discord-webhooks:0.8.2'
 	implementation 'org.xerial:sqlite-jdbc:3.36.0.2'
 	implementation 'com.google.code.gson:gson:2.8.9'
 	implementation('net.dv8tion:JDA:4.4.0_350') {
@@ -36,6 +37,7 @@ dependencies {
 	}
 	implementation 'com.googlecode.json-simple:json-simple:1.1.1'
 
+	include 'club.minnced:discord-webhooks:0.8.2'
 	include 'org.xerial:sqlite-jdbc:3.36.0.2'
 	include 'com.google.code.gson:gson:2.8.9'
 	include('net.dv8tion:JDA:4.4.0_350') {

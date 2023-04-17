@@ -1,18 +1,29 @@
 package com.kahzerx.kahzerxmod.extensions.discordExtension;
 
+import club.minnced.discord.webhook.WebhookClient;
+import club.minnced.discord.webhook.WebhookClientBuilder;
+import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.commands.OnlineCommand;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordSettings;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Icon;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.requests.restaction.WebhookAction;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
+import org.apache.commons.lang3.function.FailableIntToLongFunction;
 import org.jetbrains.annotations.NotNull;
 
 import javax.security.auth.login.LoginException;
+import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +32,7 @@ public class DiscordListener extends ListenerAdapter {
     public static final String commandPrefix = "!";
 
     public static JDA jda = null;
+    public static WebhookClient webhookC = null;
     private static String channelId = "";
     private static String token = "";
     public static boolean chatbridge = false;
@@ -43,6 +55,21 @@ public class DiscordListener extends ListenerAdapter {
             chatbridge = false;
             jda = JDABuilder.createDefault(t).addEventListeners(new DiscordListener(server)).build();
             jda.awaitReady();
+            List<Webhook> webhookList = jda.getTextChannelById(channelId).retrieveWebhooks().complete();
+            boolean webhookFlag = false;
+            for (Webhook webdook: webhookList){
+                if (webdook.getName().equals("ChatBridge")){
+                    webhookFlag = true;
+                    String WebhookUrl = webdook.getUrl();
+                    webhookC = WebhookClient.withUrl(WebhookUrl);
+                    break;
+                }
+            }
+            if (!webhookFlag){
+                Webhook webook = jda.getTextChannelById(channelId).createWebhook("ChatBridge").complete();
+                String WebhookUrl = webook.getUrl();
+                webhookC = WebhookClient.withUrl(WebhookUrl);
+            }
             discordExtension.extensionSettings().setRunning(true);
             chatbridge = true;
         } catch (LoginException | InterruptedException e) {
@@ -73,9 +100,6 @@ public class DiscordListener extends ListenerAdapter {
             if (!discordSettings.isCrossServerChat()) {
                 return;
             }
-            if (event.getAuthor().getIdLong() != jda.getSelfUser().getIdLong()) {
-                return;
-            }
         }
 
         String message = event.getMessage().getContentRaw();
@@ -91,7 +115,7 @@ public class DiscordListener extends ListenerAdapter {
         }
 
         if (event.getChannel().getIdLong() == discordSettings.getChatChannelID()) {
-            if (event.getAuthor().getIdLong() == jda.getSelfUser().getIdLong()) {
+            if (event.getAuthor().isBot()) {
                 if (discordSettings.isCrossServerChat()) {
                     DiscordChatUtils.sendMessageCrossServer(event, server, discordSettings.getPrefix());
                 }
@@ -101,15 +125,23 @@ public class DiscordListener extends ListenerAdapter {
         }
     }
 
-    public static void sendDiscordMessage(String msg) {
-        if (!chatbridge) {
-            return;
-        }
-        TextChannel ch = jda.getTextChannelById(channelId);
-        if (ch != null && ch.getGuild().getSelfMember().hasAccess(ch)) {
-            ch.sendMessage(discordSettings.getPrefix() + " " + msg).queue();
-        } else {
-            System.out.println("Unable to find this Text Channel or missing permissions to view/send messages.");
-        }
+    public static void sendChatMessage(ServerPlayerEntity player, String msg, String prefix){
+        WebhookMessageBuilder builder = new WebhookMessageBuilder();
+        String playerName = player.getName().getString();
+        builder.setUsername(String.format("[%s] %s", prefix, playerName));
+        String uuid = player.getUuid().toString();
+        builder.setAvatarUrl(String.format("https://crafatar.com/avatars/%s?overlay", uuid));
+        builder.setContent(msg);
+        webhookC.send(builder.build());
+    }
+
+    public static void sendSysMessage(String msg, String prefix){
+        WebhookMessageBuilder builder = new WebhookMessageBuilder();
+        builder.setUsername(String.format("[%s] System :D", prefix));
+        builder.setAvatarUrl("https://crafatar.com/avatars/749126bc-4467-41b4-be12-d24f4496cfad?overlay");
+        builder.setContent(msg);
+        webhookC.send(builder.build());
     }
 }
+
+

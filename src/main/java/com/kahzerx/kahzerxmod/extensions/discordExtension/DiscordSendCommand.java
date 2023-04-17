@@ -18,7 +18,7 @@ public class DiscordSendCommand {
                                     MessageArgumentType.getMessage(context, "message"),
                                     false
                             );
-                            DiscordListener.sendDiscordMessage(MessageArgumentType.getMessage(context, "message").getString());
+                            DiscordListener.sendSysMessage(MessageArgumentType.getMessage(context, "message").getString(), discordExtension.extensionSettings().getPrefix());
                             return 1;
                         })));
     }
