@@ -118,6 +118,9 @@ public class DiscordListener extends ListenerAdapter {
     }
 
     public static void sendChatMessage(ServerPlayerEntity player, String msg, String prefix){
+        if (!chatbridge){
+            return;
+        }
         WebhookMessageBuilder builder = new WebhookMessageBuilder();
         String playerName = player.getName().getString();
         builder.setUsername(String.format("[%s] %s", prefix, playerName));
@@ -128,6 +131,9 @@ public class DiscordListener extends ListenerAdapter {
     }
 
     public static void sendSysMessage(String msg, String prefix){
+        if (!chatbridge){
+            return;
+        }
         WebhookMessageBuilder builder = new WebhookMessageBuilder();
         builder.setUsername(String.format("[%s] System :D", prefix));
         builder.setAvatarUrl("https://crafatar.com/avatars/749126bc-4467-41b4-be12-d24f4496cfad?overlay");
