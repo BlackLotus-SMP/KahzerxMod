@@ -118,7 +118,7 @@ public class DiscordListener extends ListenerAdapter {
     }
 
     public static void sendChatMessage(ServerPlayerEntity player, String msg, String prefix){
-        if (!chatbridge) {
+        if (!chatbridge){
             return;
         }
         WebhookMessageBuilder builder = new WebhookMessageBuilder();
@@ -131,7 +131,7 @@ public class DiscordListener extends ListenerAdapter {
     }
 
     public static void sendSysMessage(String msg, String prefix){
-        if (!chatbridge) {
+        if (!chatbridge){
             return;
         }
         WebhookMessageBuilder builder = new WebhookMessageBuilder();
