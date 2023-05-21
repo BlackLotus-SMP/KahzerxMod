@@ -31,6 +31,10 @@ public class DiscordExtension extends GenericExtension implements Extensions {
         if (!extensionSettings().isEnabled()) {
             return;
         }
+        if (extensionSettings().getPrefix().equals("")) {
+            extensionSettings().setCrossServerChat(false);
+            ExtensionManager.saveSettings();
+        }
         DiscordListener.start(minecraftServer, extensionSettings().getToken(), String.valueOf(extensionSettings().getChatChannelID()), this);
     }
 
@@ -183,6 +187,10 @@ public class DiscordExtension extends GenericExtension implements Extensions {
                 then(literal("crossServerChat").
                         then(argument("enabled", BoolArgumentType.bool()).
                                 executes(context -> {
+                                    if (extensionSettings().getPrefix().equals("")) {
+                                        context.getSource().sendFeedback(Text.literal("You need to set a prefix!"), false);
+                                        return 1;
+                                    }
                                     extensionSettings().setCrossServerChat(BoolArgumentType.getBool(context, "enabled"));
                                     context.getSource().sendFeedback(Text.literal("[CrossServerChat] > " + extensionSettings().isCrossServerChat() + "."), false);
                                     ExtensionManager.saveSettings();

@@ -123,7 +123,11 @@ public class DiscordListener extends ListenerAdapter {
         }
         WebhookMessageBuilder builder = new WebhookMessageBuilder();
         String playerName = player.getName().getString();
-        builder.setUsername(String.format("[%s] %s", prefix, playerName));
+        if (prefix.equals("")) {
+            builder.setUsername(String.format("%s", playerName));
+        } else {
+            builder.setUsername(String.format("[%s] %s", prefix, playerName));
+        }
         String uuid = player.getUuid().toString();
         builder.setAvatarUrl(String.format("https://crafatar.com/avatars/%s?overlay", uuid));
         builder.setContent(msg);
@@ -135,7 +139,11 @@ public class DiscordListener extends ListenerAdapter {
             return;
         }
         WebhookMessageBuilder builder = new WebhookMessageBuilder();
-        builder.setUsername(String.format("[%s] System :D", prefix));
+        if (prefix.equals("")) {
+            builder.setUsername("System :D");
+        } else {
+            builder.setUsername(String.format("[%s] System :D", prefix));
+        }
         builder.setAvatarUrl("https://crafatar.com/avatars/749126bc-4467-41b4-be12-d24f4496cfad?overlay");
         builder.setContent(msg);
         webhookC.send(builder.build());
