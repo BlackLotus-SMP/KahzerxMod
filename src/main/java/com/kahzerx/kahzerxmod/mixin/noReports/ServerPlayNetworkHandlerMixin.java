@@ -1,6 +1,6 @@
 package com.kahzerx.kahzerxmod.mixin.noReports;
 
-import net.minecraft.network.Packet;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.network.PacketCallbacks;
 import net.minecraft.network.listener.ServerPlayPacketListener;
 import net.minecraft.network.packet.s2c.play.ChatMessageS2CPacket;
@@ -20,7 +20,7 @@ public abstract class ServerPlayNetworkHandlerMixin implements ServerPlayPacketL
 
     @Shadow public ServerPlayerEntity player;
 
-    @Inject(method = "sendPacket(Lnet/minecraft/network/Packet;)V", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "sendPacket(Lnet/minecraft/network/packet/Packet;)V", at = @At(value = "HEAD"), cancellable = true)
     private void onSend(Packet<?> packet, CallbackInfo ci) {
         if (packet instanceof ChatMessageS2CPacket chatPacket) {
             ci.cancel();
@@ -28,7 +28,7 @@ public abstract class ServerPlayNetworkHandlerMixin implements ServerPlayPacketL
         }
     }
 
-    @Inject(method = "sendPacket(Lnet/minecraft/network/Packet;Lnet/minecraft/network/PacketCallbacks;)V", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "sendPacket(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/PacketCallbacks;)V", at = @At(value = "HEAD"), cancellable = true)
     private void onSend(Packet<?> packet, PacketCallbacks callbacks, CallbackInfo ci) {
         if (packet instanceof ChatMessageS2CPacket chatPacket) {
             ci.cancel();

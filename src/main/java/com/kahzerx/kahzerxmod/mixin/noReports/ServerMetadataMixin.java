@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ServerMetadata.class)
 public class ServerMetadataMixin {
-    @Inject(method = "isSecureChatEnforced", at = @At(value = "RETURN"), cancellable = true)
+    @Inject(method = "secureChatEnforced", at = @At(value = "RETURN"), cancellable = true)
     private void onSecure(CallbackInfoReturnable<Boolean> cir) {
         cir.setReturnValue(true);
     }
