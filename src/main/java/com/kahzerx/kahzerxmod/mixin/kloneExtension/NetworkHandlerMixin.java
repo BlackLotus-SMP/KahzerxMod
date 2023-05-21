@@ -1,7 +1,7 @@
 package com.kahzerx.kahzerxmod.mixin.kloneExtension;
 
 import com.kahzerx.kahzerxmod.klone.KlonePlayerEntity;
-import net.minecraft.network.Packet;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class NetworkHandlerMixin {
     @Shadow public ServerPlayerEntity player;
 
-    @Inject(method = "sendPacket(Lnet/minecraft/network/Packet;)V", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "sendPacket(Lnet/minecraft/network/packet/Packet;)V", at = @At("HEAD"), cancellable = true)
     private void onSendPacket(Packet<?> packet, CallbackInfo ci) {
         if (player instanceof KlonePlayerEntity) {
             ci.cancel();

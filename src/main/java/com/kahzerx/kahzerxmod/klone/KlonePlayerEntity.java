@@ -53,7 +53,7 @@ public class KlonePlayerEntity extends ServerPlayerEntity {
         klonedPlayer.teleport(world, player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch());
         klonedPlayer.setHealth(player.getHealth());
         klonedPlayer.unsetRemoved();
-        klonedPlayer.stepHeight = 0.6F;
+        klonedPlayer.setStepHeight(0.6F);
         klonedPlayer.interactionManager.changeGameMode(player.interactionManager.getGameMode());
 
         server.getPlayerManager().sendToDimension(new EntitySetHeadYawS2CPacket(klonedPlayer, (byte) (player.headYaw * 256 / 360)), klonedPlayer.world.getRegistryKey());
