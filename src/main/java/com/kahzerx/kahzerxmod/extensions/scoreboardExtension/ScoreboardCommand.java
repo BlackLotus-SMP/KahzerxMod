@@ -45,8 +45,8 @@ public class ScoreboardCommand {
                                 executes(context -> scoreboard.startThreadedShowSideBar(context.getSource(), ItemStackArgumentType.getItemStackArgument(context, "item"), "dropped", persistent)))).
                 then(literal("killed").
                         then(argument("entity", RegistryEntryArgumentType.registryEntry(commandRegistryAccess, RegistryKeys.ENTITY_TYPE)).
-                                suggests(SuggestionProviders.SUMMONABLE_ENTITIES)).
-                                executes(context -> scoreboard.startThreadedKilledScoreboard(context.getSource(), RegistryEntryArgumentType.getSummonableEntityType(context, "entity"), "killed", persistent))).
+                                suggests(SuggestionProviders.SUMMONABLE_ENTITIES).
+                                executes(context -> scoreboard.startThreadedKilledScoreboard(context.getSource(), RegistryEntryArgumentType.getSummonableEntityType(context, "entity"), "killed", persistent)))).
                 then(literal("killed_by").
                         then(argument("entity", RegistryEntryArgumentType.registryEntry(commandRegistryAccess, RegistryKeys.ENTITY_TYPE)).
                                 suggests(SuggestionProviders.SUMMONABLE_ENTITIES).

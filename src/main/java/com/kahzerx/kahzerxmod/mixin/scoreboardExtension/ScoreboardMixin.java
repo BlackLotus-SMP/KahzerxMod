@@ -1,7 +1,7 @@
 package com.kahzerx.kahzerxmod.mixin.scoreboardExtension;
 
 import com.kahzerx.kahzerxmod.extensions.scoreboardExtension.ScoreboardExtension;
-import net.minecraft.network.Packet;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.ScoreboardPlayerUpdateS2CPacket;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ScoreboardObjective;
@@ -34,7 +34,7 @@ public class ScoreboardMixin extends Scoreboard {
         }
     }
 
-    @Inject(method = "updateScore", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;sendToAll(Lnet/minecraft/network/Packet;)V"))
+    @Inject(method = "updateScore", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;sendToAll(Lnet/minecraft/network/packet/Packet;)V"))
     private void onUpdate(ScoreboardPlayerScore score, CallbackInfo ci) {
         if (ScoreboardExtension.isExtensionEnabled) {
             ScoreboardObjective objective = score.getObjective();
