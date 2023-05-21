@@ -29,7 +29,7 @@ public class SpawnCommand {
                 requires(server -> spawnExtension.extensionSettings().isEnabled() && server.hasPermissionLevel(2)).
                 executes(context -> {
                     ServerPlayerEntity player = context.getSource().getPlayer();
-                    BlockPos pos = new BlockPos(player.getX(), player.getY(), player.getZ());
+                    BlockPos pos = new BlockPos(player.getBlockX(), player.getBlockY(), player.getBlockZ());
                     spawnExtension.updateSpawnPos(pos, context.getSource());
                     return 1;
                 }).
