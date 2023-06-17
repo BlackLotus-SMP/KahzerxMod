@@ -5,6 +5,8 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
+import java.util.function.Supplier;
+
 public enum MarkEnum {
     TICK("✔", Formatting.GREEN),
     CROSS("✘", Formatting.DARK_RED),
@@ -42,12 +44,20 @@ public enum MarkEnum {
         return Text.literal(identifier).styled(style -> style.withColor(formatting).withBold(true).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, identifier)));
     }
 
-    public MutableText appendMessage(String message, Formatting color) {
+    public Supplier<Text> appendMessage(String message, Formatting color) {
+        return () -> getFormattedIdentifier().append(Text.literal(" " + message).styled(style -> style.withColor(color)));
+    }
+
+    public Supplier<Text> appendMessage(String message) {
+        return appendMessage(message, Formatting.WHITE);
+    }
+
+    public MutableText appendMsg(String message, Formatting color) {
         return getFormattedIdentifier().append(Text.literal(" " + message).styled(style -> style.withColor(color)));
     }
 
-    public MutableText appendMessage(String message) {
-        return appendMessage(message, Formatting.WHITE);
+    public MutableText appendMsg(String message) {
+        return appendMsg(message, Formatting.WHITE);
     }
 
     public MutableText appendText(MutableText t, Formatting color) {

@@ -61,7 +61,7 @@ public class ParcelsCommand {
                                 context.getSource().sendFeedback(MarkEnum.INFO.appendMessage("No hay parcelas!"), false);
                             }
                             for (Parcel p : extension.getParcels().getParcels()) {
-                                context.getSource().sendFeedback(p.formatted(extension), false);
+                                context.getSource().sendFeedback(() -> p.formatted(extension), false);
                             }
                             return 1;
                         })).
@@ -109,7 +109,7 @@ public class ParcelsCommand {
                                                 actualParcel.setNextPayout(t);
                                                 extension.getDB().getQuery().giveParcel(actualParcel, playerUUID, t);
                                                 context.getSource().sendFeedback(MarkEnum.TICK.appendMessage("Parcela comprada por " + playerName), false);
-                                                context.getSource().sendFeedback(MarkEnum.INFO.appendMessage("§8/parcel info§r para más información").styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/parcel info"))), false);
+                                                context.getSource().sendFeedback(() -> MarkEnum.INFO.appendMsg("§8/parcel info§r para más información").styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/parcel info"))), false);
                                             }
                                         } else {
                                             context.getSource().sendFeedback(MarkEnum.CROSS.appendMessage("Debes estar en una parcela!"), false);
@@ -125,7 +125,7 @@ public class ParcelsCommand {
                                 BlockPos playerPos = player.getBlockPos();
                                 if (extension.getParcels().isPosInParcel(dim, playerPos)) {
                                     Parcel actualParcel = extension.getParcels().getParcel(dim, playerPos);
-                                    context.getSource().sendFeedback(actualParcel.formatted(extension), false);
+                                    context.getSource().sendFeedback(() -> actualParcel.formatted(extension), false);
                                 } else {
                                     context.getSource().sendFeedback(MarkEnum.CROSS.appendMessage("Debes estar en una parcela!"), false);
                                 }

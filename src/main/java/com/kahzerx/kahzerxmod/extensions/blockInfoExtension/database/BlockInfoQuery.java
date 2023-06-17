@@ -131,30 +131,30 @@ public record BlockInfoQuery(Connection connection) {
 
         List<MutableText> msg = getBlockInfo(x, y, z, DimUtils.getWorldID(DimUtils.getDim(source.getWorld())), page);
         Collections.reverse(msg);
-        source.sendFeedback(Text.literal("======BlockInfo======"), false);
+        source.sendFeedback(() -> Text.literal("======BlockInfo======"), false);
         int nLine = getLines(x, y, z, DimUtils.getWorldID(DimUtils.getDim(source.getWorld())));
 
         for (MutableText line : msg) {
-            source.sendFeedback(line, false);
+            source.sendFeedback(() -> line, false);
         }
 
         if (page > nLine) {  // No pages.
             return;
         } else if (page == nLine && page == 1) {  // There is only 1 page.
-            source.sendFeedback(Text.literal(String.format("%d/%d.", page, nLine)), false);
+            source.sendFeedback(() -> Text.literal(String.format("%d/%d.", page, nLine)), false);
         } else if (page == 1) {  // First page but there are more
             MutableText pages = BlockInfoUtils.getPages(page, nLine);
             MutableText next = BlockInfoUtils.getNext(x, y, z, page);
-            source.sendFeedback(Text.literal("").append(pages).append(next).append(BlockInfoUtils.getHelp(x, y, z)), false);
+            source.sendFeedback(() -> Text.literal("").append(pages).append(next).append(BlockInfoUtils.getHelp(x, y, z)), false);
         } else if (page == nLine) {  // The last page.
             MutableText prev = BlockInfoUtils.getPrev(x, y, z, page);
             MutableText pages = BlockInfoUtils.getPages(page, nLine);
-            source.sendFeedback(Text.literal("").append(prev).append(pages).append(BlockInfoUtils.getHelp(x, y, z)), false);
+            source.sendFeedback(() -> Text.literal("").append(prev).append(pages).append(BlockInfoUtils.getHelp(x, y, z)), false);
         } else {  // Have pages before and after the one you are in.
             MutableText prev = BlockInfoUtils.getPrev(x, y, z, page);
             MutableText pages = BlockInfoUtils.getPages(page, nLine);
             MutableText next = BlockInfoUtils.getNext(x, y, z, page);
-            source.sendFeedback(Text.literal("").append(prev).append(pages).append(next).append(BlockInfoUtils.getHelp(x, y, z)), false);
+            source.sendFeedback(() -> Text.literal("").append(prev).append(pages).append(next).append(BlockInfoUtils.getHelp(x, y, z)), false);
         }
     }
 

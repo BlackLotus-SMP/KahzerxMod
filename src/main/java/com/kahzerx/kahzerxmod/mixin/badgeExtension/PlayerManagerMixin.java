@@ -56,7 +56,7 @@ public class PlayerManagerMixin {
             }
             m.append(t);
             display.append(m);
-            MessageType.Parameters par = MessageType.params(MessageType.CHAT, sender.world.getRegistryManager(), display);
+            MessageType.Parameters par = MessageType.params(MessageType.CHAT, sender.getServerWorld().getRegistryManager(), display);
             instance.sendChatMessage(message, filterMaskEnabled, par);
         }
         else {

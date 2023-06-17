@@ -23,7 +23,7 @@ public class PitoExtension extends GenericExtension implements Extensions {
     }
 
     public int pitoResponse(ServerCommandSource src) {
-        src.sendFeedback(Text.literal("Buena tula mi rey."), false);
+        src.sendFeedback(() -> Text.literal("Buena tula mi rey."), false);
         return 1;
     }
 }

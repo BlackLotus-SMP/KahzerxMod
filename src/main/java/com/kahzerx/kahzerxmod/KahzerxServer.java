@@ -81,9 +81,8 @@ public class KahzerxServer {
                                 return 1;
                             })).
                     executes(context -> {
-                        context.getSource().sendFeedback(
-                                Text.literal("\n" + ex.extensionSettings().getName() + "\n").styled(style -> style.withBold(true)).
-                                        append(MarkEnum.INFO.appendMessage(ex.extensionSettings().getDescription() + "\n", Formatting.GRAY).styled(style -> style.withBold(false))).
+                        context.getSource().sendFeedback(() -> Text.literal("\n" + ex.extensionSettings().getName() + "\n").styled(style -> style.withBold(true)).
+                                        append(MarkEnum.INFO.appendMsg(ex.extensionSettings().getDescription() + "\n", Formatting.GRAY).styled(style -> style.withBold(false))).
                                         append(Text.literal("Enabled: ").styled(style -> style.withBold(false).withColor(Formatting.WHITE))).
                                         append(Text.literal(String.format("%s", ex.extensionSettings().isEnabled())).styled(style -> style.withBold(false).withColor(ex.extensionSettings().isEnabled() ? Formatting.GREEN : Formatting.RED))), false);
                         return 1;
@@ -120,9 +119,9 @@ public class KahzerxServer {
                                 withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/KSettings %s false", ex.extensionSettings().getName())))));
                 extensionNames.add(exData);
             }
-            context.getSource().sendFeedback(Text.literal("All Settings").styled(style -> style.withBold(true)), false);
+            context.getSource().sendFeedback(() -> Text.literal("All Settings").styled(style -> style.withBold(true)), false);
             for (Text t : extensionNames) {
-                context.getSource().sendFeedback(t, false);
+                context.getSource().sendFeedback(() -> t, false);
             }
             return 1;
         });

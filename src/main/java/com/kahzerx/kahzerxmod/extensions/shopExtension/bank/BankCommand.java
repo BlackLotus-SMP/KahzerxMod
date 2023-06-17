@@ -25,11 +25,11 @@ public class BankCommand {
                         then(literal("bank").
                                 requires(server -> server.hasPermissionLevel(2) || (extension.getPermsExtension().extensionSettings().isEnabled() && extension.getPermsExtension().getDBPlayerPerms(server.getPlayer().getUuidAsString()).getId() >= PermsLevels.HELPER.getId())).
                                 executes(context -> {
-                                    context.getSource().sendFeedback(Text.literal("Bank Balance: ").append(MarkEnum.OTAKU_COIN.appendMessage(String.valueOf(extension.getDB().getQuery().getBalance("00000000-0000-0000-0000-000000000000")))), false);
+                                    context.getSource().sendFeedback(() -> Text.literal("Bank Balance: ").append(MarkEnum.OTAKU_COIN.appendMsg(String.valueOf(extension.getDB().getQuery().getBalance("00000000-0000-0000-0000-000000000000")))), false);
                                     return 1;
                                 })).
                         executes(context -> {
-                            context.getSource().sendFeedback(Text.literal("Balance: ").append(MarkEnum.OTAKU_COIN.appendMessage(String.valueOf(extension.getDB().getQuery().getBalance(context.getSource().getPlayer())))), false);
+                            context.getSource().sendFeedback(() -> Text.literal("Balance: ").append(MarkEnum.OTAKU_COIN.appendMsg(String.valueOf(extension.getDB().getQuery().getBalance(context.getSource().getPlayer())))), false);
                             return 1;
                         })).
                 then(literal("transfer").
@@ -58,10 +58,10 @@ public class BankCommand {
                                                     extension.getDB().getQuery().updateFounds(playerUUID, amount, extension.getAccounts());
                                                     extension.getDB().getQuery().updateFounds(bankUUID, amount * -1, extension.getAccounts());
                                                     extension.getDB().getQuery().logTransfer(bankUUID, playerUUID, playerName, amount, extension.getAccounts());
-                                                    context.getSource().sendFeedback(MarkEnum.TICK.appendMessage("Transferencia de ").append(MarkEnum.OTAKU_COIN.appendMessage(String.format("%d a %s completada!", amount, playerName))), false);
+                                                    context.getSource().sendFeedback(() -> MarkEnum.TICK.appendMsg("Transferencia de ").append(MarkEnum.OTAKU_COIN.appendMsg(String.format("%d a %s completada!", amount, playerName))), false);
                                                     ServerPlayerEntity destPlayer = context.getSource().getServer().getPlayerManager().getPlayer(UUID.fromString(playerUUID));
                                                     if (destPlayer != null) {
-                                                        destPlayer.networkHandler.sendPacket(new OverlayMessageS2CPacket(Text.literal("El Banco te ha transferido ").append(MarkEnum.OTAKU_COIN.appendMessage(String.valueOf(amount)))));
+                                                        destPlayer.networkHandler.sendPacket(new OverlayMessageS2CPacket(Text.literal("El Banco te ha transferido ").append(MarkEnum.OTAKU_COIN.appendMsg(String.valueOf(amount)))));
                                                     }
                                                     return 1;
                                                 })))).
@@ -91,10 +91,10 @@ public class BankCommand {
                                             extension.getDB().getQuery().updateFounds(playerUUID, amount, extension.getAccounts());
                                             extension.getDB().getQuery().updateFounds(context.getSource().getPlayer(), amount * -1, extension.getAccounts());
                                             extension.getDB().getQuery().logTransfer(context.getSource().getPlayer(), playerUUID, playerName, amount, extension.getAccounts());
-                                            context.getSource().sendFeedback(MarkEnum.TICK.appendMessage("Transferencia de ").append(MarkEnum.OTAKU_COIN.appendMessage(String.format("%d a %s completada!", amount, playerName))), false);
+                                            context.getSource().sendFeedback(() -> MarkEnum.TICK.appendMsg("Transferencia de ").append(MarkEnum.OTAKU_COIN.appendMsg(String.format("%d a %s completada!", amount, playerName))), false);
                                             ServerPlayerEntity destPlayer = context.getSource().getServer().getPlayerManager().getPlayer(UUID.fromString(playerUUID));
                                             if (destPlayer != null) {
-                                                destPlayer.networkHandler.sendPacket(new OverlayMessageS2CPacket(Text.literal(context.getSource().getPlayer().getName().getString() + " te ha transferido ").append(MarkEnum.OTAKU_COIN.appendMessage(String.valueOf(amount)))));
+                                                destPlayer.networkHandler.sendPacket(new OverlayMessageS2CPacket(Text.literal(context.getSource().getPlayer().getName().getString() + " te ha transferido ").append(MarkEnum.OTAKU_COIN.appendMsg(String.valueOf(amount)))));
                                             }
                                             return 1;
                                         })))));

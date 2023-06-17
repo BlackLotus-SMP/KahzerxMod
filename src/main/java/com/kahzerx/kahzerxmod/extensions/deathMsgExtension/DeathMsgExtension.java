@@ -15,7 +15,7 @@ public class DeathMsgExtension extends GenericExtension implements Extensions {
     @Override
     public void onPlayerDied(ServerPlayerEntity player) {
         if (this.getSettings().isEnabled()) {
-            player.sendMessage(MarkEnum.RIP.appendMessage(String.format("%s %s", DimUtils.getDimensionWithColor(player.world), DimUtils.formatCoords(player.getX(), player.getY(), player.getZ()))), false);
+            player.sendMessage(MarkEnum.RIP.appendMsg(String.format("%s %s", DimUtils.getDimensionWithColor(player.getWorld()), DimUtils.formatCoords(player.getX(), player.getY(), player.getZ()))), false);
         }
     }
 

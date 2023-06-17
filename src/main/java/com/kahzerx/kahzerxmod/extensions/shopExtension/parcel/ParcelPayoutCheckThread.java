@@ -70,7 +70,7 @@ public class ParcelPayoutCheckThread extends TimerTask {
                     parcel.setName(null);
                     extension.getDB().getQuery().giveParcel(parcel, null, null);
                     if (player != null) {
-                        player.sendMessage(MarkEnum.CROSS.appendMessage(String.format("No tienes balance suficiente para pagar tu parcela en %d %d dim %s, avisa a helpers para recuperarla", centerX, centerZ, DimUtils.getWorldString(parcel.getDim()))));
+                        player.sendMessage(MarkEnum.CROSS.appendMsg(String.format("No tienes balance suficiente para pagar tu parcela en %d %d dim %s, avisa a helpers para recuperarla", centerX, centerZ, DimUtils.getWorldString(parcel.getDim()))));
                     }
                     LOGGER.info(message);
                     EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{message}, "", true, Color.RED, true, true);
@@ -86,7 +86,7 @@ public class ParcelPayoutCheckThread extends TimerTask {
                     parcel.setNextPayout(nextTimestamp);
                     extension.getDB().getQuery().giveParcel(parcel, uuid, nextTimestamp);
                     if (player != null) {
-                        player.sendMessage(MarkEnum.INFO.appendMessage(String.format("Has pagado tus %d mensuales de tu parcela en %d %d dim %s", price, centerX, centerZ, DimUtils.getWorldString(parcel.getDim()))));
+                        player.sendMessage(MarkEnum.INFO.appendMsg(String.format("Has pagado tus %d mensuales de tu parcela en %d %d dim %s", price, centerX, centerZ, DimUtils.getWorldString(parcel.getDim()))));
                     }
                     String message = String.format("%s ha pagado %d por su parcela en %d %d dim %s", playerName, price, centerX, centerZ, DimUtils.getWorldString(parcel.getDim()));
                     LOGGER.info(message);

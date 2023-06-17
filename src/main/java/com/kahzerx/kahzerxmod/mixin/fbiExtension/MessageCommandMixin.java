@@ -23,7 +23,7 @@ public class MessageCommandMixin {
         if (targets.size() == 1) {
             for (ServerPlayerEntity player : targets) {
                 if (getHiddenPlayers().contains(player)) {
-                    source.sendFeedback(Text.translatable("argument.entity.notfound.player").formatted(Formatting.RED), false);
+                    source.sendFeedback(() -> Text.translatable("argument.entity.notfound.player").formatted(Formatting.RED), false);
                     ci.cancel();
                 }
             }

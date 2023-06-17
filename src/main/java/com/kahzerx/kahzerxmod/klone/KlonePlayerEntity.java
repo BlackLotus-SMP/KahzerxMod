@@ -37,7 +37,7 @@ public class KlonePlayerEntity extends ServerPlayerEntity {
     }
 
     public static KlonePlayerEntity createKlone(MinecraftServer server, ServerPlayerEntity player, KloneExtension kloneExtension) {
-        ServerWorld world = player.getWorld();
+        ServerWorld world = player.getServerWorld();
         GameProfile profile = player.getGameProfile();
 
         server.getPlayerManager().saveAllPlayerData();
@@ -56,11 +56,11 @@ public class KlonePlayerEntity extends ServerPlayerEntity {
         klonedPlayer.setStepHeight(0.6F);
         klonedPlayer.interactionManager.changeGameMode(player.interactionManager.getGameMode());
 
-        server.getPlayerManager().sendToDimension(new EntitySetHeadYawS2CPacket(klonedPlayer, (byte) (player.headYaw * 256 / 360)), klonedPlayer.world.getRegistryKey());
-        server.getPlayerManager().sendToDimension(new EntityPositionS2CPacket(klonedPlayer), klonedPlayer.world.getRegistryKey());
+        server.getPlayerManager().sendToDimension(new EntitySetHeadYawS2CPacket(klonedPlayer, (byte) (player.headYaw * 256 / 360)), klonedPlayer.getWorld().getRegistryKey());
+        server.getPlayerManager().sendToDimension(new EntityPositionS2CPacket(klonedPlayer), klonedPlayer.getWorld().getRegistryKey());
         server.getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, klonedPlayer));
 
-        player.getWorld().getChunkManager().updatePosition(klonedPlayer);
+        player.getServerWorld().getChunkManager().updatePosition(klonedPlayer);
 
         klonedPlayer.dataTracker.set(PLAYER_MODEL_PARTS, (byte) 0x7f);
         klonedPlayer.getAbilities().flying = player.getAbilities().flying;
@@ -93,7 +93,7 @@ public class KlonePlayerEntity extends ServerPlayerEntity {
     public void tick() {
         if (Objects.requireNonNull(this.getServer()).getTicks() % 10 == 0) {
             this.networkHandler.syncWithPlayerPosition();
-            this.getWorld().getChunkManager().updatePosition(this);
+            this.getServerWorld().getChunkManager().updatePosition(this);
             this.onTeleportationDone();
         }
         try {
@@ -108,12 +108,12 @@ public class KlonePlayerEntity extends ServerPlayerEntity {
         this.setHealth(20);
         this.hungerManager = new HungerManager();
         Text text = this.getDamageTracker().getDeathMessage();
-        if (this.world.getGameRules().getBoolean(GameRules.SHOW_DEATH_MESSAGES)) {
-            this.networkHandler.sendPacket(new DeathMessageS2CPacket(this.getDamageTracker(), text), PacketCallbacks.of(() -> {
+        if (this.getWorld().getGameRules().getBoolean(GameRules.SHOW_DEATH_MESSAGES)) {
+            this.networkHandler.sendPacket(new DeathMessageS2CPacket(this.getId(), text), PacketCallbacks.of(() -> {
                 String string = text.asTruncatedString(256);
                 Text text2 = Text.translatable("death.attack.message_too_long", Text.literal(string).formatted(Formatting.YELLOW));
                 Text text3 = Text.translatable("death.attack.even_more_magic", this.getDisplayName()).styled((style) -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, text2)));
-                return new DeathMessageS2CPacket(this.getDamageTracker(), text3);
+                return new DeathMessageS2CPacket(this.getId(), text3);
             }));
         }
         this.kill(text);

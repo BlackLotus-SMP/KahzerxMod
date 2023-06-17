@@ -30,7 +30,7 @@ public class JoinMOTDExtension extends GenericExtension implements Extensions {
     public void updateMessage(ServerCommandSource source, String message) {
         this.extensionSettings().setMessage(message);
         source.sendFeedback(MarkEnum.TICK.appendMessage("New join message configured!"), false);
-        source.sendFeedback(getFormatted(message), false);
+        source.sendFeedback(() -> getFormatted(message), false);
     }
 
     @Override

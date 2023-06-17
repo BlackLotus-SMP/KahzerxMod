@@ -89,10 +89,10 @@ public class SpawnExtension extends GenericExtension implements Extensions {
             ps.setDouble(1, pos.getX());
             ps.setDouble(2, pos.getY());
             ps.setDouble(3, pos.getZ());
-            ps.setInt(4, DimUtils.getWorldID(DimUtils.getDim(player.world)));
+            ps.setInt(4, DimUtils.getWorldID(DimUtils.getDim(player.getWorld())));
             ps.executeUpdate();
             ps.close();
-            source.sendFeedback(MarkEnum.TICK.appendMessage(String.format("Spawn @: %s %s", DimUtils.getDimensionWithColor(player.world), DimUtils.formatCoords(pos.getX(), pos.getY(), pos.getZ()))), false);
+            source.sendFeedback(MarkEnum.TICK.appendMessage(String.format("Spawn @: %s %s", DimUtils.getDimensionWithColor(player.getWorld()), DimUtils.formatCoords(pos.getX(), pos.getY(), pos.getZ()))), false);
         } catch (SQLException e) {
             e.printStackTrace();
         }

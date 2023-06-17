@@ -22,7 +22,7 @@ public class BedTimeExtension extends GenericExtension implements Extensions {
     public void onPlayerSleep(ServerPlayerEntity player) {
         MinecraftServer server = player.getServer();
         if (server != null && this.extensionSettings().isEnabled()) {
-            server.getPlayerManager().broadcast(MarkEnum.SLEEP.appendMessage(player.getName().getString() + " went to sleep", Formatting.YELLOW), false);
+            server.getPlayerManager().broadcast(MarkEnum.SLEEP.appendMsg(player.getName().getString() + " went to sleep", Formatting.YELLOW), false);
         }
     }
 
@@ -30,7 +30,7 @@ public class BedTimeExtension extends GenericExtension implements Extensions {
     public void onPlayerWakeUp(ServerPlayerEntity player) {
         MinecraftServer server = player.getServer();
         if (server != null && this.extensionSettings().isEnabled()) {
-            server.getPlayerManager().broadcast(MarkEnum.SLEEP.appendMessage(player.getName().getString() + " woke up", Formatting.YELLOW), false);
+            server.getPlayerManager().broadcast(MarkEnum.SLEEP.appendMsg(player.getName().getString() + " woke up", Formatting.YELLOW), false);
         }
     }
 }

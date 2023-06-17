@@ -12,7 +12,7 @@ public class AchusCommand {
         dispatcher.register(literal("achus").
                 requires(server -> achus.getSettings().isEnabled()).
                 executes(context -> {
-                    context.getSource().sendFeedback(Text.literal(Formatting.GREEN + "Salud"), false);
+                    context.getSource().sendFeedback(() -> Text.literal(Formatting.GREEN + "Salud"), false);
                     return 1;
                 }));
     }

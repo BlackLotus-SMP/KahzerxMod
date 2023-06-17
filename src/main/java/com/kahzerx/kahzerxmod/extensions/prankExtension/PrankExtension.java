@@ -10,7 +10,6 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.sql.*;
-import java.util.Collection;
 import java.util.HashMap;
 
 public class PrankExtension extends GenericExtension implements Extensions {

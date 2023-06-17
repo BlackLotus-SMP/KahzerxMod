@@ -121,11 +121,11 @@ public class DiscordExtension extends GenericExtension implements Extensions {
                                 then(argument("chatChannelID", LongArgumentType.longArg()).
                                         executes(context -> {
                                             if (DiscordListener.chatbridge) {
-                                                context.getSource().sendFeedback(Text.literal("Stop the bot before you make any changes..."), false);
+                                                context.getSource().sendFeedback(() -> Text.literal("Stop the bot before you make any changes..."), false);
                                             } else {
                                                 extensionSettings().setToken(StringArgumentType.getString(context, "token"));
                                                 extensionSettings().setChatChannelID(LongArgumentType.getLong(context, "chatChannelID"));
-                                                context.getSource().sendFeedback(Text.literal("Done!"), false);
+                                                context.getSource().sendFeedback(() -> Text.literal("Done!"), false);
                                                 ExtensionManager.saveSettings();
                                             }
                                             return 1;
@@ -135,10 +135,10 @@ public class DiscordExtension extends GenericExtension implements Extensions {
                             if (DiscordListener.chatbridge) {
                                 DiscordListener.stop();
                                 this.extensionSettings().setRunning(false);
-                                context.getSource().sendFeedback(Text.literal("Bot stopped!"), false);
+                                context.getSource().sendFeedback(() -> Text.literal("Bot stopped!"), false);
                                 ExtensionManager.saveSettings();
                             } else {
-                                context.getSource().sendFeedback(Text.literal("Bot already stopped."), false);
+                                context.getSource().sendFeedback(() -> Text.literal("Bot already stopped."), false);
                             }
                             return 1;
                         })).
@@ -147,13 +147,13 @@ public class DiscordExtension extends GenericExtension implements Extensions {
                             if (!DiscordListener.chatbridge) {
                                 DiscordListener.start(KahzerxServer.minecraftServer, extensionSettings().getToken(), String.valueOf(extensionSettings().getChatChannelID()), this);
                                 if (DiscordListener.chatbridge) {
-                                    context.getSource().sendFeedback(Text.literal("Started!"), false);
+                                    context.getSource().sendFeedback(() -> Text.literal("Started!"), false);
                                 } else {
-                                    context.getSource().sendFeedback(Text.literal("Failed to start."), false);
+                                    context.getSource().sendFeedback(() -> Text.literal("Failed to start."), false);
                                 }
                                 ExtensionManager.saveSettings();
                             } else {
-                                context.getSource().sendFeedback(Text.literal("But is already running."), false);
+                                context.getSource().sendFeedback(() -> Text.literal("But is already running."), false);
                             }
                             return 1;
                         })).
@@ -161,45 +161,45 @@ public class DiscordExtension extends GenericExtension implements Extensions {
                         then(argument("feedback", BoolArgumentType.bool()).
                                 executes(context -> {
                                     extensionSettings().setShouldFeedback(BoolArgumentType.getBool(context, "feedback"));
-                                    context.getSource().sendFeedback(Text.literal("[shouldFeedback] > " + extensionSettings().isShouldFeedback() + "."), false);
+                                    context.getSource().sendFeedback(() -> Text.literal("[shouldFeedback] > " + extensionSettings().isShouldFeedback() + "."), false);
                                     ExtensionManager.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
-                            context.getSource().sendFeedback(Text.literal("[shouldFeedback] > " + extensionSettings().isShouldFeedback() + "."), false);
+                            context.getSource().sendFeedback(() -> Text.literal("[shouldFeedback] > " + extensionSettings().isShouldFeedback() + "."), false);
                             return 1;
                         })).
                 then(literal("chatBridgePrefix").
                         then(argument("prefix", StringArgumentType.string()).
                                 executes(context -> {
                                     extensionSettings().setPrefix(StringArgumentType.getString(context, "prefix"));
-                                    context.getSource().sendFeedback(Text.literal("[Prefix] > " + extensionSettings().getPrefix() + "."), false);
+                                    context.getSource().sendFeedback(() -> Text.literal("[Prefix] > " + extensionSettings().getPrefix() + "."), false);
                                     ExtensionManager.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
                             String help = "Server prefix.";
-                            context.getSource().sendFeedback(Text.literal(help), false);
+                            context.getSource().sendFeedback(() -> Text.literal(help), false);
                             String prefix = extensionSettings().getPrefix();
-                            context.getSource().sendFeedback(Text.literal(prefix.equals("") ? "There is no prefix." : "[Prefix] > " + extensionSettings().getPrefix() + "."), false);
+                            context.getSource().sendFeedback(() -> Text.literal(prefix.equals("") ? "There is no prefix." : "[Prefix] > " + extensionSettings().getPrefix() + "."), false);
                             return 1;
                         })).
                 then(literal("crossServerChat").
                         then(argument("enabled", BoolArgumentType.bool()).
                                 executes(context -> {
                                     if (extensionSettings().getPrefix().equals("")) {
-                                        context.getSource().sendFeedback(Text.literal("You need to set a prefix!"), false);
+                                        context.getSource().sendFeedback(() -> Text.literal("You need to set a prefix!"), false);
                                         return 1;
                                     }
                                     extensionSettings().setCrossServerChat(BoolArgumentType.getBool(context, "enabled"));
-                                    context.getSource().sendFeedback(Text.literal("[CrossServerChat] > " + extensionSettings().isCrossServerChat() + "."), false);
+                                    context.getSource().sendFeedback(() -> Text.literal("[CrossServerChat] > " + extensionSettings().isCrossServerChat() + "."), false);
                                     ExtensionManager.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
                             String help = "Same bot(same token) on same chatID and different prefix on many servers will connect their chats.";
-                            context.getSource().sendFeedback(Text.literal(help), false);
-                            context.getSource().sendFeedback(Text.literal("[CrossServerChat] > " + extensionSettings().isCrossServerChat() + "."), false);
+                            context.getSource().sendFeedback(() -> Text.literal(help), false);
+                            context.getSource().sendFeedback(() -> Text.literal("[CrossServerChat] > " + extensionSettings().isCrossServerChat() + "."), false);
                             return 1;
                         })).
                 then(literal("allowedChats").
@@ -207,10 +207,10 @@ public class DiscordExtension extends GenericExtension implements Extensions {
                                 then(argument("chatID", LongArgumentType.longArg()).
                                         executes(context -> {
                                             if (extensionSettings().getAllowedChats().contains(LongArgumentType.getLong(context, "chatID"))) {
-                                                context.getSource().sendFeedback(Text.literal("ID already added."), false);
+                                                context.getSource().sendFeedback(() -> Text.literal("ID already added."), false);
                                             } else {
                                                 extensionSettings().addAllowedChatID(LongArgumentType.getLong(context, "chatID"));
-                                                context.getSource().sendFeedback(Text.literal("ID added."), false);
+                                                context.getSource().sendFeedback(() -> Text.literal("ID added."), false);
                                                 ExtensionManager.saveSettings();
                                             }
                                             return 1;
@@ -220,21 +220,21 @@ public class DiscordExtension extends GenericExtension implements Extensions {
                                         executes(context -> {
                                             if (extensionSettings().getAllowedChats().contains(LongArgumentType.getLong(context, "chatID"))) {
                                                 extensionSettings().removeAllowedChatID(LongArgumentType.getLong(context, "chatID"));
-                                                context.getSource().sendFeedback(Text.literal("ID removed."), false);
+                                                context.getSource().sendFeedback(() -> Text.literal("ID removed."), false);
                                                 ExtensionManager.saveSettings();
                                             } else {
-                                                context.getSource().sendFeedback(Text.literal("This ID doesn't exist."), false);
+                                                context.getSource().sendFeedback(() -> Text.literal("This ID doesn't exist."), false);
                                             }
                                             return 1;
                                         }))).
                         then(literal("list").
                                 executes(context -> {
-                                    context.getSource().sendFeedback(Text.literal(extensionSettings().getAllowedChats().toString()), false);
+                                    context.getSource().sendFeedback(() -> Text.literal(extensionSettings().getAllowedChats().toString()), false);
                                     return 1;
                                 })).
                         executes(context -> {
                             String help = "ChatIDs where !online work.";
-                            context.getSource().sendFeedback(Text.literal(help), false);
+                            context.getSource().sendFeedback(() -> Text.literal(help), false);
                             return 1;
                         }));
     }

@@ -34,7 +34,7 @@ public class JoinMOTDCommand {
                         })).
                 executes(context -> {
                     context.getSource().sendFeedback(MarkEnum.TICK.appendMessage("Actual MOTD!"), false);
-                    context.getSource().sendFeedback(joinMOTD.getFormatted(joinMOTD.extensionSettings().getMessage()), false);
+                    context.getSource().sendFeedback(() -> joinMOTD.getFormatted(joinMOTD.extensionSettings().getMessage()), false);
                     return 1;
                 }));
     }
