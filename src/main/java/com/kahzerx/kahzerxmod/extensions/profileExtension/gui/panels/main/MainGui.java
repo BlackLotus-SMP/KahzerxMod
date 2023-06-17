@@ -95,7 +95,7 @@ public class MainGui extends GuiBase {
         });
         waypointsText = new TextLabel(new TextMapper("Waypoints", new Font("Times New Roman", Font.BOLD, 20)), BLACK.getCode());
         renderImage = new ImageButton(MainResources.RENDER);
-        renderImage.setClickCallback((boolean isKey, GuiPlayer p) -> p.getPlayer().sendMessage(MarkEnum.INFO.appendMessage("Puedes encontrar el render del mundo aquí: ").append(Text.literal("https://maps.kahzerx.com/otakucraft/otakucraft4/").styled(style -> style.withColor(Formatting.GRAY).withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://maps.kahzerx.com/otakucraft/otakucraft4/")))), false));
+        renderImage.setClickCallback((boolean isKey, GuiPlayer p) -> p.getPlayer().sendMessage(MarkEnum.INFO.appendMsg("Puedes encontrar el render del mundo aquí: ").append(Text.literal("https://maps.kahzerx.com/otakucraft/otakucraft4/").styled(style -> style.withColor(Formatting.GRAY).withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://maps.kahzerx.com/otakucraft/otakucraft4/")))), false));
         renderText = new TextLabel(new TextMapper("Render", new Font("Times New Roman", Font.BOLD, 20)), BLACK.getCode());
 
         addComponent(mainBack);

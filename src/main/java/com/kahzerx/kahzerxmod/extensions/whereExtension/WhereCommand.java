@@ -27,10 +27,10 @@ public class WhereCommand {
                         executes(context -> {
                             ServerPlayerEntity playerEntity = context.getSource().getServer().getPlayerManager().getPlayer(StringArgumentType.getString(context, "player"));
                             if (playerEntity != null) {
-                                context.getSource().sendFeedback(Text.literal(String.format(
+                                context.getSource().sendFeedback(() -> Text.literal(String.format(
                                         "%s %s %s",
                                         PlayerUtils.getPlayerWithColor(playerEntity),
-                                        DimUtils.getDimensionWithColor(playerEntity.world),
+                                        DimUtils.getDimensionWithColor(playerEntity.getWorld()),
                                         DimUtils.formatCoords(playerEntity.getX(), playerEntity.getY(), playerEntity.getZ())
                                 )), false);
                             }

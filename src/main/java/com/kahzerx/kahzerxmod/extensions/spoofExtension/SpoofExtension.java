@@ -42,7 +42,7 @@ public class SpoofExtension extends GenericExtension implements Extensions {
                     GenericContainerScreenHandler.createGeneric9x3(i, playerInventory, enderChestInventory),
                     Text.literal(String.format("%s stop hax >:(", player.getName().getString()))));
         } else {
-            source.sendFeedback(Text.literal("player offline"), false);
+            source.sendFeedback(() -> Text.literal("player offline"), false);
         }
         return 1;
     }

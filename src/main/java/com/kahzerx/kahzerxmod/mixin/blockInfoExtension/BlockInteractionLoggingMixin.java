@@ -30,7 +30,7 @@ public class BlockInteractionLoggingMixin {
                     hitResult.getBlockPos().getX(),
                     hitResult.getBlockPos().getY(),
                     hitResult.getBlockPos().getZ(),
-                    DimUtils.getWorldID(DimUtils.getDim(player.world)),
+                    DimUtils.getWorldID(DimUtils.getDim(player.getWorld())),
                     ActionTypes.INTERACT.getId(),
                     DateUtils.getDate()
             );
@@ -43,7 +43,7 @@ public class BlockInteractionLoggingMixin {
                     hitResult.getBlockPos().getX(),
                     hitResult.getBlockPos().getY(),
                     hitResult.getBlockPos().getZ(),
-                    DimUtils.getWorldID(DimUtils.getDim(player.world)),
+                    DimUtils.getWorldID(DimUtils.getDim(player.getWorld())),
                     ActionTypes.INTERACT.getId(),
                     DateUtils.getDate()
             );

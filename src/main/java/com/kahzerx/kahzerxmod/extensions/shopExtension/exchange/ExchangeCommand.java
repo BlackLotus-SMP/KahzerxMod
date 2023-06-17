@@ -97,7 +97,7 @@ public class ExchangeCommand {
                                             extension.getDB().getQuery().updateFounds(player, Exchange.getValue(item) * count, extension.getAccounts());
                                             extension.getDB().getQuery().logExchange(player, item, count, extension.getAccounts());
                                             player.setStackInHand(Hand.MAIN_HAND, new ItemStack(Items.AIR));
-                                            context.getSource().sendFeedback(MarkEnum.TICK.appendMessage("Añadidos ").append(MarkEnum.OTAKU_COIN.appendMessage(String.valueOf(Exchange.getValue(item) * count))), false);
+                                            context.getSource().sendFeedback(() -> MarkEnum.TICK.appendMsg("Añadidos ").append(MarkEnum.OTAKU_COIN.appendMsg(String.valueOf(Exchange.getValue(item) * count))), false);
                                             return 1;
                                         })))).
                 then(literal("abort").
@@ -127,12 +127,12 @@ public class ExchangeCommand {
                     if (item == Items.AIR) {
                         context.getSource().sendFeedback(MarkEnum.INFO.appendMessage("Haz click sobre el item que quieres cambiar?"), false);
                         BankInstance.Exchanges exchanges = extension.getAccounts().get(player).getExchanges();
-                        context.getSource().sendFeedback(getFormattedGetBack(Items.DIAMOND, exchanges.getDiamond(), true), false);
-                        context.getSource().sendFeedback(getFormattedGetBack(Items.DIAMOND_BLOCK, exchanges.getDiamondBlock(), true), false);
-                        context.getSource().sendFeedback(getFormattedGetBack(Items.NETHERITE_INGOT, exchanges.getNetheriteIngot(), true), false);
-                        context.getSource().sendFeedback(getFormattedGetBack(Items.NETHERITE_BLOCK, exchanges.getNetheriteBlock(), true), false);
-                        context.getSource().sendFeedback(getFormattedGetBack(Items.NETHERITE_SCRAP, exchanges.getNetheriteScrap(), true), false);
-                        context.getSource().sendFeedback(getFormattedGetBack(Items.ANCIENT_DEBRIS, exchanges.getDebris(), true), false);
+                        context.getSource().sendFeedback(() -> getFormattedGetBack(Items.DIAMOND, exchanges.getDiamond(), true), false);
+                        context.getSource().sendFeedback(() -> getFormattedGetBack(Items.DIAMOND_BLOCK, exchanges.getDiamondBlock(), true), false);
+                        context.getSource().sendFeedback(() -> getFormattedGetBack(Items.NETHERITE_INGOT, exchanges.getNetheriteIngot(), true), false);
+                        context.getSource().sendFeedback(() -> getFormattedGetBack(Items.NETHERITE_BLOCK, exchanges.getNetheriteBlock(), true), false);
+                        context.getSource().sendFeedback(() -> getFormattedGetBack(Items.NETHERITE_SCRAP, exchanges.getNetheriteScrap(), true), false);
+                        context.getSource().sendFeedback(() -> getFormattedGetBack(Items.ANCIENT_DEBRIS, exchanges.getDebris(), true), false);
                         context.getSource().sendFeedback(MarkEnum.INFO.appendMessage("Al hacer click especifica en el comando cuanto quieres cambiar?"), false);
                         context.getSource().sendFeedback(MarkEnum.WARNING.appendMessage("Los items se dropearán al suelo! Verifica que estés en un sitio seguro.", Formatting.GOLD), false);
                         return 1;
@@ -140,12 +140,12 @@ public class ExchangeCommand {
                     if (isInvalid(context, player)) {
                         return 1;
                     }
-                    context.getSource().sendFeedback(
-                            MarkEnum.INFO.appendMessage(String.format("Vas a cambiar %d %s por ", count, item.getName().getString())).
-                                    append(MarkEnum.OTAKU_COIN.appendMessage(String.format("%d", Exchange.getValue(item) * count))),
+                    context.getSource().sendFeedback(() ->
+                                    MarkEnum.INFO.appendMsg(String.format("Vas a cambiar %d %s por ", count, item.getName().getString())).
+                                    append(MarkEnum.OTAKU_COIN.appendMsg(String.format("%d", Exchange.getValue(item) * count))),
                             false);
-                    context.getSource().sendFeedback(
-                            MarkEnum.QUESTION.appendMessage("Confirmar exchange? ").
+                    context.getSource().sendFeedback(() ->
+                                    MarkEnum.QUESTION.appendMsg("Confirmar exchange? ").
                                     append(Text.literal("[Sí]").styled(style -> style.withColor(Formatting.GREEN).
                                             withBold(true).
                                             withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/exchange confirm %d %s", count, item.getTranslationKey()))).
@@ -161,8 +161,8 @@ public class ExchangeCommand {
                 }).
                 then(literal("info").
                         executes(context -> {
-                            context.getSource().sendFeedback(
-                                    Text.literal("\n").
+                            context.getSource().sendFeedback(() ->
+                                            Text.literal("\n").
                                     append(MarkEnum.OTAKU_COIN.getFormattedIdentifier().append(Text.literal(" ").styled(style -> style.
                                             withUnderline(false)))).
                                     append(Text.literal("Economía").styled(style -> style.
@@ -172,7 +172,7 @@ public class ExchangeCommand {
                                     false
                             );
                             for (Item item : Exchange.getValidExchanges().keySet()) {
-                                context.getSource().sendFeedback(getFormattedGetBack(item, Exchange.getValue(item), false).append(Text.literal(" ")).append(MarkEnum.OTAKU_COIN.getFormattedIdentifier()), false);
+                                context.getSource().sendFeedback(() -> getFormattedGetBack(item, Exchange.getValue(item), false).append(Text.literal(" ")).append(MarkEnum.OTAKU_COIN.getFormattedIdentifier()), false);
                             }
                             return 1;
                         })));
@@ -202,12 +202,12 @@ public class ExchangeCommand {
         Item item = player.getMainHandStack().getItem();
         if (player.getMainHandStack().isEmpty()) {
             context.getSource().sendFeedback(MarkEnum.CROSS.appendMessage("Necesitas el item a cambiar en la mano!"), false);
-            context.getSource().sendFeedback(MarkEnum.INFO.appendText(Text.literal("Usa ").append(getExchangeHelpCommand())), false);
+            context.getSource().sendFeedback(() -> MarkEnum.INFO.appendText(Text.literal("Usa ").append(getExchangeHelpCommand())), false);
             return true;
         }
         if (!Exchange.isValidItem(item)) {
             context.getSource().sendFeedback(MarkEnum.CROSS.appendMessage("El item no es válido!"), false);
-            context.getSource().sendFeedback(MarkEnum.INFO.appendText(Text.literal("Usa ").append(getExchangeHelpCommand())), false);
+            context.getSource().sendFeedback(() -> MarkEnum.INFO.appendText(Text.literal("Usa ").append(getExchangeHelpCommand())), false);
             return true;
         }
         return false;

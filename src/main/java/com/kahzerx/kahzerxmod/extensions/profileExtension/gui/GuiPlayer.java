@@ -147,7 +147,7 @@ public class GuiPlayer {
             gui.setReRender(true);
         }
         isOpen = true;
-        panelWorld = player.getWorld();
+        panelWorld = player.getServerWorld();
         panelOpenPos = pos;
         panelFacingSide = dir;
         panelWidth = width;

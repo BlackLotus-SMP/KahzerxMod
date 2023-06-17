@@ -27,7 +27,7 @@ public class PrankCommand {
                                 suggests(((context, builder) -> CommandSource.suggestMatching(new String[]{"0", "1", "2", "3", "4", "5"}, builder))).
                                 executes(context -> {
                                     PrankLevel level = PrankLevel.idToLevel(IntegerArgumentType.getInteger(context, "level"));
-                                    context.getSource().sendFeedback(MarkEnum.INFO.appendText(Text.literal(
+                                    context.getSource().sendFeedback(() -> MarkEnum.INFO.appendText(Text.literal(
                                             String.format("Nivel %d", level.getID())
                                     ).styled(style -> style.
                                             withBold(true).

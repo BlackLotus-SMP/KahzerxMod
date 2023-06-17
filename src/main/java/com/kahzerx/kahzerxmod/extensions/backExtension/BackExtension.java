@@ -63,7 +63,7 @@ public class BackExtension extends GenericExtension implements Extensions {
     @Override
     public void onPlayerDied(ServerPlayerEntity player) {
         String playerUUID = player.getUuidAsString();
-        BackPos backPos = new BackPos(player.getX(), player.getY(), player.getZ(), DimUtils.getDim(player.world));
+        BackPos backPos = new BackPos(player.getX(), player.getY(), player.getZ(), DimUtils.getDim(player.getWorld()));
         playerBack.put(playerUUID, backPos);
         updateDeathPos(player, backPos);
     }
@@ -126,7 +126,7 @@ public class BackExtension extends GenericExtension implements Extensions {
         }
         String playerUUID = player.getUuidAsString();
         if (!this.playerBack.containsKey(playerUUID)) {
-            player.sendMessage(MarkEnum.CROSS.appendMessage("Error"), false);
+            player.sendMessage(MarkEnum.CROSS.appendMsg("Error"), false);
             return 1;
         }
         BackPos backPos = playerBack.get(playerUUID);
@@ -141,7 +141,7 @@ public class BackExtension extends GenericExtension implements Extensions {
             );
             player.addExperience(0);  // xp resets when you tp from other dimension and needs to update smh, mojang pls.
         } else {
-            player.sendMessage(MarkEnum.INFO.appendMessage("You haven't died yet :("), false);
+            player.sendMessage(MarkEnum.INFO.appendMsg("You haven't died yet :("), false);
         }
         return 1;
     }

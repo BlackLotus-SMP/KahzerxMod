@@ -102,7 +102,7 @@ public class ScoreboardExtension extends GenericExtension implements Extensions 
         } else {
             scoreboard.setObjectiveSlot(1, null);
             assert entity != null;
-            source.getServer().getPlayerManager().broadcast(MarkEnum.TICK.appendMessage(entity.getEntityName() + " removed the scoreboard."), false);
+            source.getServer().getPlayerManager().broadcast(MarkEnum.TICK.appendMsg(entity.getEntityName() + " removed the scoreboard."), false);
         }
         return 1;
     }
@@ -137,7 +137,7 @@ public class ScoreboardExtension extends GenericExtension implements Extensions 
     public Text display(Scoreboard scoreboard, ScoreboardObjective scoreboardObjective, int tick, Entity entity, boolean persistent) {
         Text text;
         if (scoreboard.getObjectiveForSlot(1) == scoreboardObjective) {
-            text = MarkEnum.CROSS.appendMessage("Already showing");
+            text = MarkEnum.CROSS.appendMsg("Already showing");
         } else {
             assert entity != null;
             scoreboard.setObjectiveSlot(1, scoreboardObjective);
@@ -156,7 +156,7 @@ public class ScoreboardExtension extends GenericExtension implements Extensions 
         Scoreboard scoreboard = source.getServer().getScoreboard();
         Optional<EntityType<?>> optEntity = EntityType.get(id.toString());
         if (optEntity.isEmpty()) {
-            source.getServer().getPlayerManager().broadcast(MarkEnum.CROSS.appendMessage("Error on get entity!"), false);
+            source.getServer().getPlayerManager().broadcast(MarkEnum.CROSS.appendMsg("Error on get entity!"), false);
             return;
         }
         EntityType<?> entityType = optEntity.get();
@@ -182,7 +182,7 @@ public class ScoreboardExtension extends GenericExtension implements Extensions 
                 initScoreboard(source, newScoreboardObjective, entityType, type);
             } catch (Exception e) {
                 scoreboard.removeObjective(newScoreboardObjective);
-                text = MarkEnum.CROSS.appendMessage("Error on init scoreboard");
+                text = MarkEnum.CROSS.appendMsg("Error on init scoreboard");
                 assert entity != null;
                 source.getServer().getPlayerManager().broadcast(text, false);
 
@@ -229,7 +229,7 @@ public class ScoreboardExtension extends GenericExtension implements Extensions 
                 initScoreboard(source, newScoreboardObjective, minecraftItem, type);
             } catch (Exception e) {
                 scoreboard.removeObjective(newScoreboardObjective);
-                text = MarkEnum.CROSS.appendMessage("Error.");
+                text = MarkEnum.CROSS.appendMsg("Error.");
                 assert entity != null;
                 source.getServer().getPlayerManager().broadcast(text, false);
 

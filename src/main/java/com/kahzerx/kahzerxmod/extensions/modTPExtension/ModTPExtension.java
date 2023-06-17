@@ -28,7 +28,7 @@ public class ModTPExtension extends GenericExtension implements Extensions {
             return 1;
         }
         ServerPlayerEntity sourcePlayer = source.getPlayer();
-        sourcePlayer.teleport(player.getWorld(), player.getX(), player.getY(), player.getZ(), sourcePlayer.getYaw(), sourcePlayer.getPitch());
+        sourcePlayer.teleport(player.getServerWorld(), player.getX(), player.getY(), player.getZ(), sourcePlayer.getYaw(), sourcePlayer.getPitch());
         return 1;
     }
 

@@ -24,7 +24,7 @@ public class XiemarCommand {
                         requires(isXiemar -> isXiemar.getPlayer().getUuid().equals(UUID.fromString(XIEMAR_UUID))).
                         executes(context -> {
                             xiemar.extensionSettings().setEnabled(BoolArgumentType.getBool(context, "enabled"));
-                            context.getSource().sendFeedback(Text.literal("[Xiemar] > " + xiemar.extensionSettings().isEnabled()), false);
+                            context.getSource().sendFeedback(() -> Text.literal("[Xiemar] > " + xiemar.extensionSettings().isEnabled()), false);
                             ExtensionManager.saveSettings();
                             PlayerUtils.reloadCommands();
                             return 1;

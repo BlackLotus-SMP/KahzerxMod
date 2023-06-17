@@ -38,7 +38,7 @@ public abstract class ServerPlayNetworkHandlerMixin implements ServerPlayPacketL
 
     private void replaceChatMessage(ChatMessageS2CPacket chatPacket) {
         GameMessageS2CPacket gamePacket = new GameMessageS2CPacket(
-                chatPacket.serializedParameters().toParameters(this.player.world.getRegistryManager()).get().applyChatDecoration(
+                chatPacket.serializedParameters().toParameters(this.player.getServerWorld().getRegistryManager()).get().applyChatDecoration(
                         chatPacket.unsignedContent() != null ? chatPacket.unsignedContent() : Text.literal(chatPacket.body().content())
                 ), false
         );

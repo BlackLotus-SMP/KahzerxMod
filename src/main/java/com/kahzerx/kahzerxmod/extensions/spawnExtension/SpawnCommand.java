@@ -21,7 +21,7 @@ public class SpawnCommand {
                         ServerPlayerEntity player = context.getSource().getPlayer();
                         player.teleport(DimUtils.getWorld(pos.getDim(), context.getSource().getServer()), pos.getX(), pos.getY(), pos.getZ(), player.getYaw(), player.getPitch());
                     } else {
-                        context.getSource().sendFeedback(Text.literal("Not configured yet..."), false);
+                        context.getSource().sendFeedback(() -> Text.literal("Not configured yet..."), false);
                     }
                     return 1;
                 }));

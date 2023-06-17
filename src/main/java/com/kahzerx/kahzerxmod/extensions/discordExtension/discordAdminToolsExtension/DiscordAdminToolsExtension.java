@@ -116,12 +116,12 @@ public class DiscordAdminToolsExtension extends GenericExtension implements Exte
                         then(argument("feedback", BoolArgumentType.bool()).
                                 executes(context -> {
                                     extensionSettings().setShouldFeedback(BoolArgumentType.getBool(context, "feedback"));
-                                    context.getSource().sendFeedback(Text.literal("[shouldFeedback] > " + extensionSettings().isShouldFeedback() + "."), false);
+                                    context.getSource().sendFeedback(() -> Text.literal("[shouldFeedback] > " + extensionSettings().isShouldFeedback() + "."), false);
                                     ExtensionManager.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
-                            context.getSource().sendFeedback(Text.literal("[shouldFeedback] > " + extensionSettings().isShouldFeedback() + "."), false);
+                            context.getSource().sendFeedback(() -> Text.literal("[shouldFeedback] > " + extensionSettings().isShouldFeedback() + "."), false);
                             return 1;
                         })).
                 then(literal("adminChats").
@@ -129,10 +129,10 @@ public class DiscordAdminToolsExtension extends GenericExtension implements Exte
                                 then(argument("chatID", LongArgumentType.longArg()).
                                         executes(context -> {
                                             if (extensionSettings().getAdminChats().contains(LongArgumentType.getLong(context, "chatID"))) {
-                                                context.getSource().sendFeedback(Text.literal("ID already added."), false);
+                                                context.getSource().sendFeedback(() -> Text.literal("ID already added."), false);
                                             } else {
                                                 extensionSettings().addAdminChatID(LongArgumentType.getLong(context, "chatID"));
-                                                context.getSource().sendFeedback(Text.literal("ID added."), false);
+                                                context.getSource().sendFeedback(() -> Text.literal("ID added."), false);
                                                 ExtensionManager.saveSettings();
                                             }
                                             return 1;
@@ -142,21 +142,21 @@ public class DiscordAdminToolsExtension extends GenericExtension implements Exte
                                         executes(context -> {
                                             if (extensionSettings().getAdminChats().contains(LongArgumentType.getLong(context, "chatID"))) {
                                                 extensionSettings().removeAdminChatID(LongArgumentType.getLong(context, "chatID"));
-                                                context.getSource().sendFeedback(Text.literal("ID removed."), false);
+                                                context.getSource().sendFeedback(() -> Text.literal("ID removed."), false);
                                                 ExtensionManager.saveSettings();
                                             } else {
-                                                context.getSource().sendFeedback(Text.literal("This ID doesn't exist."), false);
+                                                context.getSource().sendFeedback(() -> Text.literal("This ID doesn't exist."), false);
                                             }
                                             return 1;
                                         }))).
                         then(literal("list").
                                 executes(context -> {
-                                    context.getSource().sendFeedback(Text.literal(extensionSettings().getAdminChats().toString()), false);
+                                    context.getSource().sendFeedback(() -> Text.literal(extensionSettings().getAdminChats().toString()), false);
                                     return 1;
                                 })).
                         executes(context -> {
                             String help = "ChatIDs where !ban, !pardon, !exadd and !exremove work.";
-                            context.getSource().sendFeedback(Text.literal(help), false);
+                            context.getSource().sendFeedback(() -> Text.literal(help), false);
                             return 1;
                         }));
     }

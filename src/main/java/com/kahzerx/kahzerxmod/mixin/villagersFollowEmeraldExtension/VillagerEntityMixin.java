@@ -23,8 +23,8 @@ public abstract class VillagerEntityMixin extends MerchantEntity {
     @Inject(method = "mobTick", at = @At("TAIL"))
     public void onTick(CallbackInfo ci) {
         if (VillagersFollowEmeraldExtension.isExtensionEnabled && !this.isAiDisabled()) {
-            if (world.getTime() % 60 == 0) {
-                player = world.getClosestPlayer(
+            if (this.getWorld().getTime() % 60 == 0) {
+                player = this.getWorld().getClosestPlayer(
                         this.getX(),
                         this.getY(),
                         this.getZ(),

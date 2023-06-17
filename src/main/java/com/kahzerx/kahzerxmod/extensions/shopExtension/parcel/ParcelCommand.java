@@ -23,7 +23,7 @@ public class ParcelCommand {
                                 context.getSource().sendFeedback(MarkEnum.INFO.appendMessage("No hay parcelas!"), false);
                             }
                             for (Parcel p : extension.getParcels().getParcels()) {
-                                context.getSource().sendFeedback(p.formatted(extension), false);
+                                context.getSource().sendFeedback(() -> p.formatted(extension), false);
                             }
                             return 1;
                         })).
@@ -35,7 +35,7 @@ public class ParcelCommand {
                                 BlockPos playerPos = player.getBlockPos();
                                 if (extension.getParcels().isPosInParcel(dim, playerPos)) {
                                     Parcel actualParcel = extension.getParcels().getParcel(dim, playerPos);
-                                    context.getSource().sendFeedback(actualParcel.formatted(extension), false);
+                                    context.getSource().sendFeedback(() -> actualParcel.formatted(extension), false);
                                 } else {
                                     context.getSource().sendFeedback(MarkEnum.CROSS.appendMessage("Debes estar en una parcela!"), false);
                                 }

@@ -159,13 +159,12 @@ public class HomeExtension extends GenericExtension implements Extensions {
         if (player == null) {
             return 1;
         }
-        HomePos newHomePos = new HomePos(player.getX(), player.getY(), player.getZ(), DimUtils.getDim(player.world));
+        HomePos newHomePos = new HomePos(player.getX(), player.getY(), player.getZ(), DimUtils.getDim(player.getWorld()));
         String playerUUID = player.getUuidAsString();
         playerHomes.put(playerUUID, newHomePos);
-        src.sendFeedback(
-            Text.literal(String.format(
+        src.sendFeedback(() -> Text.literal(String.format(
                 "Home @ %s %s",
-                DimUtils.getDimensionWithColor(player.world),
+                DimUtils.getDimensionWithColor(player.getWorld()),
                 DimUtils.formatCoords(player.getX(), player.getY(), player.getZ())
             )),
             false
