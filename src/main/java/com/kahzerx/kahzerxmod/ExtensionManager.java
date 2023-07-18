@@ -94,6 +94,8 @@ public class ExtensionManager {
             }
         }
 
+        // TODO way of making so the extensions register themselves so we dont need massive class of extensions.add(...)
+
         MemberExtension memberExtension = new MemberExtension(config);
         // TODO make extensions have access to all the other extensions so they can consult this.extensions.get("member").getSettings()...
         PermsExtension permsExtension = new PermsExtension(config, memberExtension);
@@ -104,7 +106,7 @@ public class ExtensionManager {
         KahzerxServer.extensions.add(new BackExtension(config, permsExtension));
         KahzerxServer.extensions.add(new CameraExtension(config, permsExtension));
         // TODO modTP for perms!
-        KahzerxServer.extensions.add(new HelperKickExtension(new ExtensionSettings("helperKick", isEnabled(found, "helperKick"), "Allows helpers and above to run /kick"), permsExtension));
+        KahzerxServer.extensions.add(new HelperKickExtension(config, permsExtension));
         KahzerxServer.extensions.add(new SurvivalExtension(new ExtensionSettings("survival", isEnabled(found, "survival"), "/s, survival - night vision - conduit (stolen from carpet).")));
         KahzerxServer.extensions.add(new HereExtension(new ExtensionSettings("here", isEnabled(found, "here"), "/here, print current location + glowing 5 seconds.")));
         KahzerxServer.extensions.add(new DeathMsgExtension(new ExtensionSettings("deathMessage", isEnabled(found, "deathMessage"), "Print death position when player dies.")));

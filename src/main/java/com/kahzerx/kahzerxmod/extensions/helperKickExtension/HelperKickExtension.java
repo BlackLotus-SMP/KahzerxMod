@@ -6,12 +6,14 @@ import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.kahzerx.kahzerxmod.extensions.permsExtension.PermsExtension;
 import net.minecraft.server.MinecraftServer;
 
+import java.util.HashMap;
+
 public class HelperKickExtension extends GenericExtension implements Extensions {
     public static boolean isExtensionEnabled = false;
     public static PermsExtension permsExtension = null;
 
-    public HelperKickExtension(ExtensionSettings settings, PermsExtension perms) {
-        super(settings);
+    public HelperKickExtension(HashMap<String, Boolean> config, PermsExtension perms) {
+        super(new ExtensionSettings(config, "helperKick", "Allows helpers and above to run /kick"));
         permsExtension = perms;
     }
 

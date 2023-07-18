@@ -32,26 +32,14 @@ public class CameraExtension extends GenericExtension implements Extensions {
         return this.getSettings();
     }
 
-    public int setCameraMode(ServerCommandSource src) throws CommandSyntaxException {
+    public int setCameraMode(ServerCommandSource src) {
         ServerPlayerEntity player = src.getPlayer();
         if (player == null) {
             return 1;
         }
         player.changeGameMode(GameMode.SPECTATOR);
-        player.addStatusEffect(new StatusEffectInstance(
-                StatusEffects.NIGHT_VISION,
-                999999,
-                0,
-                false,
-                false
-        ));
-        player.addStatusEffect(new StatusEffectInstance(
-                StatusEffects.CONDUIT_POWER,
-                999999,
-                0,
-                false,
-                false
-        ));
+        player.addStatusEffect(new StatusEffectInstance(StatusEffects.NIGHT_VISION, 999999, 0, false, false));
+        player.addStatusEffect(new StatusEffectInstance(StatusEffects.CONDUIT_POWER, 999999, 0, false, false));
         return 1;
     }
 }
