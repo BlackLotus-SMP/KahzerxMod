@@ -4,8 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.kahzerx.kahzerxmod.config.KSettings;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
-import com.kahzerx.kahzerxmod.extensions.achusExtension.AchusExtension;
-import com.kahzerx.kahzerxmod.extensions.afkExtension.AFKExtension;
 import com.kahzerx.kahzerxmod.extensions.backExtension.BackExtension;
 import com.kahzerx.kahzerxmod.extensions.badgeExtension.BadgeExtension;
 import com.kahzerx.kahzerxmod.extensions.bedTimeExtension.BedTimeExtension;
@@ -44,7 +42,6 @@ import com.kahzerx.kahzerxmod.extensions.memberExtension.MemberExtension;
 import com.kahzerx.kahzerxmod.extensions.modTPExtension.ModTPExtension;
 import com.kahzerx.kahzerxmod.extensions.opOnWhitelistExtension.OpOnWhitelistExtension;
 import com.kahzerx.kahzerxmod.extensions.permsExtension.PermsExtension;
-import com.kahzerx.kahzerxmod.extensions.pitoExtension.PitoExtension;
 import com.kahzerx.kahzerxmod.extensions.playerDropsSkullExtension.PlayerDropsSkullExtension;
 import com.kahzerx.kahzerxmod.extensions.prankExtension.PrankExtension;
 import com.kahzerx.kahzerxmod.extensions.profileExtension.ProfileExtension;
@@ -63,7 +60,6 @@ import com.kahzerx.kahzerxmod.extensions.survivalExtension.SurvivalExtension;
 import com.kahzerx.kahzerxmod.extensions.totopoExtension.TotopoExtension;
 import com.kahzerx.kahzerxmod.extensions.villagersFollowEmeraldExtension.VillagersFollowEmeraldExtension;
 import com.kahzerx.kahzerxmod.extensions.whereExtension.WhereExtension;
-import com.kahzerx.kahzerxmod.extensions.xiemarExtension.XiemarExtension;
 import com.kahzerx.kahzerxmod.utils.FileUtils;
 import net.minecraft.util.WorldSavePath;
 
@@ -110,10 +106,8 @@ public class ExtensionManager {
         KahzerxServer.extensions.add(new ModTPExtension(new ExtensionSettings("modTP", isEnabled(found, "modTP"), "Enables /modTP that allows players with mod perms to tp to other players."), permsExtension));
         KahzerxServer.extensions.add(new HelperKickExtension(new ExtensionSettings("helperKick", isEnabled(found, "helperKick"), "Allows helpers and above to run /kick"), permsExtension));
         KahzerxServer.extensions.add(new SurvivalExtension(new ExtensionSettings("survival", isEnabled(found, "survival"), "/s, survival - night vision - conduit (stolen from carpet).")));
-        KahzerxServer.extensions.add(new PitoExtension(new ExtensionSettings("pito", isEnabled(found, "pito"), "/pito ¯\\_(ツ)_/¯")));
         KahzerxServer.extensions.add(new HereExtension(new ExtensionSettings("here", isEnabled(found, "here"), "/here, print current location + glowing 5 seconds.")));
         KahzerxServer.extensions.add(new DeathMsgExtension(new ExtensionSettings("deathMessage", isEnabled(found, "deathMessage"), "Print death position when player dies.")));
-        KahzerxServer.extensions.add(new AFKExtension(new ExtensionSettings("afk", isEnabled(found, "afk"), "/afk idk everyone keeps asking for this thing, it literally kicks you from the server.")));
         KahzerxServer.extensions.add(new RandomTPExtension(new ExtensionSettings("randomTP", isEnabled(found, "randomTP"), "randomTP in a 10k block radius."), permsExtension));
         KahzerxServer.extensions.add(new BlockInfoExtension(new ExtensionSettings("blockInfo", isEnabled(found, "blockInfo"), "Player action logging and /blockInfo command.")));
         KahzerxServer.extensions.add(new SeedExtension(new ExtensionSettings("seed", isEnabled(found, "seed"), "Enables seed command for everyone in the server.")));
@@ -129,7 +123,6 @@ public class ExtensionManager {
         KahzerxServer.extensions.add(new DeepslateInstaMineExtension(new ExtensionSettings("deepslateInstaMine", isEnabled(found, "deepslateInstaMine"), "Deepslate instamine as if it was stone.")));
         KahzerxServer.extensions.add(new RenewableElytraExtension(new ExtensionSettings("renewableElytra", isEnabled(found, "renewableElytra"), "Phantoms killed by shulker have 25% chance of dropping elytras.")));
         KahzerxServer.extensions.add(new VillagersFollowEmeraldExtension(new ExtensionSettings("villagersFollowEmeralds", isEnabled(found, "villagersFollowEmeralds"), "Villagers will follow any player holding emerald blocks.")));
-        KahzerxServer.extensions.add(new XiemarExtension(new ExtensionSettings("xiemar", isEnabled(found, "xiemar"), "Literally kills xiemar if connected.")));
         KahzerxServer.extensions.add(new SolExtension(new ExtensionSettings("sol", isEnabled(found, "sol"), "Waifu!")));
         KahzerxServer.extensions.add(new KloneExtension(new ExtensionSettings("klone", isEnabled(found, "klone"), "Clones your player to afk (will kick you); the bot will leave once you rejoin."), permsExtension));
         KahzerxServer.extensions.add(new MaintenanceExtension(new ExtensionSettings("maintenance", isEnabled(found, "maintenance"), "Sets your server in maintenance mode so only op players can join.")));
@@ -139,11 +132,9 @@ public class ExtensionManager {
         KahzerxServer.extensions.add(new BadgeExtension(new ExtensionSettings("badge", isEnabled(found, "badge"), "Badge system, helpers can add badges to players that will display on chat(only last 3), and on chat hover."), permsExtension));
         KahzerxServer.extensions.add(new ItemFormattedExtension(new ExtensionSettings("formattedItems",isEnabled(found, "formattedItems"), "Items renamed on anvils can set format if set on the usual mc formatting replacing § with %.")));
         KahzerxServer.extensions.add(new SlabExtension(new ExtensionSettings("slab", isEnabled(found, "slab"), "Enchants the slab on your main hand with the /slab command so you can always place the upper slab.")));
-        KahzerxServer.extensions.add(new AchusExtension(new ExtensionSettings("achus", isEnabled(found, "achus"), "Achus!!")));
         KahzerxServer.extensions.add(new SitExtension(new ExtensionSettings("sit", isEnabled(found, "sit"), "To sit anywhere.")));
         KahzerxServer.extensions.add(new FarmlandMyceliumExtension(new ExtensionSettings("farmlandMycelium", isEnabled(found, "farmlandMycelium"), "Hoe can be used to farm mycelium.")));
         KahzerxServer.extensions.add(new FBIExtension(new ExtensionSettings("fbi", isEnabled(found, "fbi"), "Allows ops and mods to be in the server without players noticing.")));
-
         KahzerxServer.extensions.add(new OpOnWhitelistExtension(new ExtensionSettings("opOnWhitelist", isEnabled(found, "opOnWhitelist"), "Auto ops and deops on whitelist add and remove.")));
         KahzerxServer.extensions.add(new BedTimeExtension(new ExtensionSettings("bedTime", isEnabled(found, "bedTime"), "Notifies when a player goes to sleep.")));
 
