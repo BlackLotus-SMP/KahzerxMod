@@ -83,25 +83,26 @@ public class ExtensionManager {
     public static void manageExtensions(String settings) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         KSettings ks = gson.fromJson(settings, KSettings.class);
-        HashMap<String, Boolean> found = new HashMap<>();
+        HashMap<String, Boolean> config = new HashMap<>();
 
         if (ks != null) {
             for (ExtensionSettings es : ks.getSettings()) {
                 if (es == null) {
                     continue;
                 }
-                found.put(es.getName(), es.isEnabled());
+                config.put(es.getName(), es.isEnabled());
             }
         }
 
-        MemberExtension memberExtension = new MemberExtension(new ExtensionSettings("member", isEnabled(found, "member"), "Gives member role on player first joined, it also creates member, mod and admin teams if not exist."));
-        PermsExtension permsExtension = new PermsExtension(new ExtensionSettings("perms", isEnabled(found, "perms"), "Permission levels for other commands like /back, /c or /modTP. Enables /kPerms command."), memberExtension);
+        MemberExtension memberExtension = new MemberExtension(config);
+        // TODO make extensions have access to all the other extensions so they can consult this.extensions.get("member").getSettings()...
+        PermsExtension permsExtension = new PermsExtension(config, memberExtension);
 
         KahzerxServer.extensions.add(memberExtension);
         KahzerxServer.extensions.add(permsExtension);
-        KahzerxServer.extensions.add(new HomeExtension(found));
-        KahzerxServer.extensions.add(new BackExtension(found, permsExtension));
-        KahzerxServer.extensions.add(new CameraExtension(found, permsExtension));
+        KahzerxServer.extensions.add(new HomeExtension(config));
+        KahzerxServer.extensions.add(new BackExtension(config, permsExtension));
+        KahzerxServer.extensions.add(new CameraExtension(config, permsExtension));
         // TODO modTP for perms!
         KahzerxServer.extensions.add(new HelperKickExtension(new ExtensionSettings("helperKick", isEnabled(found, "helperKick"), "Allows helpers and above to run /kick"), permsExtension));
         KahzerxServer.extensions.add(new SurvivalExtension(new ExtensionSettings("survival", isEnabled(found, "survival"), "/s, survival - night vision - conduit (stolen from carpet).")));
