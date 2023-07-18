@@ -109,7 +109,7 @@ public class ExtensionManager {
         KahzerxServer.extensions.add(new HelperKickExtension(config, permsExtension));
         KahzerxServer.extensions.add(new SurvivalExtension(config));
         KahzerxServer.extensions.add(new HereExtension(config));
-        KahzerxServer.extensions.add(new DeathMsgExtension(new ExtensionSettings("deathMessage", isEnabled(found, "deathMessage"), "Print death position when player dies.")));
+        KahzerxServer.extensions.add(new DeathMsgExtension(config));
         KahzerxServer.extensions.add(new RandomTPExtension(new ExtensionSettings("randomTP", isEnabled(found, "randomTP"), "randomTP in a 10k block radius."), permsExtension));
         KahzerxServer.extensions.add(new BlockInfoExtension(new ExtensionSettings("blockInfo", isEnabled(found, "blockInfo"), "Player action logging and /blockInfo command.")));
         KahzerxServer.extensions.add(new SeedExtension(new ExtensionSettings("seed", isEnabled(found, "seed"), "Enables seed command for everyone in the server.")));
