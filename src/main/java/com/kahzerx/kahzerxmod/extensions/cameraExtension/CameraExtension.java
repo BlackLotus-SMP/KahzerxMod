@@ -12,12 +12,14 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.GameMode;
 
+import java.util.HashMap;
+
 public class CameraExtension extends GenericExtension implements Extensions {
     public final PermsExtension permsExtension;
 
-    public CameraExtension(ExtensionSettings settings, PermsExtension permsExtension) {
-        super(settings);
-        this.permsExtension = permsExtension;
+    public CameraExtension(HashMap<String, Boolean> config, PermsExtension perms) {
+        super(new ExtensionSettings(config, "camera", "/c, spectator + night vision + conduit (stolen from carpet)."));
+        this.permsExtension = perms;
     }
 
     @Override

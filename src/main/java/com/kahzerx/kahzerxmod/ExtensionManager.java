@@ -102,7 +102,7 @@ public class ExtensionManager {
         KahzerxServer.extensions.add(permsExtension);
         KahzerxServer.extensions.add(new HomeExtension(found));
         KahzerxServer.extensions.add(new BackExtension(found, permsExtension));
-        KahzerxServer.extensions.add(new CameraExtension(new ExtensionSettings("camera", isEnabled(found, "camera"), "/c, spectator + night vision + conduit (stolen from carpet)."), permsExtension));
+        KahzerxServer.extensions.add(new CameraExtension(found, permsExtension));
         KahzerxServer.extensions.add(new ModTPExtension(new ExtensionSettings("modTP", isEnabled(found, "modTP"), "Enables /modTP that allows players with mod perms to tp to other players."), permsExtension));
         KahzerxServer.extensions.add(new HelperKickExtension(new ExtensionSettings("helperKick", isEnabled(found, "helperKick"), "Allows helpers and above to run /kick"), permsExtension));
         KahzerxServer.extensions.add(new SurvivalExtension(new ExtensionSettings("survival", isEnabled(found, "survival"), "/s, survival - night vision - conduit (stolen from carpet).")));
