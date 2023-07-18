@@ -11,11 +11,12 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 
 import java.sql.*;
+import java.util.HashMap;
 
 public class SpawnExtension extends GenericExtension implements Extensions {
     private Connection conn;
-    public SpawnExtension(ExtensionSettings settings) {
-        super(settings);
+    public SpawnExtension(HashMap<String, Boolean> config) {
+        super(new ExtensionSettings(config, "spawn", "Enables /spawn."));
     }
 
     @Override

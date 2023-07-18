@@ -113,6 +113,7 @@ public class DiscordExtension extends GenericExtension implements Extensions {
         PlayerUtils.reloadCommands();
     }
 
+    // TODO ugly prints...
     @Override
     public void settingsCommand(LiteralArgumentBuilder<ServerCommandSource> builder) {
         builder.
