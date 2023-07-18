@@ -107,8 +107,8 @@ public class ExtensionManager {
         KahzerxServer.extensions.add(new CameraExtension(config, permsExtension));
         // TODO modTP for perms!
         KahzerxServer.extensions.add(new HelperKickExtension(config, permsExtension));
-        KahzerxServer.extensions.add(new SurvivalExtension(new ExtensionSettings("survival", isEnabled(found, "survival"), "/s, survival - night vision - conduit (stolen from carpet).")));
-        KahzerxServer.extensions.add(new HereExtension(new ExtensionSettings("here", isEnabled(found, "here"), "/here, print current location + glowing 5 seconds.")));
+        KahzerxServer.extensions.add(new SurvivalExtension(config));
+        KahzerxServer.extensions.add(new HereExtension(config));
         KahzerxServer.extensions.add(new DeathMsgExtension(new ExtensionSettings("deathMessage", isEnabled(found, "deathMessage"), "Print death position when player dies.")));
         KahzerxServer.extensions.add(new RandomTPExtension(new ExtensionSettings("randomTP", isEnabled(found, "randomTP"), "randomTP in a 10k block radius."), permsExtension));
         KahzerxServer.extensions.add(new BlockInfoExtension(new ExtensionSettings("blockInfo", isEnabled(found, "blockInfo"), "Player action logging and /blockInfo command.")));

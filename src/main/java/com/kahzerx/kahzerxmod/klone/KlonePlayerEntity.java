@@ -28,7 +28,7 @@ public class KlonePlayerEntity extends ServerPlayerEntity {
     private final KloneExtension kloneExtension;
     public KlonePlayerEntity(MinecraftServer server, ServerWorld world, GameProfile profile, KloneExtension kloneExtension) {
         super(server, world, profile);
-        this.timeout = LocalDateTime.now().plusDays(1);
+        this.timeout = LocalDateTime.now().plusDays(1);  // TODO this has to be customizable
         this.kloneExtension = kloneExtension;
     }
 

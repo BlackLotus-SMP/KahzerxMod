@@ -10,9 +10,11 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.GameMode;
 
+import java.util.HashMap;
+
 public class SurvivalExtension extends GenericExtension implements Extensions {
-    public SurvivalExtension(ExtensionSettings settings) {
-        super(settings);
+    public SurvivalExtension(HashMap<String, Boolean> config) {
+        super(new ExtensionSettings(config, "survival", "/s, survival - night vision - conduit (stolen from carpet)."));
     }
 
     @Override
