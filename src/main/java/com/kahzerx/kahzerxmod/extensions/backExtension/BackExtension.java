@@ -19,8 +19,8 @@ public class BackExtension extends GenericExtension implements Extensions {
     private Connection conn;
     public final PermsExtension permsExtension;
 
-    public BackExtension(ExtensionSettings settings, PermsExtension perms) {
-        super(settings);
+    public BackExtension(HashMap<String, Boolean> config, PermsExtension perms) {
+        super(new ExtensionSettings(config, "back", "/back command to tp to the last death position."));
         this.permsExtension = perms;
     }
 
