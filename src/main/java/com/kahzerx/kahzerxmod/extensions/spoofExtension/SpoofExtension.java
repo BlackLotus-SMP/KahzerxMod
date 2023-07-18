@@ -17,9 +17,11 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
+import java.util.HashMap;
+
 public class SpoofExtension extends GenericExtension implements Extensions {
-    public SpoofExtension(ExtensionSettings settings) {
-        super(settings);
+    public SpoofExtension(HashMap<String, Boolean> config) {
+        super(new ExtensionSettings(config, "spoof", "Enables /spoof command that allows to see other connected players enderchest."));
     }
 
     @Override

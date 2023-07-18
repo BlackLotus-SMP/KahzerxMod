@@ -114,7 +114,7 @@ public class ExtensionManager {
         KahzerxServer.extensions.add(new BlockInfoExtension(config));
         KahzerxServer.extensions.add(new SeedExtension(config));
         KahzerxServer.extensions.add(new FckPrivacyExtension(config));
-        KahzerxServer.extensions.add(new SpoofExtension(new ExtensionSettings("spoof", isEnabled(found, "spoof"), "Enables /spoof command that allows OP players to see other connected players enderchest and inventories, player inventory may not work correctly so unless you know what you are doing is not recommended to move items from the slots.")));
+        KahzerxServer.extensions.add(new SpoofExtension(config));
         KahzerxServer.extensions.add(new ScoreboardExtension(new ExtensionSettings("scoreboard", isEnabled(found, "scoreboard"), "Enables /sb command.")));
         KahzerxServer.extensions.add(new SpawnExtension(new ExtensionSettings("spawn", isEnabled(found, "spawn"), "Enables /spawn.")));
         KahzerxServer.extensions.add(new WhereExtension(new ExtensionSettings("where", isEnabled(found, "where"), "Enables /where."), permsExtension));
