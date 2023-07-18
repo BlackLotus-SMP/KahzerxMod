@@ -115,7 +115,7 @@ public class ExtensionManager {
         KahzerxServer.extensions.add(new SeedExtension(config));
         KahzerxServer.extensions.add(new FckPrivacyExtension(config));
         KahzerxServer.extensions.add(new SpoofExtension(config));
-        KahzerxServer.extensions.add(new ScoreboardExtension(new ExtensionSettings("scoreboard", isEnabled(found, "scoreboard"), "Enables /sb command.")));
+        KahzerxServer.extensions.add(new ScoreboardExtension(config));
         KahzerxServer.extensions.add(new SpawnExtension(new ExtensionSettings("spawn", isEnabled(found, "spawn"), "Enables /spawn.")));
         KahzerxServer.extensions.add(new WhereExtension(new ExtensionSettings("where", isEnabled(found, "where"), "Enables /where."), permsExtension));
         KahzerxServer.extensions.add(new BocaExtension(new ExtensionSettings("boca", isEnabled(found, "boca"), "Enables /boca & /boquita command.")));

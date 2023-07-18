@@ -29,6 +29,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.world.level.ServerWorldProperties;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -39,8 +40,8 @@ public class ScoreboardExtension extends GenericExtension implements Extensions 
     public static boolean isExtensionEnabled = false;
     private int tickSet = -100;
 
-    public ScoreboardExtension(ExtensionSettings settings) {
-        super(settings);
+    public ScoreboardExtension(HashMap<String, Boolean> config) {
+        super(new ExtensionSettings(config, "scoreboard", "Enables /sb command."));
     }
 
     @Override
