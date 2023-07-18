@@ -24,8 +24,8 @@ public class HomeExtension extends GenericExtension implements Extensions {
     private Connection conn;
     private MinecraftServer server;
 
-    public HomeExtension(ExtensionSettings settings) {
-        super(settings);
+    public HomeExtension(HashMap<String, Boolean> config) {
+        super(new ExtensionSettings(config, "home", "/home and /setHome commands."));
     }
 
     @Override
