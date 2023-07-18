@@ -45,6 +45,8 @@ public interface Extensions extends Comparable<Extensions> {
     default void settingsCommand(LiteralArgumentBuilder<ServerCommandSource> builder) {}
     ExtensionSettings extensionSettings();
 
+    // TODO probably onExtensionsReady()
+
     @Override
     default int compareTo(Extensions extensions) {
         return this.extensionSettings().getName().compareTo(extensions.extensionSettings().getName());
