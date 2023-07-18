@@ -110,7 +110,7 @@ public class ExtensionManager {
         KahzerxServer.extensions.add(new SurvivalExtension(config));
         KahzerxServer.extensions.add(new HereExtension(config));
         KahzerxServer.extensions.add(new DeathMsgExtension(config));
-        KahzerxServer.extensions.add(new RandomTPExtension(new ExtensionSettings("randomTP", isEnabled(found, "randomTP"), "randomTP in a 10k block radius."), permsExtension));
+        KahzerxServer.extensions.add(new RandomTPExtension(config, permsExtension));
         KahzerxServer.extensions.add(new BlockInfoExtension(new ExtensionSettings("blockInfo", isEnabled(found, "blockInfo"), "Player action logging and /blockInfo command.")));
         KahzerxServer.extensions.add(new SeedExtension(new ExtensionSettings("seed", isEnabled(found, "seed"), "Enables seed command for everyone in the server.")));
         KahzerxServer.extensions.add(new FckPrivacyExtension(new ExtensionSettings("fckPrivacy", isEnabled(found, "fckPrivacy"), "Saves every executed command including private messages in the logs file, like /msg name hello.")));
