@@ -39,7 +39,6 @@ import com.kahzerx.kahzerxmod.extensions.joinMOTDExtension.JoinMOTDSettings;
 import com.kahzerx.kahzerxmod.extensions.kloneExtension.KloneExtension;
 import com.kahzerx.kahzerxmod.extensions.maintenanceExtension.MaintenanceExtension;
 import com.kahzerx.kahzerxmod.extensions.memberExtension.MemberExtension;
-import com.kahzerx.kahzerxmod.extensions.modTPExtension.ModTPExtension;
 import com.kahzerx.kahzerxmod.extensions.opOnWhitelistExtension.OpOnWhitelistExtension;
 import com.kahzerx.kahzerxmod.extensions.permsExtension.PermsExtension;
 import com.kahzerx.kahzerxmod.extensions.playerDropsSkullExtension.PlayerDropsSkullExtension;
@@ -103,7 +102,7 @@ public class ExtensionManager {
         KahzerxServer.extensions.add(new HomeExtension(found));
         KahzerxServer.extensions.add(new BackExtension(found, permsExtension));
         KahzerxServer.extensions.add(new CameraExtension(found, permsExtension));
-        KahzerxServer.extensions.add(new ModTPExtension(new ExtensionSettings("modTP", isEnabled(found, "modTP"), "Enables /modTP that allows players with mod perms to tp to other players."), permsExtension));
+        // TODO modTP for perms!
         KahzerxServer.extensions.add(new HelperKickExtension(new ExtensionSettings("helperKick", isEnabled(found, "helperKick"), "Allows helpers and above to run /kick"), permsExtension));
         KahzerxServer.extensions.add(new SurvivalExtension(new ExtensionSettings("survival", isEnabled(found, "survival"), "/s, survival - night vision - conduit (stolen from carpet).")));
         KahzerxServer.extensions.add(new HereExtension(new ExtensionSettings("here", isEnabled(found, "here"), "/here, print current location + glowing 5 seconds.")));
