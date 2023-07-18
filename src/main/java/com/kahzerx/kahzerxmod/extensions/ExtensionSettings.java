@@ -1,14 +1,20 @@
 package com.kahzerx.kahzerxmod.extensions;
 
-public class ExtensionSettings {
-    private String name;
-    private boolean enabled;
-    private String description;
+import java.util.HashMap;
 
-    public ExtensionSettings(String name, boolean enabled, String description) {
+public class ExtensionSettings {
+    private final String name;
+    private boolean enabled;
+    private final String description;
+
+    public ExtensionSettings(HashMap<String, Boolean> config, String name, String description) {
         this.name = name;
-        this.enabled = enabled;
+        this.enabled = this.isEnabled(config, name);
         this.description = description;
+    }
+
+    private boolean isEnabled(HashMap<String, Boolean> found, String extension) {
+        return found.get(extension) != null ? found.get(extension) : false;
     }
 
     public boolean isEnabled() {
