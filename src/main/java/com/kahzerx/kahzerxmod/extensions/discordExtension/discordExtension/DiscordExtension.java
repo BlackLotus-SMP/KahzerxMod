@@ -18,12 +18,15 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
+import java.util.HashMap;
+import java.util.List;
+
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class DiscordExtension extends GenericExtension implements Extensions {
-    public DiscordExtension(DiscordSettings settings) {
-        super(settings);
+    public DiscordExtension(HashMap<String, Boolean> config, String token, boolean crossServerChat, String prefix, boolean running, long chatChannelID, List<Long> allowedChats, boolean shouldFeedback) {
+        super(new DiscordSettings(config, "discord", "Connects minecraft chat + some events with a discord chat (chatbridge). Prefix is necessary if you want crossServerChat to work properly and not having duplicated messages.", token, crossServerChat, prefix, running, chatChannelID, allowedChats, shouldFeedback));
     }
 
     @Override

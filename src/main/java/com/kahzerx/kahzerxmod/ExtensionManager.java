@@ -182,19 +182,7 @@ public class ExtensionManager {
                 }
             }
         }
-        DiscordExtension discordExtension = new DiscordExtension(
-                new DiscordSettings(
-                        "discord",
-                        isEnabled(found, "discord"),
-                        "Connects minecraft chat + some events with a discord chat (chatbridge). Prefix is necessary if you want crossServerChat to work properly and not having duplicated messages.",
-                        token,
-                        crossServerChat,
-                        prefix,
-                        isRunning,
-                        chatChannelID,
-                        allowedChats,
-                        shouldFeedback
-                ));
+        DiscordExtension discordExtension = new DiscordExtension(config, token, crossServerChat, prefix, isRunning, chatChannelID, allowedChats, shouldFeedback);
         KahzerxServer.extensions.add(discordExtension);
 
         long discordRoleID = 0L;

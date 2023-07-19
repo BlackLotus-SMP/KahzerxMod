@@ -2,6 +2,7 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension;
 
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class DiscordSettings extends ExtensionSettings {
@@ -12,8 +13,8 @@ public class DiscordSettings extends ExtensionSettings {
     private long chatChannelID;
     private List<Long> allowedChats;
     private boolean shouldFeedback;
-    public DiscordSettings(String name, boolean enabled, String description, String token, boolean crossServerChat, String prefix, boolean running, long chatChannelID, List<Long> allowedChats, boolean shouldFeedback) {
-        super(name, enabled, description);
+    public DiscordSettings(HashMap<String, Boolean> config, String name, String description, String token, boolean crossServerChat, String prefix, boolean running, long chatChannelID, List<Long> allowedChats, boolean shouldFeedback) {
+        super(config, name, description);
         this.token = token;
         this.crossServerChat = crossServerChat;
         this.prefix = prefix;
