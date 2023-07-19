@@ -13,12 +13,13 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class JoinMOTDExtension extends GenericExtension implements Extensions {
     public final PermsExtension permsExtension;
-    public JoinMOTDExtension(JoinMOTDSettings settings, PermsExtension permsExtension) {
-        super(settings);
+    public JoinMOTDExtension(HashMap<String, Boolean> config, String message, PermsExtension permsExtension) {
+        super(new JoinMOTDSettings(config, "joinMOTD", "Sends a custon message on player join.", message));
         this.permsExtension = permsExtension;
     }
 

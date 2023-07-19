@@ -154,7 +154,7 @@ public class ExtensionManager {
                 }
             }
         }
-        JoinMOTDExtension joinMOTDExtension = new JoinMOTDExtension(new JoinMOTDSettings("joinMOTD", isEnabled(found, "joinMOTD"), "Sends a custon message on player join.", message), permsExtension);
+        JoinMOTDExtension joinMOTDExtension = new JoinMOTDExtension(config, message, permsExtension);
         KahzerxServer.extensions.add(joinMOTDExtension);
 
         String token = "";
