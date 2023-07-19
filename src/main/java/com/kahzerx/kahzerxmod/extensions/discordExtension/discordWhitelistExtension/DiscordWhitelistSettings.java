@@ -2,14 +2,15 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExten
 
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class DiscordWhitelistSettings extends ExtensionSettings {
     private List<Long> whitelistChats;
     private long discordRoleID;
     private int nPlayers;
-    public DiscordWhitelistSettings(String name, boolean enabled, String description, List<Long> whitelistChats, long discordRoleID, int nPlayers) {
-        super(name, enabled, description);
+    public DiscordWhitelistSettings(HashMap<String, Boolean> config, String name, String description, List<Long> whitelistChats, long discordRoleID, int nPlayers) {
+        super(config, name, description);
         this.whitelistChats = whitelistChats;
         this.discordRoleID = discordRoleID;
         this.nPlayers = nPlayers;

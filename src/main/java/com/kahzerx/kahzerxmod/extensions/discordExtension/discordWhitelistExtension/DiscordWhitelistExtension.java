@@ -28,6 +28,8 @@ import net.minecraft.text.Text;
 import java.awt.*;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -45,8 +47,8 @@ public class DiscordWhitelistExtension extends GenericExtension implements Exten
     private final ListCommand listCommand = new ListCommand(DiscordListener.commandPrefix);
     private final InfoCommand infoCommand = new InfoCommand(DiscordListener.commandPrefix);
 
-    public DiscordWhitelistExtension(DiscordWhitelistSettings settings, DiscordExtension discordExtension) {
-        super(settings);
+    public DiscordWhitelistExtension(HashMap<String, Boolean> config, List<Long> whitelistChats, long discordRoleID, int nPlayers, DiscordExtension discordExtension) {
+        super(new DiscordWhitelistSettings(config, "discordWhitelist", "Enables !list, !add and !remove commands along with nPlayers that specifies how many minecraft players a discord user can add; There is also an optional discordRole that will be given to the discord user on !add and deleted on !remove.", whitelistChats, discordRoleID, nPlayers));
         this.discordExtension = discordExtension;
     }
 

@@ -202,16 +202,7 @@ public class ExtensionManager {
                 }
             }
         }
-        DiscordWhitelistExtension discordWhitelistExtension = new DiscordWhitelistExtension(
-                new DiscordWhitelistSettings(
-                        "discordWhitelist",
-                        isEnabled(found, "discordWhitelist") && (discordExtension.extensionSettings().isEnabled()),
-                        "Enables !list, !add and !remove commands along with nPlayers that specifies how many minecraft players a discord user can add; There is also an optional discordRole that will be given to the discord user on !add and deleted on !remove.",
-                        whitelistChats,
-                        discordRoleID,
-                        nPlayers
-                ),
-                discordExtension);
+        DiscordWhitelistExtension discordWhitelistExtension = new DiscordWhitelistExtension(config, whitelistChats, discordRoleID, nPlayers, discordExtension);
         KahzerxServer.extensions.add(discordWhitelistExtension);
 
         List<Long> adminChats = new ArrayList<>();
