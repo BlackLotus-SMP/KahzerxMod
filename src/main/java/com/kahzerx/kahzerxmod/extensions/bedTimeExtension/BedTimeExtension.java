@@ -8,9 +8,11 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Formatting;
 
+import java.util.HashMap;
+
 public class BedTimeExtension extends GenericExtension implements Extensions {
-    public BedTimeExtension(ExtensionSettings settings) {
-        super(settings);
+    public BedTimeExtension(HashMap<String, Boolean> config) {
+        super(new ExtensionSettings(config, "bedTime", "Notifies when a player goes to sleep."));
     }
 
     @Override

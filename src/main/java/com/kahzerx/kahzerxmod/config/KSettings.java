@@ -4,21 +4,9 @@ import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 
 import java.util.List;
 
-public class KSettings {
-    private List<ExtensionSettings> settings;
-
-    public KSettings(List<ExtensionSettings> settings) {
-        this.settings = settings;
-    }
-
-    public List<ExtensionSettings> getSettings() {
-        return settings;
-    }
-
+public record KSettings(List<ExtensionSettings> settings) {
     @Override
     public String toString() {
-        return "KSettings{" +
-                "settings=" + settings +
-                '}';
+        return "KSettings{settings=" + settings + '}';
     }
 }

@@ -86,7 +86,7 @@ public class ExtensionManager {
         HashMap<String, Boolean> config = new HashMap<>();
 
         if (ks != null) {
-            for (ExtensionSettings es : ks.getSettings()) {
+            for (ExtensionSettings es : ks.settings()) {
                 if (es == null) {
                     continue;
                 }
@@ -138,8 +138,8 @@ public class ExtensionManager {
         KahzerxServer.extensions.add(new SitExtension(config));
         KahzerxServer.extensions.add(new FarmlandMyceliumExtension(config));
         KahzerxServer.extensions.add(new FBIExtension(config));
-        KahzerxServer.extensions.add(new OpOnWhitelistExtension(new ExtensionSettings("opOnWhitelist", isEnabled(found, "opOnWhitelist"), "Auto ops and deops on whitelist add and remove.")));
-        KahzerxServer.extensions.add(new BedTimeExtension(new ExtensionSettings("bedTime", isEnabled(found, "bedTime"), "Notifies when a player goes to sleep.")));
+        KahzerxServer.extensions.add(new OpOnWhitelistExtension(config));
+        KahzerxServer.extensions.add(new BedTimeExtension(config));
 
         String message = "";
         JoinMOTDJsonSettings jmjs = gson.fromJson(settings, JoinMOTDJsonSettings.class);
