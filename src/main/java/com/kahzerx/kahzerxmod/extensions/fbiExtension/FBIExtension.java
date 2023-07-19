@@ -8,12 +8,13 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class FBIExtension extends GenericExtension implements Extensions {
     private static final List<ServerPlayerEntity> hiddenPlayers = new ArrayList<>();
-    public FBIExtension(ExtensionSettings settings) {
-        super(settings);
+    public FBIExtension(HashMap<String, Boolean> config) {
+        super(new ExtensionSettings(config, "fbi", "Allows ops and mods to be in the server without players noticing."));
     }
 
     @Override

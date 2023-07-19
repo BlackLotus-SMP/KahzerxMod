@@ -133,11 +133,11 @@ public class ExtensionManager {
         KahzerxServer.extensions.add(new SkullExtension(config));
         KahzerxServer.extensions.add(new PlayerDropsSkullExtension(config));
         KahzerxServer.extensions.add(new BadgeExtension(config, permsExtension));
-        KahzerxServer.extensions.add(new ItemFormattedExtension(new ExtensionSettings("formattedItems",isEnabled(found, "formattedItems"), "Items renamed on anvils can set format if set on the usual mc formatting replacing § with %.")));
-        KahzerxServer.extensions.add(new SlabExtension(new ExtensionSettings("slab", isEnabled(found, "slab"), "Enchants the slab on your main hand with the /slab command so you can always place the upper slab.")));
-        KahzerxServer.extensions.add(new SitExtension(new ExtensionSettings("sit", isEnabled(found, "sit"), "To sit anywhere.")));
-        KahzerxServer.extensions.add(new FarmlandMyceliumExtension(new ExtensionSettings("farmlandMycelium", isEnabled(found, "farmlandMycelium"), "Hoe can be used to farm mycelium.")));
-        KahzerxServer.extensions.add(new FBIExtension(new ExtensionSettings("fbi", isEnabled(found, "fbi"), "Allows ops and mods to be in the server without players noticing.")));
+        KahzerxServer.extensions.add(new ItemFormattedExtension(config));
+        KahzerxServer.extensions.add(new SlabExtension(config));
+        KahzerxServer.extensions.add(new SitExtension(config));
+        KahzerxServer.extensions.add(new FarmlandMyceliumExtension(config));
+        KahzerxServer.extensions.add(new FBIExtension(config));
         KahzerxServer.extensions.add(new OpOnWhitelistExtension(new ExtensionSettings("opOnWhitelist", isEnabled(found, "opOnWhitelist"), "Auto ops and deops on whitelist add and remove.")));
         KahzerxServer.extensions.add(new BedTimeExtension(new ExtensionSettings("bedTime", isEnabled(found, "bedTime"), "Notifies when a player goes to sleep.")));
 

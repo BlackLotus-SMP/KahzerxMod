@@ -5,10 +5,12 @@ import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import net.minecraft.server.MinecraftServer;
 
+import java.util.HashMap;
+
 public class FarmlandMyceliumExtension extends GenericExtension implements Extensions {
     public static boolean isExtensionEnabled = false;
-    public FarmlandMyceliumExtension(ExtensionSettings settings) {
-        super(settings);
+    public FarmlandMyceliumExtension(HashMap<String, Boolean> config) {
+        super(new ExtensionSettings(config, "farmlandMycelium", "Hoe can be used to farm mycelium."));
     }
 
     @Override

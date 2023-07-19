@@ -6,9 +6,11 @@ import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.server.command.ServerCommandSource;
 
+import java.util.HashMap;
+
 public class SitExtension extends GenericExtension implements Extensions {
-    public SitExtension(ExtensionSettings settings) {
-        super(settings);
+    public SitExtension(HashMap<String, Boolean> config) {
+        super(new ExtensionSettings(config, "sit", "To sit anywhere."));
     }
 
     @Override
