@@ -2,13 +2,14 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension.discordAdminToolsExte
 
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class DiscordAdminToolsSettings extends ExtensionSettings {
     private List<Long> adminChats;
     private boolean shouldFeedback;
-    public DiscordAdminToolsSettings(String name, boolean enabled, String description, List<Long> adminChats, boolean shouldFeedback) {
-        super(name, enabled, description);
+    public DiscordAdminToolsSettings(HashMap<String, Boolean> config, String name, String description, List<Long> adminChats, boolean shouldFeedback) {
+        super(config, name, description);
         this.adminChats = adminChats;
         this.shouldFeedback = shouldFeedback;
     }

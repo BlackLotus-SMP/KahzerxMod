@@ -76,10 +76,6 @@ public class ExtensionManager {
         FileUtils.createConfig(KahzerxServer.minecraftServer.getSavePath(WorldSavePath.ROOT).toString(), settings);
     }
 
-    private static boolean isEnabled(HashMap<String, Boolean> found, String extension) {
-        return found.get(extension) != null ? found.get(extension) : false;
-    }
-
     public static void manageExtensions(String settings) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         KSettings ks = gson.fromJson(settings, KSettings.class);
@@ -223,16 +219,7 @@ public class ExtensionManager {
                 }
             }
         }
-        DiscordAdminToolsExtension discordAdminToolsExtension = new DiscordAdminToolsExtension(
-                new DiscordAdminToolsSettings(
-                        "discordAdminTools",
-                        isEnabled(found, "discordAdminTools") && (discordExtension.extensionSettings().isEnabled()) && (discordWhitelistExtension.extensionSettings().isEnabled()),
-                        "Enables !ban, !pardon, !exadd, !exremove on discord AdminChats.",
-                        adminChats,
-                        feedback
-                ),
-                discordExtension,
-                discordWhitelistExtension);
+        DiscordAdminToolsExtension discordAdminToolsExtension = new DiscordAdminToolsExtension(config, adminChats, feedback, discordExtension, discordWhitelistExtension);
         KahzerxServer.extensions.add(discordAdminToolsExtension);
 
         List<Long> validRoles = new ArrayList<>();
@@ -253,17 +240,6 @@ public class ExtensionManager {
                 }
             }
         }
-        KahzerxServer.extensions.add(new DiscordWhitelistSyncExtension(
-                new DiscordWhitelistSyncSettings(
-                        "discordWhitelistSync",
-                        isEnabled(found, "discordWhitelistSync") && (discordExtension.extensionSettings().isEnabled()) && (discordWhitelistExtension.extensionSettings().isEnabled()),
-                        "Check if people that did !add have a given discord role, if not they will get automatically removed from whitelist, useful for sub twitch role. The groupID is the ID of the discord server/guild. The aggressive mode will force whitelist and discord database have the same users so any player added with /whitelist add will get removed on autosave.",
-                        notifyChannelID,
-                        validRoles,
-                        groupID,
-                        aggressive
-                ),
-                discordExtension,
-                discordWhitelistExtension));
+        KahzerxServer.extensions.add(new DiscordWhitelistSyncExtension(config, notifyChannelID, validRoles, groupID, aggressive, discordExtension, discordWhitelistExtension));
     }
 }

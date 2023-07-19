@@ -47,6 +47,7 @@ public class DiscordWhitelistExtension extends GenericExtension implements Exten
     private final ListCommand listCommand = new ListCommand(DiscordListener.commandPrefix);
     private final InfoCommand infoCommand = new InfoCommand(DiscordListener.commandPrefix);
 
+    // TODO needs to validate if discord is enabled as well
     public DiscordWhitelistExtension(HashMap<String, Boolean> config, List<Long> whitelistChats, long discordRoleID, int nPlayers, DiscordExtension discordExtension) {
         super(new DiscordWhitelistSettings(config, "discordWhitelist", "Enables !list, !add and !remove commands along with nPlayers that specifies how many minecraft players a discord user can add; There is also an optional discordRole that will be given to the discord user on !add and deleted on !remove.", whitelistChats, discordRoleID, nPlayers));
         this.discordExtension = discordExtension;

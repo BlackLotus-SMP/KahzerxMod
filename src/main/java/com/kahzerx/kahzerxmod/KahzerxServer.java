@@ -43,6 +43,7 @@ public class KahzerxServer {
         extensions.forEach(e -> e.onRegisterCommands(dispatcher));
         extensions.forEach(e -> e.onRegisterCommands(dispatcher, commandRegistryAccess));
 
+        // TODO command of reload, from file, check diffs and apply
         LiteralArgumentBuilder<ServerCommandSource> settingsCommand = literal("KSettings").
                 requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(2));  // TODO this has to be customizable for CMPs
         for (Extensions ex : extensions) {

@@ -21,6 +21,9 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 
+import java.util.HashMap;
+import java.util.List;
+
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -33,8 +36,9 @@ public class DiscordAdminToolsExtension extends GenericExtension implements Exte
     private final ExaddCommand exaddCommand = new ExaddCommand(DiscordListener.commandPrefix);
     private final ExremoveCommand exremoveCommand = new ExremoveCommand(DiscordListener.commandPrefix);
 
-    public DiscordAdminToolsExtension(ExtensionSettings settings, DiscordExtension discordExtension, DiscordWhitelistExtension discordWhitelistExtension) {
-        super(settings);
+    // TODO needs to validate if discord and discord whitelist is enabled as well
+    public DiscordAdminToolsExtension(HashMap<String, Boolean> config, List<Long> adminChats, boolean shouldFeedback, DiscordExtension discordExtension, DiscordWhitelistExtension discordWhitelistExtension) {
+        super(new DiscordAdminToolsSettings(config, "discordAdminTools", "Enables !ban, !pardon, !exadd, !exremove on discord AdminChats.", adminChats, shouldFeedback));
         this.discordExtension = discordExtension;
         this.discordWhitelistExtension = discordWhitelistExtension;
     }

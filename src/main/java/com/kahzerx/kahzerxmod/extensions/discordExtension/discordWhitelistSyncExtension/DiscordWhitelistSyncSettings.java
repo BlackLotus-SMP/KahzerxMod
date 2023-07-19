@@ -2,6 +2,7 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistSyncE
 
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class DiscordWhitelistSyncSettings extends ExtensionSettings {
@@ -9,8 +10,8 @@ public class DiscordWhitelistSyncSettings extends ExtensionSettings {
     private List<Long> validRoles;
     private long groupID;
     private boolean aggressive;
-    public DiscordWhitelistSyncSettings(String name, boolean enabled, String description, long notifyChannelID, List<Long> validRoles, long groupID, boolean aggressive) {
-        super(name, enabled, description);
+    public DiscordWhitelistSyncSettings(HashMap<String, Boolean> config, String name, String description, long notifyChannelID, List<Long> validRoles, long groupID, boolean aggressive) {
+        super(config, name, description);
         this.notifyChannelID = notifyChannelID;
         this.validRoles = validRoles;
         this.groupID = groupID;

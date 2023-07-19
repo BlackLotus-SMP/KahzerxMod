@@ -13,6 +13,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Timer;
 
 import static net.minecraft.server.command.CommandManager.argument;
@@ -23,8 +25,9 @@ public class DiscordWhitelistSyncExtension extends GenericExtension implements E
     private final DiscordWhitelistExtension discordWhitelistExtension;
     private Timer timer;
 
-    public DiscordWhitelistSyncExtension(ExtensionSettings settings, DiscordExtension discordExtension, DiscordWhitelistExtension discordWhitelistExtension) {
-        super(settings);
+    // TODO needs to validate if discord and discord whitelist is enabled as well
+    public DiscordWhitelistSyncExtension(HashMap<String, Boolean> config, long notifyChannelID, List<Long> validRoles, long groupID, boolean aggressive, DiscordExtension discordExtension, DiscordWhitelistExtension discordWhitelistExtension) {
+        super(new DiscordWhitelistSyncSettings(config, "discordWhitelistSync", "Check if people that did !add have a given discord role, if not they will get automatically removed from whitelist, useful for sub twitch role. The groupID is the ID of the discord server/guild. The aggressive mode will force whitelist and discord database have the same users so any player added with /whitelist add will get removed on autosave.", notifyChannelID, validRoles, groupID, aggressive));
         this.discordExtension = discordExtension;
         this.discordWhitelistExtension = discordWhitelistExtension;
     }
