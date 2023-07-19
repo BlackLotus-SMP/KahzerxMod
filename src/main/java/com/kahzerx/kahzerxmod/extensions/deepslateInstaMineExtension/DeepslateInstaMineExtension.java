@@ -10,8 +10,8 @@ import java.util.HashMap;
 public class DeepslateInstaMineExtension extends GenericExtension implements Extensions {
     public static boolean isExtensionEnabled = false;
 
-    public DeepslateInstaMineExtension(HashMap<String, Boolean> config) {
-        super(new ExtensionSettings(config, "deepslateInstaMine", "Deepslate instamine as if it was stone."));
+    public DeepslateInstaMineExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "deepslateInstaMine", "Deepslate instamine as if it was stone."));
     }
 
     @Override

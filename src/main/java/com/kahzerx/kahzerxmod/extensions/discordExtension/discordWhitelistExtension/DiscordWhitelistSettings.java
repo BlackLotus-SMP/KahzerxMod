@@ -9,8 +9,8 @@ public class DiscordWhitelistSettings extends ExtensionSettings {
     private List<Long> whitelistChats;
     private long discordRoleID;
     private int nPlayers;
-    public DiscordWhitelistSettings(HashMap<String, Boolean> config, String name, String description, List<Long> whitelistChats, long discordRoleID, int nPlayers) {
-        super(config, name, description);
+    public DiscordWhitelistSettings(HashMap<String, String> fileSettings, String name, String description, List<Long> whitelistChats, long discordRoleID, int nPlayers) {
+        super(fileSettings, name, description);
         this.whitelistChats = whitelistChats;
         this.discordRoleID = discordRoleID;
         this.nPlayers = nPlayers;

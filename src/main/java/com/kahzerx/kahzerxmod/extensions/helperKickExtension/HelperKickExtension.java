@@ -12,8 +12,8 @@ public class HelperKickExtension extends GenericExtension implements Extensions 
     public static boolean isExtensionEnabled = false;
     public static PermsExtension permsExtension = null;
 
-    public HelperKickExtension(HashMap<String, Boolean> config, PermsExtension perms) {
-        super(new ExtensionSettings(config, "helperKick", "Allows helpers and above to run /kick"));
+    public HelperKickExtension(HashMap<String, String> fileSettings, PermsExtension perms) {
+        super(new ExtensionSettings(fileSettings, "helperKick", "Allows helpers and above to run /kick"));
         permsExtension = perms;
     }
 

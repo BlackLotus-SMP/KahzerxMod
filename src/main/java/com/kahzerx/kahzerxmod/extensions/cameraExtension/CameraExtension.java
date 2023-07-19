@@ -17,8 +17,8 @@ import java.util.HashMap;
 public class CameraExtension extends GenericExtension implements Extensions {
     public final PermsExtension permsExtension;
 
-    public CameraExtension(HashMap<String, Boolean> config, PermsExtension perms) {
-        super(new ExtensionSettings(config, "camera", "/c, spectator + night vision + conduit (stolen from carpet)."));
+    public CameraExtension(HashMap<String, String> fileSettings, PermsExtension perms) {
+        super(new ExtensionSettings(fileSettings, "camera", "/c, spectator + night vision + conduit (stolen from carpet)."));
         this.permsExtension = perms;
     }
 

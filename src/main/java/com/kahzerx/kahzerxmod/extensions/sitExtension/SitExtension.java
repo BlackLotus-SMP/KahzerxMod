@@ -9,8 +9,8 @@ import net.minecraft.server.command.ServerCommandSource;
 import java.util.HashMap;
 
 public class SitExtension extends GenericExtension implements Extensions {
-    public SitExtension(HashMap<String, Boolean> config) {
-        super(new ExtensionSettings(config, "sit", "To sit anywhere."));
+    public SitExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "sit", "To sit anywhere."));
     }
 
     @Override

@@ -18,8 +18,8 @@ import java.util.List;
 
 public class JoinMOTDExtension extends GenericExtension implements Extensions {
     public final PermsExtension permsExtension;
-    public JoinMOTDExtension(HashMap<String, Boolean> config, String message, PermsExtension permsExtension) {
-        super(new JoinMOTDSettings(config, "joinMOTD", "Sends a custon message on player join.", message));
+    public JoinMOTDExtension(HashMap<String, String> fileSettings, String message, PermsExtension permsExtension) {
+        super(new JoinMOTDSettings(fileSettings, "joinMOTD", "Sends a custon message on player join.", message));
         this.permsExtension = permsExtension;
     }
 

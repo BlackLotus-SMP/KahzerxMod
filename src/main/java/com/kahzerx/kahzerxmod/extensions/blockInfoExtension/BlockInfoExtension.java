@@ -23,8 +23,8 @@ public class BlockInfoExtension extends GenericExtension implements Extensions {
 
     public static final ArrayBlockingQueue<BlockActionLog> queue = new ArrayBlockingQueue<>(10_000);
     private BlockInfoLoggerThread logger = new BlockInfoLoggerThread("BLOCKINFO", this);
-    public BlockInfoExtension(HashMap<String, Boolean> config) {
-        super(new ExtensionSettings(config, "blockInfo", "Player action logging and /blockInfo command."));
+    public BlockInfoExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "blockInfo", "Player action logging and /blockInfo command."));
     }
 
     @Override

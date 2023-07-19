@@ -13,8 +13,8 @@ import java.util.Collection;
 import java.util.HashMap;
 
 public class MemberExtension extends GenericExtension implements Extensions {
-    public MemberExtension(HashMap<String, Boolean> config) {
-        super(new ExtensionSettings(config, "member", "Gives member role on player first joined, it also creates member, mod and admin teams if not exist."));
+    public MemberExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "member", "Gives member role on player first joined, it also creates member, mod and admin teams if not exist."));
     }
 
     @Override

@@ -9,8 +9,8 @@ import net.minecraft.server.command.ServerCommandSource;
 import java.util.HashMap;
 
 public class HatExtension extends GenericExtension implements Extensions {
-    public HatExtension(HashMap<String, Boolean> config) {
-        super(new ExtensionSettings(config, "hat", "Puts whatever item you have in the main hand on your head."));
+    public HatExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "hat", "Puts whatever item you have in the main hand on your head."));
     }
 
     @Override

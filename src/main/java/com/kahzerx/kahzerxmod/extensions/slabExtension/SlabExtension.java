@@ -12,8 +12,8 @@ import java.util.HashMap;
 public class SlabExtension extends GenericExtension implements Extensions {
     public static boolean isExtensionEnabled = false;
 
-    public SlabExtension(HashMap<String, Boolean> config) {
-        super(new ExtensionSettings(config, "slab", "Enchants the slab on your main hand with the /slab command so you can always place the upper slab."));
+    public SlabExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "slab", "Enchants the slab on your main hand with the /slab command so you can always place the upper slab."));
     }
 
     @Override

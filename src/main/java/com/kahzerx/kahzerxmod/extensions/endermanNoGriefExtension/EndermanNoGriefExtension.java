@@ -10,8 +10,8 @@ import java.util.HashMap;
 public class EndermanNoGriefExtension extends GenericExtension implements Extensions {
     public static boolean isExtensionEnabled = false;
 
-    public EndermanNoGriefExtension(HashMap<String, Boolean> config) {
-        super(new ExtensionSettings(config, "endermanNoGrief", "Prevents endermans to pickup or place blocks (this will break enderman based farms)."));
+    public EndermanNoGriefExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "endermanNoGrief", "Prevents endermans to pickup or place blocks (this will break enderman based farms)."));
     }
 
     @Override

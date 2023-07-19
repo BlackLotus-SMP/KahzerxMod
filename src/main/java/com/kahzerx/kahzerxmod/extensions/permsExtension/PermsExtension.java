@@ -24,8 +24,8 @@ public class PermsExtension extends GenericExtension implements Extensions {
     private MinecraftServer minecraftServer;
     private MemberExtension memberExtension;
 
-    public PermsExtension(HashMap<String, Boolean> config, MemberExtension memberExtension) {
-        super(new ExtensionSettings(config, "perms", "Permission levels for other commands like /back, /c or /modTP. Enables /kPerms command."));
+    public PermsExtension(HashMap<String, String> fileSettings, MemberExtension memberExtension) {
+        super(new ExtensionSettings(fileSettings, "perms", "Permission levels for other commands like /back, /c or /modTP. Enables /kPerms command."));
         this.memberExtension = memberExtension;
     }
 

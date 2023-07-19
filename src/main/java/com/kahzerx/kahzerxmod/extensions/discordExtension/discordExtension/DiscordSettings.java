@@ -13,8 +13,8 @@ public class DiscordSettings extends ExtensionSettings {
     private long chatChannelID;
     private List<Long> allowedChats;
     private boolean shouldFeedback;
-    public DiscordSettings(HashMap<String, Boolean> config, String name, String description, String token, boolean crossServerChat, String prefix, boolean running, long chatChannelID, List<Long> allowedChats, boolean shouldFeedback) {
-        super(config, name, description);
+    public DiscordSettings(HashMap<String, String> fileSettings, String name, String description, String token, boolean crossServerChat, String prefix, boolean running, long chatChannelID, List<Long> allowedChats, boolean shouldFeedback) {
+        super(fileSettings, name, description);
         this.token = token;
         this.crossServerChat = crossServerChat;
         this.prefix = prefix;

@@ -12,8 +12,8 @@ import java.util.HashMap;
 public class WhereExtension extends GenericExtension implements Extensions {
     private final PermsExtension permsExtension;
 
-    public WhereExtension(HashMap<String, Boolean> config, PermsExtension perms) {
-        super(new ExtensionSettings(config, "where", "Enables /where."));
+    public WhereExtension(HashMap<String, String> fileSettings, PermsExtension perms) {
+        super(new ExtensionSettings(fileSettings, "where", "Enables /where."));
         this.permsExtension = perms;
     }
 

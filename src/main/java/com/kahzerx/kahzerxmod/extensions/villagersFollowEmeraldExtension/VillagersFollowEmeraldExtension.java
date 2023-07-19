@@ -10,8 +10,8 @@ import java.util.HashMap;
 public class VillagersFollowEmeraldExtension extends GenericExtension implements Extensions {
     public static boolean isExtensionEnabled = false;
 
-    public VillagersFollowEmeraldExtension(HashMap<String, Boolean> config) {
-        super(new ExtensionSettings(config, "villagersFollowEmeralds", "Villagers will follow any player holding emerald blocks."));
+    public VillagersFollowEmeraldExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "villagersFollowEmeralds", "Villagers will follow any player holding emerald blocks."));
     }
 
     @Override

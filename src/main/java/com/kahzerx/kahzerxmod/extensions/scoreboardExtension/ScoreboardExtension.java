@@ -40,8 +40,8 @@ public class ScoreboardExtension extends GenericExtension implements Extensions 
     public static boolean isExtensionEnabled = false;
     private int tickSet = -100;
 
-    public ScoreboardExtension(HashMap<String, Boolean> config) {
-        super(new ExtensionSettings(config, "scoreboard", "Enables /sb command."));
+    public ScoreboardExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "scoreboard", "Enables /sb command."));
     }
 
     @Override

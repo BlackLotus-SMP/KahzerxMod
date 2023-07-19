@@ -12,8 +12,8 @@ import java.util.HashMap;
 public class FckPrivacyExtension extends GenericExtension implements Extensions {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public FckPrivacyExtension(HashMap<String, Boolean> config) {
-        super(new ExtensionSettings(config, "fckPrivacy", "Saves every executed command including private messages in the logs file."));
+    public FckPrivacyExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "fckPrivacy", "Saves every executed command including private messages in the logs file."));
     }
 
     @Override

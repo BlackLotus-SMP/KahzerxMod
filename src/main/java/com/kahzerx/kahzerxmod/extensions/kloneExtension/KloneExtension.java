@@ -18,8 +18,8 @@ public class KloneExtension extends GenericExtension implements Extensions {
     private final ArrayList<KlonePlayerEntity> klones = new ArrayList<>();
     private Timer timer;
 
-    public KloneExtension(HashMap<String, Boolean> config, PermsExtension perms) {
-        super(new ExtensionSettings(config, "klone", "Clones your player to afk (will kick you) for up to 1 day; the bot will leave once you rejoin."));
+    public KloneExtension(HashMap<String, String> fileSettings, PermsExtension perms) {
+        super(new ExtensionSettings(fileSettings, "klone", "Clones your player to afk (will kick you) for up to 1 day; the bot will leave once you rejoin."));
         this.permsExtension = perms;
     }
 

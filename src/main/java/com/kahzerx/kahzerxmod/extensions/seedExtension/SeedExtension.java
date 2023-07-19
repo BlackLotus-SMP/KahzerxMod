@@ -12,8 +12,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import java.util.HashMap;
 
 public class SeedExtension extends GenericExtension implements Extensions {
-    public SeedExtension(HashMap<String, Boolean> config) {
-        super(new ExtensionSettings(config, "seed", "Enables seed command for everyone in the server."));
+    public SeedExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "seed", "Enables seed command for everyone in the server."));
     }
 
     @Override

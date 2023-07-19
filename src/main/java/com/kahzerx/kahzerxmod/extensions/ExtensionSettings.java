@@ -1,5 +1,8 @@
 package com.kahzerx.kahzerxmod.extensions;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.util.HashMap;
 
 public class ExtensionSettings {
@@ -7,14 +10,11 @@ public class ExtensionSettings {
     private boolean enabled;
     private final String description;
 
-    public ExtensionSettings(HashMap<String, Boolean> config, String name, String description) {
+    public ExtensionSettings(HashMap<String, String> fileSettings, String name, String description) {
+        ExtensionSettings file = this.processFileSettings(fileSettings.getOrDefault(name, null));
         this.name = name;
-        this.enabled = this.isEnabled(config, name);
+        this.enabled = file != null && file.isEnabled();
         this.description = description;
-    }
-
-    private boolean isEnabled(HashMap<String, Boolean> found, String extension) {
-        return found.get(extension) != null ? found.get(extension) : false;
     }
 
     public boolean isEnabled() {
@@ -31,6 +31,14 @@ public class ExtensionSettings {
 
     public String getDescription() {
         return description;
+    }
+
+    private ExtensionSettings processFileSettings(String settings) {
+        if (settings == null) {
+            return null;
+        }
+        Gson gson = new GsonBuilder().create();
+        return gson.fromJson(settings, ExtensionSettings.class);
     }
 
     @Override

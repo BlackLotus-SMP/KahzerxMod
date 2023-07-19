@@ -19,8 +19,8 @@ import java.util.Random;
 public class RandomTPExtension extends GenericExtension implements Extensions {
     private final PermsExtension permsExtension;
 
-    public RandomTPExtension(HashMap<String, Boolean> config, PermsExtension perms) {
-        super(new ExtensionSettings(config, "randomTP", "randomTP in a 10k block radius."));
+    public RandomTPExtension(HashMap<String, String> fileSettings, PermsExtension perms) {
+        super(new ExtensionSettings(fileSettings, "randomTP", "randomTP in a 10k block radius."));
         this.permsExtension = perms;
     }
 

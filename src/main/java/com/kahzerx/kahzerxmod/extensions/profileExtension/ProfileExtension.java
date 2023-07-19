@@ -23,8 +23,8 @@ import java.util.HashMap;
 public class ProfileExtension extends GenericExtension implements Extensions {
     public static HashMap<ServerPlayerEntity, GuiPlayer> guis = new HashMap<>();
     private final ShopExtension shopExtension;
-    public ProfileExtension(HashMap<String, Boolean> config, ShopExtension shopExtension) {
-        super(new ExtensionSettings(config, "profile", "Enables the /kProfile command."));
+    public ProfileExtension(HashMap<String, String> fileSettings, ShopExtension shopExtension) {
+        super(new ExtensionSettings(fileSettings, "profile", "Enables the /kProfile command."));
         this.shopExtension = shopExtension;
     }
 

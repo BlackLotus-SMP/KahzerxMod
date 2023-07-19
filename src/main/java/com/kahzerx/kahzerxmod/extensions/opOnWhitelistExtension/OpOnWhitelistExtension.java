@@ -11,8 +11,8 @@ public class OpOnWhitelistExtension extends GenericExtension implements Extensio
     public static boolean isExtensionEnabled = false;
     public static MinecraftServer server = null;
 
-    public OpOnWhitelistExtension(HashMap<String, Boolean> config) {
-        super(new ExtensionSettings(config, "opOnWhitelist", "Auto ops and deops on whitelist add and remove."));
+    public OpOnWhitelistExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "opOnWhitelist", "Auto ops and deops on whitelist add and remove."));
     }
 
     @Override

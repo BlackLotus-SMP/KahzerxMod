@@ -15,8 +15,8 @@ import java.util.HashMap;
 
 public class SpawnExtension extends GenericExtension implements Extensions {
     private Connection conn;
-    public SpawnExtension(HashMap<String, Boolean> config) {
-        super(new ExtensionSettings(config, "spawn", "Enables /spawn."));
+    public SpawnExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "spawn", "Enables /spawn."));
     }
 
     @Override

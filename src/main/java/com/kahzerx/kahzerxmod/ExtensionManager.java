@@ -2,7 +2,9 @@ package com.kahzerx.kahzerxmod;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.internal.LinkedTreeMap;
 import com.kahzerx.kahzerxmod.config.KSettings;
+import com.kahzerx.kahzerxmod.fileSettings.KSettings;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.backExtension.BackExtension;
 import com.kahzerx.kahzerxmod.extensions.badgeExtension.BadgeExtension;
@@ -62,83 +64,88 @@ import com.kahzerx.kahzerxmod.extensions.whereExtension.WhereExtension;
 import com.kahzerx.kahzerxmod.utils.FileUtils;
 import net.minecraft.util.WorldSavePath;
 
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class ExtensionManager {
     public static void saveSettings() {
-        List<ExtensionSettings> settingsArray = new ArrayList<>();
+        List<Object> settingsArray = new ArrayList<>();
         for (Extensions ex : KahzerxServer.extensions) {
             settingsArray.add(ex.extensionSettings());
         }
         KSettings settings = new KSettings(settingsArray);
-        FileUtils.createConfig(KahzerxServer.minecraftServer.getSavePath(WorldSavePath.ROOT).toString(), settings);
+//        FileUtils.createfileSettings(KahzerxServer.minecraftServer.getSavePath(WorldSavePath.ROOT).toString(), settings);
     }
 
     public static void manageExtensions(String settings) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         KSettings ks = gson.fromJson(settings, KSettings.class);
-        HashMap<String, Boolean> config = new HashMap<>();
+        HashMap<String, String> fileSettings = new HashMap<>();
 
         if (ks != null) {
-            for (ExtensionSettings es : ks.settings()) {
+            for (Object es : ks.settings()) {
                 if (es == null) {
                     continue;
                 }
-                config.put(es.getName(), es.isEnabled());
+                Object name = ((LinkedTreeMap<?, ?>) es).get("name");
+                if (name == null) {
+                    continue;
+                }
+                fileSettings.put((String) name, gson.toJson(es));
             }
         }
 
         // TODO way of making so the extensions register themselves so we dont need massive class of extensions.add(...)
 
-        MemberExtension memberExtension = new MemberExtension(config);
+        MemberExtension memberExtension = new MemberExtension(fileSettings);
         // TODO make extensions have access to all the other extensions so they can consult this.extensions.get("member").getSettings()...
-        PermsExtension permsExtension = new PermsExtension(config, memberExtension);
+        PermsExtension permsExtension = new PermsExtension(fileSettings, memberExtension);
 
         KahzerxServer.extensions.add(memberExtension);
         KahzerxServer.extensions.add(permsExtension);
-        KahzerxServer.extensions.add(new HomeExtension(config));
-        KahzerxServer.extensions.add(new BackExtension(config, permsExtension));
-        KahzerxServer.extensions.add(new CameraExtension(config, permsExtension));
+        KahzerxServer.extensions.add(new HomeExtension(fileSettings));
+        KahzerxServer.extensions.add(new BackExtension(fileSettings, permsExtension));
+        KahzerxServer.extensions.add(new CameraExtension(fileSettings, permsExtension));
         // TODO modTP for perms!
-        KahzerxServer.extensions.add(new HelperKickExtension(config, permsExtension));
-        KahzerxServer.extensions.add(new SurvivalExtension(config));
-        KahzerxServer.extensions.add(new HereExtension(config));
-        KahzerxServer.extensions.add(new DeathMsgExtension(config));
-        KahzerxServer.extensions.add(new RandomTPExtension(config, permsExtension));
-        KahzerxServer.extensions.add(new BlockInfoExtension(config));
-        KahzerxServer.extensions.add(new SeedExtension(config));
-        KahzerxServer.extensions.add(new FckPrivacyExtension(config));
-        KahzerxServer.extensions.add(new SpoofExtension(config));
-        KahzerxServer.extensions.add(new ScoreboardExtension(config));
-        KahzerxServer.extensions.add(new SpawnExtension(config));
-        KahzerxServer.extensions.add(new WhereExtension(config, permsExtension));
-        KahzerxServer.extensions.add(new BocaExtension(config));
-        KahzerxServer.extensions.add(new TotopoExtension(config));
-        KahzerxServer.extensions.add(new HatExtension(config));
-        KahzerxServer.extensions.add(new EndermanNoGriefExtension(config));
-        KahzerxServer.extensions.add(new DeepslateInstaMineExtension(config));
-        KahzerxServer.extensions.add(new RenewableElytraExtension(config));
-        KahzerxServer.extensions.add(new VillagersFollowEmeraldExtension(config));
-        KahzerxServer.extensions.add(new SolExtension(config));
-        KahzerxServer.extensions.add(new KloneExtension(config, permsExtension));
-        KahzerxServer.extensions.add(new MaintenanceExtension(config));
-        KahzerxServer.extensions.add(new PrankExtension(config));
+        KahzerxServer.extensions.add(new HelperKickExtension(fileSettings, permsExtension));
+        KahzerxServer.extensions.add(new SurvivalExtension(fileSettings));
+        KahzerxServer.extensions.add(new HereExtension(fileSettings));
+        KahzerxServer.extensions.add(new DeathMsgExtension(fileSettings));
+        KahzerxServer.extensions.add(new RandomTPExtension(fileSettings, permsExtension));
+        KahzerxServer.extensions.add(new BlockInfoExtension(fileSettings));
+        KahzerxServer.extensions.add(new SeedExtension(fileSettings));
+        KahzerxServer.extensions.add(new FckPrivacyExtension(fileSettings));
+        KahzerxServer.extensions.add(new SpoofExtension(fileSettings));
+        KahzerxServer.extensions.add(new ScoreboardExtension(fileSettings));
+        KahzerxServer.extensions.add(new SpawnExtension(fileSettings));
+        KahzerxServer.extensions.add(new WhereExtension(fileSettings, permsExtension));
+        KahzerxServer.extensions.add(new BocaExtension(fileSettings));
+        KahzerxServer.extensions.add(new TotopoExtension(fileSettings));
+        KahzerxServer.extensions.add(new HatExtension(fileSettings));
+        KahzerxServer.extensions.add(new EndermanNoGriefExtension(fileSettings));
+        KahzerxServer.extensions.add(new DeepslateInstaMineExtension(fileSettings));
+        KahzerxServer.extensions.add(new RenewableElytraExtension(fileSettings));
+        KahzerxServer.extensions.add(new VillagersFollowEmeraldExtension(fileSettings));
+        KahzerxServer.extensions.add(new SolExtension(fileSettings));
+        KahzerxServer.extensions.add(new KloneExtension(fileSettings, permsExtension));
+        KahzerxServer.extensions.add(new MaintenanceExtension(fileSettings));
+        KahzerxServer.extensions.add(new PrankExtension(fileSettings));
         // TODO validate if 2 extensions with the same name exist
-        KahzerxServer.extensions.add(new SkullExtension(config));
-        KahzerxServer.extensions.add(new PlayerDropsSkullExtension(config));
-        KahzerxServer.extensions.add(new BadgeExtension(config, permsExtension));
-        KahzerxServer.extensions.add(new ItemFormattedExtension(config));
-        KahzerxServer.extensions.add(new SlabExtension(config));
-        KahzerxServer.extensions.add(new SitExtension(config));
-        KahzerxServer.extensions.add(new FarmlandMyceliumExtension(config));
-        KahzerxServer.extensions.add(new FBIExtension(config));
-        KahzerxServer.extensions.add(new OpOnWhitelistExtension(config));
-        KahzerxServer.extensions.add(new BedTimeExtension(config));
-        ShopExtension shopExtension = new ShopExtension(config, permsExtension);
+        KahzerxServer.extensions.add(new SkullExtension(fileSettings));
+        KahzerxServer.extensions.add(new PlayerDropsSkullExtension(fileSettings));
+        KahzerxServer.extensions.add(new BadgeExtension(fileSettings, permsExtension));
+        KahzerxServer.extensions.add(new ItemFormattedExtension(fileSettings));
+        KahzerxServer.extensions.add(new SlabExtension(fileSettings));
+        KahzerxServer.extensions.add(new SitExtension(fileSettings));
+        KahzerxServer.extensions.add(new FarmlandMyceliumExtension(fileSettings));
+        KahzerxServer.extensions.add(new FBIExtension(fileSettings));
+        KahzerxServer.extensions.add(new OpOnWhitelistExtension(fileSettings));
+        KahzerxServer.extensions.add(new BedTimeExtension(fileSettings));
+        ShopExtension shopExtension = new ShopExtension(fileSettings, permsExtension);
         KahzerxServer.extensions.add(shopExtension);
-        KahzerxServer.extensions.add(new ProfileExtension(config, shopExtension));
+        KahzerxServer.extensions.add(new ProfileExtension(fileSettings, shopExtension));
 
         String message = "";
         JoinMOTDJsonSettings jmjs = gson.fromJson(settings, JoinMOTDJsonSettings.class);
@@ -153,7 +160,7 @@ public class ExtensionManager {
                 }
             }
         }
-        JoinMOTDExtension joinMOTDExtension = new JoinMOTDExtension(config, message, permsExtension);
+        JoinMOTDExtension joinMOTDExtension = new JoinMOTDExtension(fileSettings, message, permsExtension);
         KahzerxServer.extensions.add(joinMOTDExtension);
 
         String token = "";
@@ -181,7 +188,7 @@ public class ExtensionManager {
                 }
             }
         }
-        DiscordExtension discordExtension = new DiscordExtension(config, token, crossServerChat, prefix, isRunning, chatChannelID, allowedChats, shouldFeedback);
+        DiscordExtension discordExtension = new DiscordExtension(fileSettings, token, crossServerChat, prefix, isRunning, chatChannelID, allowedChats, shouldFeedback);
         KahzerxServer.extensions.add(discordExtension);
 
         long discordRoleID = 0L;
@@ -201,7 +208,7 @@ public class ExtensionManager {
                 }
             }
         }
-        DiscordWhitelistExtension discordWhitelistExtension = new DiscordWhitelistExtension(config, whitelistChats, discordRoleID, nPlayers, discordExtension);
+        DiscordWhitelistExtension discordWhitelistExtension = new DiscordWhitelistExtension(fileSettings, whitelistChats, discordRoleID, nPlayers, discordExtension);
         KahzerxServer.extensions.add(discordWhitelistExtension);
 
         List<Long> adminChats = new ArrayList<>();
@@ -219,7 +226,7 @@ public class ExtensionManager {
                 }
             }
         }
-        DiscordAdminToolsExtension discordAdminToolsExtension = new DiscordAdminToolsExtension(config, adminChats, feedback, discordExtension, discordWhitelistExtension);
+        DiscordAdminToolsExtension discordAdminToolsExtension = new DiscordAdminToolsExtension(fileSettings, adminChats, feedback, discordExtension, discordWhitelistExtension);
         KahzerxServer.extensions.add(discordAdminToolsExtension);
 
         List<Long> validRoles = new ArrayList<>();
@@ -240,6 +247,6 @@ public class ExtensionManager {
                 }
             }
         }
-        KahzerxServer.extensions.add(new DiscordWhitelistSyncExtension(config, notifyChannelID, validRoles, groupID, aggressive, discordExtension, discordWhitelistExtension));
+        KahzerxServer.extensions.add(new DiscordWhitelistSyncExtension(fileSettings, notifyChannelID, validRoles, groupID, aggressive, discordExtension, discordWhitelistExtension));
     }
 }

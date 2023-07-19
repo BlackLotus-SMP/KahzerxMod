@@ -9,8 +9,8 @@ import java.util.HashMap;
 
 public class FarmlandMyceliumExtension extends GenericExtension implements Extensions {
     public static boolean isExtensionEnabled = false;
-    public FarmlandMyceliumExtension(HashMap<String, Boolean> config) {
-        super(new ExtensionSettings(config, "farmlandMycelium", "Hoe can be used to farm mycelium."));
+    public FarmlandMyceliumExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "farmlandMycelium", "Hoe can be used to farm mycelium."));
     }
 
     @Override

@@ -31,8 +31,8 @@ public class ShopExtension extends GenericExtension implements Extensions {
     private Timer timer;
     public static boolean isExtensionEnabled = false;
 
-    public ShopExtension(HashMap<String, Boolean> config, PermsExtension permsExtension) {
-        super(new ExtensionSettings(config, "shop", "Enables currency system along with shop commands and helpers."));
+    public ShopExtension(HashMap<String, String> fileSettings, PermsExtension permsExtension) {
+        super(new ExtensionSettings(fileSettings, "shop", "Enables currency system along with shop commands and helpers."));
         this.permsExtension = permsExtension;
     }
 

@@ -13,8 +13,8 @@ public class MaintenanceExtension extends GenericExtension implements Extensions
     public static boolean isExtensionEnabled = false;
     private MinecraftServer server = null;
 
-    public MaintenanceExtension(HashMap<String, Boolean> config) {
-        super(new ExtensionSettings(config, "maintenance", "Sets your server in maintenance mode so only op players can join."));
+    public MaintenanceExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "maintenance", "Sets your server in maintenance mode so only op players can join."));
     }
 
     @Override

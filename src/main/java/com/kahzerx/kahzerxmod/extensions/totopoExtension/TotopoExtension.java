@@ -14,8 +14,8 @@ import java.awt.*;
 import java.util.HashMap;
 
 public class TotopoExtension extends GenericExtension implements Extensions {
-    public TotopoExtension(HashMap<String, Boolean> config) {
-        super(new ExtensionSettings(config, "totopo", "Enables /totopo command."));
+    public TotopoExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "totopo", "Enables /totopo command."));
     }
 
     @Override

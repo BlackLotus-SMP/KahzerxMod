@@ -9,8 +9,8 @@ import net.minecraft.server.command.ServerCommandSource;
 import java.util.HashMap;
 
 public class BocaExtension extends GenericExtension implements Extensions {
-    public BocaExtension(HashMap<String, Boolean> config) {
-        super(new ExtensionSettings(config, "boca", "Enables /boca & /boquita command."));
+    public BocaExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "boca", "Enables /boca & /boquita command."));
     }
 
     @Override

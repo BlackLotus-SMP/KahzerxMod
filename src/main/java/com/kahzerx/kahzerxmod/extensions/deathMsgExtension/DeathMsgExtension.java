@@ -10,8 +10,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import java.util.HashMap;
 
 public class DeathMsgExtension extends GenericExtension implements Extensions {
-    public DeathMsgExtension(HashMap<String, Boolean> config) {
-        super(new ExtensionSettings(config, "deathMessage", "Print death position when player dies."));
+    public DeathMsgExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "deathMessage", "Print death position when player dies."));
     }
 
     @Override

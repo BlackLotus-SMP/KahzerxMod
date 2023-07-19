@@ -22,8 +22,8 @@ public class BadgeExtension extends GenericExtension implements Extensions {
     public static final HashMap<String, List<BadgeInstance>> playerBadges = new HashMap<>();
     private MinecraftServer server;
 
-    public BadgeExtension(HashMap<String, Boolean> config, PermsExtension perms) {
-        super(new ExtensionSettings(config, "badge", "Badge system, helpers can add badges to players that will display on chat(only last 3), and on chat hover."));
+    public BadgeExtension(HashMap<String, String> fileSettings, PermsExtension perms) {
+        super(new ExtensionSettings(fileSettings, "badge", "Badge system, helpers can add badges to players that will display on chat(only last 3), and on chat hover."));
         this.permsExtension = perms;
     }
 

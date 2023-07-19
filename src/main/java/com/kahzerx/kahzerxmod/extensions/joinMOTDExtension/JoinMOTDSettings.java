@@ -6,8 +6,8 @@ import java.util.HashMap;
 
 public class JoinMOTDSettings extends ExtensionSettings {
     private String message;
-    public JoinMOTDSettings(HashMap<String, Boolean> config, String name, String description, String message) {
-        super(config, name, description);
+    public JoinMOTDSettings(HashMap<String, String> fileSettings, String name, String description, String message) {
+        super(fileSettings, name, description);
         this.message = message;
     }
 

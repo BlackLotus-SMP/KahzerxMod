@@ -9,8 +9,8 @@ import net.minecraft.server.command.ServerCommandSource;
 import java.util.HashMap;
 
 public class SkullExtension extends GenericExtension implements Extensions {
-    public SkullExtension(HashMap<String, Boolean> config) {
-        super(new ExtensionSettings(config, "skull", "Gives player heads."));
+    public SkullExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "skull", "Gives player heads."));
     }
 
     @Override

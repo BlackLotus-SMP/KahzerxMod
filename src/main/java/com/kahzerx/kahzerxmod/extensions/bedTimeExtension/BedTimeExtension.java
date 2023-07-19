@@ -11,8 +11,8 @@ import net.minecraft.util.Formatting;
 import java.util.HashMap;
 
 public class BedTimeExtension extends GenericExtension implements Extensions {
-    public BedTimeExtension(HashMap<String, Boolean> config) {
-        super(new ExtensionSettings(config, "bedTime", "Notifies when a player goes to sleep."));
+    public BedTimeExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "bedTime", "Notifies when a player goes to sleep."));
     }
 
     @Override

@@ -8,8 +8,8 @@ import java.util.List;
 public class DiscordAdminToolsSettings extends ExtensionSettings {
     private List<Long> adminChats;
     private boolean shouldFeedback;
-    public DiscordAdminToolsSettings(HashMap<String, Boolean> config, String name, String description, List<Long> adminChats, boolean shouldFeedback) {
-        super(config, name, description);
+    public DiscordAdminToolsSettings(HashMap<String, String> fileSettings, String name, String description, List<Long> adminChats, boolean shouldFeedback) {
+        super(fileSettings, name, description);
         this.adminChats = adminChats;
         this.shouldFeedback = shouldFeedback;
     }

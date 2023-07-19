@@ -13,8 +13,8 @@ import net.minecraft.world.GameMode;
 import java.util.HashMap;
 
 public class SurvivalExtension extends GenericExtension implements Extensions {
-    public SurvivalExtension(HashMap<String, Boolean> config) {
-        super(new ExtensionSettings(config, "survival", "/s, survival - night vision - conduit (stolen from carpet)."));
+    public SurvivalExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "survival", "/s, survival - night vision - conduit (stolen from carpet)."));
     }
 
     @Override
