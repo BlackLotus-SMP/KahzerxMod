@@ -27,19 +27,11 @@ import static net.minecraft.server.command.CommandManager.literal;
 public class KahzerxServer {
     public static MinecraftServer minecraftServer;
     public static List<Extensions> extensions = new ArrayList<>();
-//    public static List<AbstractProfiler> profilers = new ArrayList<>();
     public static ServerDatabase db = new ServerDatabase();
     public static CommandDispatcher<ServerCommandSource> dispatcher;
     public static CommandRegistryAccess commandRegistryAccess;
 
     public static void onRunServer(MinecraftServer minecraftServer) {
-//        profilers.add(new ChunkProfiler());
-//        profilers.add(new BlockEntitiesProfiler());
-//        profilers.add(new EntityProfiler());
-//        profilers.add(new MSPTProfiler());
-//        profilers.add(new PlayersProfiler());
-//        profilers.add(new RamProfiler());
-//        profilers.add(new TPSProfiler());
         KahzerxServer.minecraftServer = minecraftServer;
         ExtensionManager.manageExtensions(FileUtils.loadConfig(minecraftServer.getSavePath(WorldSavePath.ROOT).toString()));
         Collections.sort(extensions);
@@ -52,7 +44,7 @@ public class KahzerxServer {
         extensions.forEach(e -> e.onRegisterCommands(dispatcher, commandRegistryAccess));
 
         LiteralArgumentBuilder<ServerCommandSource> settingsCommand = literal("KSettings").
-                requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(2));
+                requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(2));  // TODO this has to be customizable for CMPs
         for (Extensions ex : extensions) {
             LiteralArgumentBuilder<ServerCommandSource> extensionSubCommand = literal(ex.extensionSettings().getName());
             extensionSubCommand.
@@ -213,10 +205,5 @@ public class KahzerxServer {
             return;
         }
         extensions.forEach(e -> e.onTick(server));
-//        String id = DateUtils.getAcc();
-//        profilers.forEach(p -> {
-//            p.onTick(server, id);
-//            p.clearResults();
-//        });
     }
 }

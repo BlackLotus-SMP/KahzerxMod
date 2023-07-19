@@ -7,12 +7,14 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
+import java.util.HashMap;
+
 public class MaintenanceExtension extends GenericExtension implements Extensions {
     public static boolean isExtensionEnabled = false;
     private MinecraftServer server = null;
 
-    public MaintenanceExtension(ExtensionSettings settings) {
-        super(settings);
+    public MaintenanceExtension(HashMap<String, Boolean> config) {
+        super(new ExtensionSettings(config, "maintenance", "Sets your server in maintenance mode so only op players can join."));
     }
 
     @Override

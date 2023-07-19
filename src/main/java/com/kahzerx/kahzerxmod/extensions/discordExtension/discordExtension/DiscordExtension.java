@@ -50,6 +50,7 @@ public class DiscordExtension extends GenericExtension implements Extensions {
         }
     }
 
+    // TODO messages with translation keys
     @Override
     public void onPlayerJoined(ServerPlayerEntity player) {
         boolean isBot = player.getClass() == KlonePlayerEntity.class;

@@ -5,11 +5,13 @@ import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import net.minecraft.server.MinecraftServer;
 
+import java.util.HashMap;
+
 public class PlayerDropsSkullExtension extends GenericExtension implements Extensions {
     public static boolean isExtensionEnabled = false;
 
-    public PlayerDropsSkullExtension(ExtensionSettings settings) {
-        super(settings);
+    public PlayerDropsSkullExtension(HashMap<String, Boolean> config) {
+        super(new ExtensionSettings(config, "playerDropsSkull", "Players have a 12% chance of dropping skull on death by trident lightning and a 30% by natural lightning."));
     }
 
     @Override

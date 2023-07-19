@@ -7,11 +7,13 @@ import com.kahzerx.kahzerxmod.extensions.permsExtension.PermsExtension;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.server.command.ServerCommandSource;
 
+import java.util.HashMap;
+
 public class WhereExtension extends GenericExtension implements Extensions {
     private final PermsExtension permsExtension;
 
-    public WhereExtension(ExtensionSettings settings, PermsExtension perms) {
-        super(settings);
+    public WhereExtension(HashMap<String, Boolean> config, PermsExtension perms) {
+        super(new ExtensionSettings(config, "where", "Enables /where."));
         this.permsExtension = perms;
     }
 

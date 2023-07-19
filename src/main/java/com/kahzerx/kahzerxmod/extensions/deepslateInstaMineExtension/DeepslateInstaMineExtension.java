@@ -5,11 +5,13 @@ import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import net.minecraft.server.MinecraftServer;
 
+import java.util.HashMap;
+
 public class DeepslateInstaMineExtension extends GenericExtension implements Extensions {
     public static boolean isExtensionEnabled = false;
 
-    public DeepslateInstaMineExtension(ExtensionSettings settings) {
-        super(settings);
+    public DeepslateInstaMineExtension(HashMap<String, Boolean> config) {
+        super(new ExtensionSettings(config, "deepslateInstaMine", "Deepslate instamine as if it was stone."));
     }
 
     @Override

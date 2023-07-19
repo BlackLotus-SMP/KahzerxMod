@@ -10,6 +10,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Timer;
 
 public class KloneExtension extends GenericExtension implements Extensions {
@@ -17,8 +18,8 @@ public class KloneExtension extends GenericExtension implements Extensions {
     private final ArrayList<KlonePlayerEntity> klones = new ArrayList<>();
     private Timer timer;
 
-    public KloneExtension(ExtensionSettings settings, PermsExtension perms) {
-        super(settings);
+    public KloneExtension(HashMap<String, Boolean> config, PermsExtension perms) {
+        super(new ExtensionSettings(config, "klone", "Clones your player to afk (will kick you) for up to 1 day; the bot will leave once you rejoin."));
         this.permsExtension = perms;
     }
 

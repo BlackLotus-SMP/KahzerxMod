@@ -5,11 +5,13 @@ import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import net.minecraft.server.MinecraftServer;
 
+import java.util.HashMap;
+
 public class VillagersFollowEmeraldExtension extends GenericExtension implements Extensions {
     public static boolean isExtensionEnabled = false;
 
-    public VillagersFollowEmeraldExtension(ExtensionSettings settings) {
-        super(settings);
+    public VillagersFollowEmeraldExtension(HashMap<String, Boolean> config) {
+        super(new ExtensionSettings(config, "villagersFollowEmeralds", "Villagers will follow any player holding emerald blocks."));
     }
 
     @Override
