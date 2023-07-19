@@ -19,11 +19,12 @@ import net.minecraft.util.math.Direction;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 
+// TODO maybe customizable?
 public class ProfileExtension extends GenericExtension implements Extensions {
     public static HashMap<ServerPlayerEntity, GuiPlayer> guis = new HashMap<>();
     private final ShopExtension shopExtension;
-    public ProfileExtension(ExtensionSettings settings, ShopExtension shopExtension) {
-        super(settings);
+    public ProfileExtension(HashMap<String, Boolean> config, ShopExtension shopExtension) {
+        super(new ExtensionSettings(config, "profile", "Enables the /kProfile command."));
         this.shopExtension = shopExtension;
     }
 

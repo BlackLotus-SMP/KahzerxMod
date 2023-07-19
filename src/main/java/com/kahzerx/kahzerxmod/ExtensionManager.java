@@ -140,6 +140,9 @@ public class ExtensionManager {
         KahzerxServer.extensions.add(new FBIExtension(config));
         KahzerxServer.extensions.add(new OpOnWhitelistExtension(config));
         KahzerxServer.extensions.add(new BedTimeExtension(config));
+        ShopExtension shopExtension = new ShopExtension(config, permsExtension);
+        KahzerxServer.extensions.add(shopExtension);
+        KahzerxServer.extensions.add(new ProfileExtension(config, shopExtension));
 
         String message = "";
         JoinMOTDJsonSettings jmjs = gson.fromJson(settings, JoinMOTDJsonSettings.class);
@@ -262,10 +265,5 @@ public class ExtensionManager {
                 ),
                 discordExtension,
                 discordWhitelistExtension));
-
-        ShopExtension shopExtension = new ShopExtension(new ExtensionSettings("shop", isEnabled(found, "shop"), "Enables currency system along with shop commands and helpers."), permsExtension);
-        KahzerxServer.extensions.add(shopExtension);
-        ProfileExtension profileExtension = new ProfileExtension(new ExtensionSettings("profile", isEnabled(found, "profile"), "Enables the /profile command."), shopExtension);
-        KahzerxServer.extensions.add(profileExtension);
     }
 }
