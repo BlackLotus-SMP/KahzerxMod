@@ -49,6 +49,8 @@ import com.kahzerx.kahzerxmod.extensions.survivalExtension.SurvivalExtension;
 import com.kahzerx.kahzerxmod.extensions.totopoExtension.TotopoExtension;
 import com.kahzerx.kahzerxmod.extensions.villagersFollowEmeraldExtension.VillagersFollowEmeraldExtension;
 import com.kahzerx.kahzerxmod.extensions.whereExtension.WhereExtension;
+import com.kahzerx.kahzerxmod.utils.FileUtils;
+import net.minecraft.util.WorldSavePath;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,7 +63,7 @@ public class ExtensionManager {
             settingsArray.add(ex.extensionSettings());
         }
         KSettings settings = new KSettings(settingsArray);
-//        FileUtils.createfileSettings(KahzerxServer.minecraftServer.getSavePath(WorldSavePath.ROOT).toString(), settings);
+        FileUtils.createConfig(KahzerxServer.minecraftServer.getSavePath(WorldSavePath.ROOT).toString(), settings);
     }
 
     public static void manageExtensions(String settings) {
