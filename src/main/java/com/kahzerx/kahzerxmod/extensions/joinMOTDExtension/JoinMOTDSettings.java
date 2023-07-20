@@ -10,16 +10,8 @@ public class JoinMOTDSettings extends ExtensionSettings {
     private String message;
     public JoinMOTDSettings(HashMap<String, String> fileSettings, String name, String description) {
         super(fileSettings, name, description);
-        JoinMOTDSettings file = this.processFileSettings(fileSettings.getOrDefault(name, null));
+        JoinMOTDSettings file = (JoinMOTDSettings) this.processFileSettings(fileSettings.getOrDefault(name, null), this.getClass());
         this.message = file != null && file.getMessage() != null ? file.getMessage() : "";
-    }
-
-    private JoinMOTDSettings processFileSettings(String settings) {
-        if (settings == null) {
-            return null;
-        }
-        Gson gson = new GsonBuilder().create();
-        return gson.fromJson(settings, JoinMOTDSettings.class);
     }
 
     public void setMessage(String message) {

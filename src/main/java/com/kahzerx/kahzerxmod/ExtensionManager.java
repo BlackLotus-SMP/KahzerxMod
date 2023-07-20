@@ -144,32 +144,8 @@ public class ExtensionManager {
         KahzerxServer.extensions.add(new ProfileExtension(fileSettings, shopExtension));
         KahzerxServer.extensions.add(new JoinMOTDExtension(fileSettings, permsExtension));
 
-        String token = "";
-        boolean crossServerChat = false;
-        String prefix = "";
-        boolean isRunning = false;
-        long chatChannelID = 0L;
-        boolean shouldFeedback = true;
-        List<Long> allowedChats = new ArrayList<>();
-        DiscordJsonSettings djs = gson.fromJson(settings, DiscordJsonSettings.class);
-        if (djs != null) {
-            for (DiscordSettings ds : djs.getSettings()) {
-                if (ds == null) {
-                    continue;
-                }
-                if (ds.getName().equals("discord")) {
-                    token = ds.getToken() != null ? ds.getToken() : "";
-                    crossServerChat = ds.isCrossServerChat();
-                    prefix = ds.getPrefix() != null ? ds.getPrefix().replaceAll(" ", "_") : "";
-                    isRunning = ds.isRunning();
-                    chatChannelID = ds.getChatChannelID();
-                    allowedChats = ds.getAllowedChats() != null ? ds.getAllowedChats() : new ArrayList<>();
-                    shouldFeedback = ds.isShouldFeedback();
-                    break;
-                }
-            }
-        }
-        DiscordExtension discordExtension = new DiscordExtension(fileSettings, token, crossServerChat, prefix, isRunning, chatChannelID, allowedChats, shouldFeedback);
+        // TODO extension file parsing in the extension class
+        DiscordExtension discordExtension = new DiscordExtension(fileSettings);
         KahzerxServer.extensions.add(discordExtension);
 
         long discordRoleID = 0L;

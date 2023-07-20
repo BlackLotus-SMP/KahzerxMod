@@ -11,7 +11,7 @@ public class ExtensionSettings {
     private final String description;
 
     public ExtensionSettings(HashMap<String, String> fileSettings, String name, String description) {
-        ExtensionSettings file = this.processFileSettings(fileSettings.getOrDefault(name, null));
+        ExtensionSettings file = this.processFileSettings(fileSettings.getOrDefault(name, null), this.getClass());
         this.name = name;
         this.enabled = file != null && file.isEnabled();
         this.description = description;
@@ -33,12 +33,12 @@ public class ExtensionSettings {
         return description;
     }
 
-    private ExtensionSettings processFileSettings(String settings) {
+    protected ExtensionSettings processFileSettings(String settings, Class<? extends ExtensionSettings> c) {
         if (settings == null) {
             return null;
         }
         Gson gson = new GsonBuilder().create();
-        return gson.fromJson(settings, ExtensionSettings.class);
+        return gson.fromJson(settings, c);
     }
 
     @Override

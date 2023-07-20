@@ -25,8 +25,8 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class DiscordExtension extends GenericExtension implements Extensions {
-    public DiscordExtension(HashMap<String, String> fileSettings, String token, boolean crossServerChat, String prefix, boolean running, long chatChannelID, List<Long> allowedChats, boolean shouldFeedback) {
-        super(new DiscordSettings(fileSettings, "discord", "Connects minecraft chat + some events with a discord chat (chatbridge). Prefix is necessary if you want crossServerChat to work properly and not having duplicated messages.", token, crossServerChat, prefix, running, chatChannelID, allowedChats, shouldFeedback));
+    public DiscordExtension(HashMap<String, String> fileSettings) {
+        super(new DiscordSettings(fileSettings, "discord", "Connects minecraft chat + some events with a discord chat (chatbridge). Prefix is necessary if you want crossServerChat to work properly and not having duplicated messages."));
     }
 
     @Override
