@@ -134,7 +134,6 @@ public class ExtensionManager {
         KahzerxServer.extensions.add(new BedTimeExtension(fileSettings));
         KahzerxServer.extensions.add(new ProfileExtension(fileSettings, shopExtension));
         KahzerxServer.extensions.add(new JoinMOTDExtension(fileSettings, permsExtension));
-        // TODO extension file parsing in the extension class
         DiscordExtension discordExtension = new DiscordExtension(fileSettings);
         KahzerxServer.extensions.add(discordExtension);
         DiscordWhitelistExtension discordWhitelistExtension = new DiscordWhitelistExtension(fileSettings, discordExtension);
