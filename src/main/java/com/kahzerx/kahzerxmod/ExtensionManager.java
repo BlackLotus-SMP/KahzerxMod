@@ -66,7 +66,7 @@ public class ExtensionManager {
         FileUtils.createConfig(KahzerxServer.minecraftServer.getSavePath(WorldSavePath.ROOT).toString(), settings);
     }
 
-    public static void manageExtensions(String settings) {
+    public static void loadExtensions(String settings) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         KSettings ks = gson.fromJson(settings, KSettings.class);
         HashMap<String, String> fileSettings = new HashMap<>();

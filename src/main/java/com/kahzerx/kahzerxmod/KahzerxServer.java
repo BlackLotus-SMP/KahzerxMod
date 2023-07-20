@@ -33,7 +33,7 @@ public class KahzerxServer {
 
     public static void onRunServer(MinecraftServer minecraftServer) {
         KahzerxServer.minecraftServer = minecraftServer;
-        ExtensionManager.manageExtensions(FileUtils.loadConfig(minecraftServer.getSavePath(WorldSavePath.ROOT).toString()));
+        ExtensionManager.loadExtensions(FileUtils.loadConfig(minecraftServer.getSavePath(WorldSavePath.ROOT).toString()));
         Collections.sort(extensions);
 
         extensions.forEach(e -> e.onServerRun(minecraftServer));
@@ -86,33 +86,32 @@ public class KahzerxServer {
         settingsCommand.executes(context -> {
             List<MutableText> extensionNames = new ArrayList<>();
             for (Extensions ex : extensions) {
-                MutableText exData = Text.literal("- " + ex.extensionSettings().getName() + " ").styled(
+
+                MutableText exData = MarkEnum.DOT.appendText(Text.literal(ex.extensionSettings().getName() + " | ").styled(
                         style -> style.
                                 withBold(false).
                                 withUnderline(false).
                                 withColor(Formatting.WHITE).
-                                withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(ex.extensionSettings().getDescription()))));
-                exData.append(Text.literal("[True]").styled(
+                                withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(ex.extensionSettings().getDescription())))));
+                exData.append(Text.literal("true").styled(
                         style -> style.
                                 withBold(false).
-                                withUnderline(ex.extensionSettings().isEnabled()).
-                                withColor(Formatting.GREEN).
+                                withColor(ex.extensionSettings().isEnabled() ? Formatting.GREEN : Formatting.GRAY).
                                 withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(String.format("Enable %s", ex.extensionSettings().getName())))).
                                 withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/KSettings %s true", ex.extensionSettings().getName())))));
                 exData.append(Text.literal(" ").styled(
                         style -> style.
                                 withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(""))).
                                 withUnderline(false)));
-                exData.append(Text.literal("[False]").styled(
+                exData.append(Text.literal("false").styled(
                         style -> style.
                                 withBold(false).
-                                withUnderline(!ex.extensionSettings().isEnabled()).
-                                withColor(Formatting.RED).
+                                withColor(!ex.extensionSettings().isEnabled() ? Formatting.RED : Formatting.GRAY).
                                 withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(String.format("Disable %s", ex.extensionSettings().getName())))).
                                 withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/KSettings %s false", ex.extensionSettings().getName())))));
                 extensionNames.add(exData);
             }
-            context.getSource().sendFeedback(() -> Text.literal("All Settings").styled(style -> style.withBold(true)), false);
+            context.getSource().sendFeedback(() -> Text.literal("\nSettings").styled(style -> style.withBold(true).withUnderline(true).withColor(Formatting.GOLD)), false);
             for (Text t : extensionNames) {
                 context.getSource().sendFeedback(() -> t, false);
             }
