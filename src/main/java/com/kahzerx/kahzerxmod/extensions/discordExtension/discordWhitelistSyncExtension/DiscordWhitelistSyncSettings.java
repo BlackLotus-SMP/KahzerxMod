@@ -1,7 +1,9 @@
 package com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistSyncExtension;
 
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
+import com.kahzerx.kahzerxmod.extensions.discordExtension.discordAdminToolsExtension.DiscordAdminToolsSettings;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -10,12 +12,13 @@ public class DiscordWhitelistSyncSettings extends ExtensionSettings {
     private List<Long> validRoles;
     private long groupID;
     private boolean aggressive;
-    public DiscordWhitelistSyncSettings(HashMap<String, String> fileSettings, String name, String description, long notifyChannelID, List<Long> validRoles, long groupID, boolean aggressive) {
+    public DiscordWhitelistSyncSettings(HashMap<String, String> fileSettings, String name, String description) {
         super(fileSettings, name, description);
-        this.notifyChannelID = notifyChannelID;
-        this.validRoles = validRoles;
-        this.groupID = groupID;
-        this.aggressive = aggressive;
+        DiscordWhitelistSyncSettings file = (DiscordWhitelistSyncSettings) this.processFileSettings(fileSettings.getOrDefault(name, null), this.getClass());
+        this.notifyChannelID = file != null ? file.getNotifyChannelID() : 0L;
+        this.validRoles = file != null && file.getValidRoles() != null ? file.getValidRoles() : new ArrayList<>();
+        this.groupID = file != null ? file.getGroupID() : 0L;
+        this.aggressive = file != null && file.isAggressive();
     }
 
     public List<Long> getValidRoles() {

@@ -26,8 +26,8 @@ public class DiscordWhitelistSyncExtension extends GenericExtension implements E
     private Timer timer;
 
     // TODO needs to validate if discord and discord whitelist is enabled as well
-    public DiscordWhitelistSyncExtension(HashMap<String, String> fileSettings, long notifyChannelID, List<Long> validRoles, long groupID, boolean aggressive, DiscordExtension discordExtension, DiscordWhitelistExtension discordWhitelistExtension) {
-        super(new DiscordWhitelistSyncSettings(fileSettings, "discordWhitelistSync", "Check if people that did !add have a given discord role, if not they will get automatically removed from whitelist, useful for sub twitch role. The groupID is the ID of the discord server/guild. The aggressive mode will force whitelist and discord database have the same users so any player added with /whitelist add will get removed on autosave.", notifyChannelID, validRoles, groupID, aggressive));
+    public DiscordWhitelistSyncExtension(HashMap<String, String> fileSettings, DiscordExtension discordExtension, DiscordWhitelistExtension discordWhitelistExtension) {
+        super(new DiscordWhitelistSyncSettings(fileSettings, "discordWhitelistSync", "Check if people that did !add have a given discord role, if not they will get automatically removed from whitelist, useful for sub twitch role. The groupID is the ID of the discord server/guild. The aggressive mode will force whitelist and discord database have the same users so any player added with /whitelist add will get removed on autosave."));
         this.discordExtension = discordExtension;
         this.discordWhitelistExtension = discordWhitelistExtension;
     }

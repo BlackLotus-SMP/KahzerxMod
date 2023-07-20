@@ -149,25 +149,6 @@ public class ExtensionManager {
         KahzerxServer.extensions.add(discordWhitelistExtension);
         DiscordAdminToolsExtension discordAdminToolsExtension = new DiscordAdminToolsExtension(fileSettings, discordExtension, discordWhitelistExtension);
         KahzerxServer.extensions.add(discordAdminToolsExtension);
-
-        List<Long> validRoles = new ArrayList<>();
-        long notifyChannelID = 0L;
-        long groupID = 0L;
-        boolean aggressive = false;
-        DiscordWhitelistSyncJsonSettings dwsjs = gson.fromJson(settings, DiscordWhitelistSyncJsonSettings.class);
-        if (dwsjs != null) {
-            for (DiscordWhitelistSyncSettings dwss : dwsjs.getSettings()) {
-                if (dwss == null) {
-                    continue;
-                }
-                if (dwss.getName().equals("discordWhitelistSync")) {
-                    validRoles = dwss.getValidRoles() != null ? dwss.getValidRoles() : new ArrayList<>();
-                    notifyChannelID = dwss.getNotifyChannelID();
-                    groupID = dwss.getGroupID();
-                    aggressive = dwss.isAggressive();
-                }
-            }
-        }
-        KahzerxServer.extensions.add(new DiscordWhitelistSyncExtension(fileSettings, notifyChannelID, validRoles, groupID, aggressive, discordExtension, discordWhitelistExtension));
+        KahzerxServer.extensions.add(new DiscordWhitelistSyncExtension(fileSettings, discordExtension, discordWhitelistExtension));
     }
 }
