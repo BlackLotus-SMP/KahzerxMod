@@ -37,8 +37,8 @@ public class DiscordAdminToolsExtension extends GenericExtension implements Exte
     private final ExremoveCommand exremoveCommand = new ExremoveCommand(DiscordListener.commandPrefix);
 
     // TODO needs to validate if discord and discord whitelist is enabled as well
-    public DiscordAdminToolsExtension(HashMap<String, String> fileSettings, List<Long> adminChats, boolean shouldFeedback, DiscordExtension discordExtension, DiscordWhitelistExtension discordWhitelistExtension) {
-        super(new DiscordAdminToolsSettings(fileSettings, "discordAdminTools", "Enables !ban, !pardon, !exadd, !exremove on discord AdminChats.", adminChats, shouldFeedback));
+    public DiscordAdminToolsExtension(HashMap<String, String> fileSettings, DiscordExtension discordExtension, DiscordWhitelistExtension discordWhitelistExtension) {
+        super(new DiscordAdminToolsSettings(fileSettings, "discordAdminTools", "Enables !ban, !pardon, !exadd, !exremove on discord AdminChats."));
         this.discordExtension = discordExtension;
         this.discordWhitelistExtension = discordWhitelistExtension;
     }

@@ -147,23 +147,7 @@ public class ExtensionManager {
         KahzerxServer.extensions.add(discordExtension);
         DiscordWhitelistExtension discordWhitelistExtension = new DiscordWhitelistExtension(fileSettings, discordExtension);
         KahzerxServer.extensions.add(discordWhitelistExtension);
-
-        List<Long> adminChats = new ArrayList<>();
-        boolean feedback = true;
-        DiscordAdminToolsJsonSettings datjs = gson.fromJson(settings, DiscordAdminToolsJsonSettings.class);
-        if (dwjs != null) {
-            for (DiscordAdminToolsSettings dats : datjs.getSettings()) {
-                if (dats == null) {
-                    continue;
-                }
-                if (dats.getName().equals("discordAdminTools")) {
-                    adminChats = dats.getAdminChats() != null ? dats.getAdminChats() : new ArrayList<>();
-                    feedback = dats.isShouldFeedback();
-                    break;
-                }
-            }
-        }
-        DiscordAdminToolsExtension discordAdminToolsExtension = new DiscordAdminToolsExtension(fileSettings, adminChats, feedback, discordExtension, discordWhitelistExtension);
+        DiscordAdminToolsExtension discordAdminToolsExtension = new DiscordAdminToolsExtension(fileSettings, discordExtension, discordWhitelistExtension);
         KahzerxServer.extensions.add(discordAdminToolsExtension);
 
         List<Long> validRoles = new ArrayList<>();

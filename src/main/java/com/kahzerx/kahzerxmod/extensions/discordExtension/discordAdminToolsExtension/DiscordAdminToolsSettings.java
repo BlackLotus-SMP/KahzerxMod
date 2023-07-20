@@ -1,17 +1,20 @@
 package com.kahzerx.kahzerxmod.extensions.discordExtension.discordAdminToolsExtension;
 
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
+import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension.DiscordWhitelistSettings;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class DiscordAdminToolsSettings extends ExtensionSettings {
     private List<Long> adminChats;
     private boolean shouldFeedback;
-    public DiscordAdminToolsSettings(HashMap<String, String> fileSettings, String name, String description, List<Long> adminChats, boolean shouldFeedback) {
+    public DiscordAdminToolsSettings(HashMap<String, String> fileSettings, String name, String description) {
         super(fileSettings, name, description);
-        this.adminChats = adminChats;
-        this.shouldFeedback = shouldFeedback;
+        DiscordAdminToolsSettings file = (DiscordAdminToolsSettings) this.processFileSettings(fileSettings.getOrDefault(name, null), this.getClass());
+        this.adminChats = file != null && file.getAdminChats() != null ? file.getAdminChats() : new ArrayList<>();
+        this.shouldFeedback = file != null && file.isShouldFeedback();;
     }
 
     public boolean isShouldFeedback() {
