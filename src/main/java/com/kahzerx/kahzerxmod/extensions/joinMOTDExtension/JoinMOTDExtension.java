@@ -120,7 +120,7 @@ public class JoinMOTDExtension extends GenericExtension implements Extensions {
                 }
                 if (kv[0].strip().equals("click")) {
                     String click = kv[1].strip();
-                    msg.styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, click)));
+                    msg.styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, click)));  // TODO check this...
                 }
             }
         }
