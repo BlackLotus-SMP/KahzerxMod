@@ -1,7 +1,9 @@
 package com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension;
 
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
+import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordSettings;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -9,11 +11,12 @@ public class DiscordWhitelistSettings extends ExtensionSettings {
     private List<Long> whitelistChats;
     private long discordRoleID;
     private int nPlayers;
-    public DiscordWhitelistSettings(HashMap<String, String> fileSettings, String name, String description, List<Long> whitelistChats, long discordRoleID, int nPlayers) {
+    public DiscordWhitelistSettings(HashMap<String, String> fileSettings, String name, String description) {
         super(fileSettings, name, description);
-        this.whitelistChats = whitelistChats;
-        this.discordRoleID = discordRoleID;
-        this.nPlayers = nPlayers;
+        DiscordWhitelistSettings file = (DiscordWhitelistSettings) this.processFileSettings(fileSettings.getOrDefault(name, null), this.getClass());
+        this.whitelistChats = file != null && file.getWhitelistChats() != null ? file.getWhitelistChats() : new ArrayList<>();
+        this.discordRoleID = file != null ? file.getDiscordRole() : 0L;
+        this.nPlayers = file != null ? file.getNPlayers() : 1;
     }
 
     public List<Long> getWhitelistChats() {

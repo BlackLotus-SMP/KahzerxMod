@@ -140,32 +140,12 @@ public class ExtensionManager {
         KahzerxServer.extensions.add(new FBIExtension(fileSettings));
         KahzerxServer.extensions.add(new OpOnWhitelistExtension(fileSettings));
         KahzerxServer.extensions.add(new BedTimeExtension(fileSettings));
-
         KahzerxServer.extensions.add(new ProfileExtension(fileSettings, shopExtension));
         KahzerxServer.extensions.add(new JoinMOTDExtension(fileSettings, permsExtension));
-
         // TODO extension file parsing in the extension class
         DiscordExtension discordExtension = new DiscordExtension(fileSettings);
         KahzerxServer.extensions.add(discordExtension);
-
-        long discordRoleID = 0L;
-        List<Long> whitelistChats = new ArrayList<>();
-        int nPlayers = 1;
-        DiscordWhitelistJsonSettings dwjs = gson.fromJson(settings, DiscordWhitelistJsonSettings.class);
-        if (dwjs != null) {
-            for (DiscordWhitelistSettings dws : dwjs.getSettings()) {
-                if (dws == null) {
-                    continue;
-                }
-                if (dws.getName().equals("discordWhitelist")) {
-                    discordRoleID = dws.getDiscordRole();
-                    whitelistChats = dws.getWhitelistChats() != null ? dws.getWhitelistChats() : new ArrayList<>();
-                    nPlayers = dws.getNPlayers() != 0 ? dws.getNPlayers() : 1;
-                    break;
-                }
-            }
-        }
-        DiscordWhitelistExtension discordWhitelistExtension = new DiscordWhitelistExtension(fileSettings, whitelistChats, discordRoleID, nPlayers, discordExtension);
+        DiscordWhitelistExtension discordWhitelistExtension = new DiscordWhitelistExtension(fileSettings, discordExtension);
         KahzerxServer.extensions.add(discordWhitelistExtension);
 
         List<Long> adminChats = new ArrayList<>();
