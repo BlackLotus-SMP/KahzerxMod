@@ -1,14 +1,25 @@
 package com.kahzerx.kahzerxmod.extensions.joinMOTDExtension;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 
 import java.util.HashMap;
 
 public class JoinMOTDSettings extends ExtensionSettings {
     private String message;
-    public JoinMOTDSettings(HashMap<String, String> fileSettings, String name, String description, String message) {
+    public JoinMOTDSettings(HashMap<String, String> fileSettings, String name, String description) {
         super(fileSettings, name, description);
-        this.message = message;
+        JoinMOTDSettings file = this.processFileSettings(fileSettings.getOrDefault(name, null));
+        this.message = file != null && file.getMessage() != null ? file.getMessage() : "";
+    }
+
+    private JoinMOTDSettings processFileSettings(String settings) {
+        if (settings == null) {
+            return null;
+        }
+        Gson gson = new GsonBuilder().create();
+        return gson.fromJson(settings, JoinMOTDSettings.class);
     }
 
     public void setMessage(String message) {
@@ -17,5 +28,15 @@ public class JoinMOTDSettings extends ExtensionSettings {
 
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String toString() {
+        return "config{" +
+                "name='" + this.getName() + '\'' +
+                ", enabled=" + this.isEnabled() +
+                ", description='" + this.getDescription() + '\'' +
+                ", message='" + this.getMessage() + '\'' +
+                '}';
     }
 }

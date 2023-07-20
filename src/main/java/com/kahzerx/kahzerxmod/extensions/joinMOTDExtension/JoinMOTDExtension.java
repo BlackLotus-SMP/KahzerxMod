@@ -18,8 +18,8 @@ import java.util.List;
 
 public class JoinMOTDExtension extends GenericExtension implements Extensions {
     public final PermsExtension permsExtension;
-    public JoinMOTDExtension(HashMap<String, String> fileSettings, String message, PermsExtension permsExtension) {
-        super(new JoinMOTDSettings(fileSettings, "joinMOTD", "Sends a custon message on player join.", message));
+    public JoinMOTDExtension(HashMap<String, String> fileSettings, PermsExtension permsExtension) {
+        super(new JoinMOTDSettings(fileSettings, "joinMOTD", "Sends a custon message on player join."));
         this.permsExtension = permsExtension;
     }
 
@@ -43,32 +43,28 @@ public class JoinMOTDExtension extends GenericExtension implements Extensions {
 
     public MutableText getFormatted(String message) {
         // /joinMOTD set awdawd [%1awdawd1]{click=/say a} \n[awdawd test]{display=test} a [%dawdawd1]{display=test2,click=/say a} a
-        message = message.replace('%', '\u00a7');
+        message = message.replace('%', '§');
         message = message.replace("\\n", "\n");
         List<StyleData> styled = new ArrayList<>();
         List<StyleData> styles = new ArrayList<>();
-        int posAtStyleOpen = -1;
         int posAtStyledOpen = -1;
+        int posAtStyleOpen = -1;
 
         for (int i = 0; i < message.length(); i++) {
             if (message.charAt(i) == '[') {
                 posAtStyledOpen = i;
             }
-            if (message.charAt(i) == ']') {
-                if (posAtStyledOpen != -1) {
-                    styled.add(new StyleData(posAtStyledOpen, i));
-                    posAtStyledOpen = -1;
-                }
+            if (message.charAt(i) == ']' && posAtStyledOpen != -1) {
+                styled.add(new StyleData(posAtStyledOpen, i));
+                posAtStyledOpen = -1;
             }
 
             if (message.charAt(i) == '{') {
                 posAtStyleOpen = i;
             }
-            if (message.charAt(i) == '}') {
-                if (posAtStyleOpen != -1) {
-                    styles.add(new StyleData(posAtStyleOpen, i));
-                    posAtStyleOpen = -1;
-                }
+            if (message.charAt(i) == '}' && posAtStyleOpen != -1) {
+                styles.add(new StyleData(posAtStyleOpen, i));
+                posAtStyleOpen = -1;
             }
         }
 
@@ -79,6 +75,7 @@ public class JoinMOTDExtension extends GenericExtension implements Extensions {
                 if (style_t.ends() + 1 == style_t2.starts()) {
                     correctStyled.add(style_t);
                     correctStyles.add(style_t2);
+                    break;
                 }
             }
         }
@@ -139,5 +136,5 @@ public class JoinMOTDExtension extends GenericExtension implements Extensions {
         return permsExtension;
     }
 
-    record StyleData(int starts, int ends) { }
+    private record StyleData(int starts, int ends) { }
 }

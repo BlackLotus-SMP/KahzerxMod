@@ -4,8 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.LinkedTreeMap;
 import com.kahzerx.kahzerxmod.config.KSettings;
-import com.kahzerx.kahzerxmod.fileSettings.KSettings;
-import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.backExtension.BackExtension;
 import com.kahzerx.kahzerxmod.extensions.badgeExtension.BadgeExtension;
 import com.kahzerx.kahzerxmod.extensions.bedTimeExtension.BedTimeExtension;
@@ -61,9 +59,6 @@ import com.kahzerx.kahzerxmod.extensions.survivalExtension.SurvivalExtension;
 import com.kahzerx.kahzerxmod.extensions.totopoExtension.TotopoExtension;
 import com.kahzerx.kahzerxmod.extensions.villagersFollowEmeraldExtension.VillagersFollowEmeraldExtension;
 import com.kahzerx.kahzerxmod.extensions.whereExtension.WhereExtension;
-import com.kahzerx.kahzerxmod.utils.FileUtils;
-import net.minecraft.util.WorldSavePath;
-
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -102,9 +97,11 @@ public class ExtensionManager {
         MemberExtension memberExtension = new MemberExtension(fileSettings);
         // TODO make extensions have access to all the other extensions so they can consult this.extensions.get("member").getSettings()...
         PermsExtension permsExtension = new PermsExtension(fileSettings, memberExtension);
+        ShopExtension shopExtension = new ShopExtension(fileSettings, permsExtension);
 
         KahzerxServer.extensions.add(memberExtension);
         KahzerxServer.extensions.add(permsExtension);
+        KahzerxServer.extensions.add(shopExtension);
         KahzerxServer.extensions.add(new HomeExtension(fileSettings));
         KahzerxServer.extensions.add(new BackExtension(fileSettings, permsExtension));
         KahzerxServer.extensions.add(new CameraExtension(fileSettings, permsExtension));
@@ -143,25 +140,9 @@ public class ExtensionManager {
         KahzerxServer.extensions.add(new FBIExtension(fileSettings));
         KahzerxServer.extensions.add(new OpOnWhitelistExtension(fileSettings));
         KahzerxServer.extensions.add(new BedTimeExtension(fileSettings));
-        ShopExtension shopExtension = new ShopExtension(fileSettings, permsExtension);
-        KahzerxServer.extensions.add(shopExtension);
-        KahzerxServer.extensions.add(new ProfileExtension(fileSettings, shopExtension));
 
-        String message = "";
-        JoinMOTDJsonSettings jmjs = gson.fromJson(settings, JoinMOTDJsonSettings.class);
-        if (jmjs != null) {
-            for (JoinMOTDSettings jms : jmjs.getSettings()) {
-                if (jms == null) {
-                    continue;
-                }
-                if (jms.getName().equals("joinMOTD")) {
-                    message = jms.getMessage() != null ? jms.getMessage() : "";
-                    break;
-                }
-            }
-        }
-        JoinMOTDExtension joinMOTDExtension = new JoinMOTDExtension(fileSettings, message, permsExtension);
-        KahzerxServer.extensions.add(joinMOTDExtension);
+        KahzerxServer.extensions.add(new ProfileExtension(fileSettings, shopExtension));
+        KahzerxServer.extensions.add(new JoinMOTDExtension(fileSettings, permsExtension));
 
         String token = "";
         boolean crossServerChat = false;
