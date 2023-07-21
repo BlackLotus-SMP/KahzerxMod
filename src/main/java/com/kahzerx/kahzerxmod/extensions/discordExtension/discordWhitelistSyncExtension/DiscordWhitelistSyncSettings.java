@@ -1,7 +1,6 @@
 package com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistSyncExtension;
 
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
-import com.kahzerx.kahzerxmod.extensions.discordExtension.discordAdminToolsExtension.DiscordAdminToolsSettings;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,5 +54,18 @@ public class DiscordWhitelistSyncSettings extends ExtensionSettings {
 
     public void removeValidRoleID(long chatID) {
         this.validRoles.remove(chatID);
+    }
+
+    @Override
+    public String toString() {
+        return "config{" +
+                "name='" + this.getName() + '\'' +
+                ", enabled=" + this.isEnabled() +
+                ", description='" + this.isEnabled() + '\'' +
+                ", notifyChannelID=" + notifyChannelID +
+                ", validRoles=" + validRoles +
+                ", groupID=" + groupID +
+                ", aggressive=" + aggressive +
+                '}';
     }
 }

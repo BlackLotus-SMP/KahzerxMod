@@ -1,6 +1,5 @@
 package com.kahzerx.kahzerxmod.extensions.joinMOTDExtension;
 
-import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.extensions.permsExtension.PermsLevels;
 import com.kahzerx.kahzerxmod.utils.MarkEnum;
 import com.mojang.brigadier.CommandDispatcher;
@@ -23,13 +22,13 @@ public class JoinMOTDCommand {
                         then(argument("message", MessageArgumentType.message()).
                                 executes(context -> {
                                     joinMOTD.updateMessage(context.getSource(), MessageArgumentType.getMessage(context, "message").getString());
-                                    ExtensionManager.saveSettings();
+                                    joinMOTD.getEm().saveSettings();
                                     return 1;
                                 }))).
                 then(literal("clear").
                         executes(context -> {
                             joinMOTD.extensionSettings().setMessage("");
-                            ExtensionManager.saveSettings();
+                            joinMOTD.getEm().saveSettings();
                             return 1;
                         })).
                 executes(context -> {

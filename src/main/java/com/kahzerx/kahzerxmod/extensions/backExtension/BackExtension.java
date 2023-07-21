@@ -1,5 +1,6 @@
 package com.kahzerx.kahzerxmod.extensions.backExtension;
 
+import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
@@ -17,11 +18,15 @@ import java.util.HashMap;
 public class BackExtension extends GenericExtension implements Extensions {
     private final HashMap<String, BackPos> playerBack = new HashMap<>();
     private Connection conn;
-    public final PermsExtension permsExtension;
+    public PermsExtension permsExtension;
 
-    public BackExtension(HashMap<String, String> fileSettings, PermsExtension perms) {
+    public BackExtension(HashMap<String, String> fileSettings) {
         super(new ExtensionSettings(fileSettings, "back", "/back command to tp to the last death position."));
-        this.permsExtension = perms;
+    }
+
+    @Override
+    public void onExtensionsReady(ExtensionManager em) {
+        this.permsExtension = (PermsExtension) em.getExtensions().get("perms");
     }
 
     @Override

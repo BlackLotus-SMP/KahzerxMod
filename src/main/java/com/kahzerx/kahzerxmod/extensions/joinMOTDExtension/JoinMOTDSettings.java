@@ -1,7 +1,5 @@
 package com.kahzerx.kahzerxmod.extensions.joinMOTDExtension;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 
 import java.util.HashMap;

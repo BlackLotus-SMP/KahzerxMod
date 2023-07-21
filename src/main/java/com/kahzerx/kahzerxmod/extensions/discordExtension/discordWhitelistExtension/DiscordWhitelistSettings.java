@@ -1,7 +1,6 @@
 package com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension;
 
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
-import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordSettings;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,5 +44,17 @@ public class DiscordWhitelistSettings extends ExtensionSettings {
 
     public void removeWhitelistChatID(long chatID) {
         this.whitelistChats.remove(chatID);
+    }
+
+    @Override
+    public String toString() {
+        return "config{" +
+                "name='" + this.getName() + '\'' +
+                ", enabled=" + this.isEnabled() +
+                ", description='" + this.isEnabled() + '\'' +
+                ", whitelistChats=" + whitelistChats +
+                ", discordRoleID=" + discordRoleID +
+                ", nPlayers=" + nPlayers +
+                '}';
     }
 }

@@ -1,5 +1,6 @@
 package com.kahzerx.kahzerxmod.extensions.randomTPExtension;
 
+import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
@@ -17,11 +18,15 @@ import java.util.HashMap;
 import java.util.Random;
 
 public class RandomTPExtension extends GenericExtension implements Extensions {
-    private final PermsExtension permsExtension;
+    private PermsExtension permsExtension;
 
-    public RandomTPExtension(HashMap<String, String> fileSettings, PermsExtension perms) {
+    public RandomTPExtension(HashMap<String, String> fileSettings) {
         super(new ExtensionSettings(fileSettings, "randomTP", "randomTP in a 10k block radius."));
-        this.permsExtension = perms;
+    }
+
+    @Override
+    public void onExtensionsReady(ExtensionManager em) {
+        this.permsExtension = (PermsExtension) em.getExtensions().get("perms");
     }
 
     @Override

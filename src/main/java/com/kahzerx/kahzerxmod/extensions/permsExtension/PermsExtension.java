@@ -1,6 +1,7 @@
 package com.kahzerx.kahzerxmod.extensions.permsExtension;
 
 import com.google.common.collect.Sets;
+import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
@@ -24,9 +25,13 @@ public class PermsExtension extends GenericExtension implements Extensions {
     private MinecraftServer minecraftServer;
     private MemberExtension memberExtension;
 
-    public PermsExtension(HashMap<String, String> fileSettings, MemberExtension memberExtension) {
+    public PermsExtension(HashMap<String, String> fileSettings) {
         super(new ExtensionSettings(fileSettings, "perms", "Permission levels for other commands like /back, /c or /modTP. Enables /kPerms command."));
-        this.memberExtension = memberExtension;
+    }
+
+    @Override
+    public void onExtensionsReady(ExtensionManager em) {
+        this.memberExtension = (MemberExtension) em.getExtensions().get("member");
     }
 
     @Override

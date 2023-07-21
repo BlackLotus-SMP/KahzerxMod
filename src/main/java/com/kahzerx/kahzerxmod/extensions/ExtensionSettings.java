@@ -17,6 +17,14 @@ public class ExtensionSettings {
         this.description = description;
     }
 
+    protected ExtensionSettings processFileSettings(String settings, Class<? extends ExtensionSettings> c) {
+        if (settings == null) {
+            return null;
+        }
+        Gson gson = new GsonBuilder().create();
+        return gson.fromJson(settings, c);
+    }
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -31,14 +39,6 @@ public class ExtensionSettings {
 
     public String getDescription() {
         return description;
-    }
-
-    protected ExtensionSettings processFileSettings(String settings, Class<? extends ExtensionSettings> c) {
-        if (settings == null) {
-            return null;
-        }
-        Gson gson = new GsonBuilder().create();
-        return gson.fromJson(settings, c);
     }
 
     @Override

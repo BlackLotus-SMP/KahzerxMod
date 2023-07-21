@@ -1,7 +1,6 @@
 package com.kahzerx.kahzerxmod.extensions.discordExtension.discordAdminToolsExtension;
 
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
-import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension.DiscordWhitelistSettings;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,5 +34,16 @@ public class DiscordAdminToolsSettings extends ExtensionSettings {
 
     public void removeAdminChatID(long chatID) {
         this.adminChats.remove(chatID);
+    }
+
+    @Override
+    public String toString() {
+        return "config{" +
+                "name='" + this.getName() + '\'' +
+                ", enabled=" + this.isEnabled() +
+                ", description='" + this.isEnabled() + '\'' +
+                ", adminChats=" + adminChats +
+                ", shouldFeedback=" + shouldFeedback +
+                '}';
     }
 }

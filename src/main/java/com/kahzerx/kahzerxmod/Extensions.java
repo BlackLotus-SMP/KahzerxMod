@@ -44,8 +44,7 @@ public interface Extensions extends Comparable<Extensions> {
     }
     default void settingsCommand(LiteralArgumentBuilder<ServerCommandSource> builder) {}
     ExtensionSettings extensionSettings();
-
-    // TODO probably onExtensionsReady()
+    default void onExtensionsReady(ExtensionManager em) {}
 
     @Override
     default int compareTo(Extensions extensions) {

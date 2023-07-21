@@ -1,5 +1,6 @@
 package com.kahzerx.kahzerxmod.extensions.joinMOTDExtension;
 
+import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.kahzerx.kahzerxmod.extensions.permsExtension.PermsExtension;
@@ -17,10 +18,16 @@ import java.util.HashMap;
 import java.util.List;
 
 public class JoinMOTDExtension extends GenericExtension implements Extensions {
-    public final PermsExtension permsExtension;
-    public JoinMOTDExtension(HashMap<String, String> fileSettings, PermsExtension permsExtension) {
+    public PermsExtension permsExtension;
+    private ExtensionManager em;
+    public JoinMOTDExtension(HashMap<String, String> fileSettings) {
         super(new JoinMOTDSettings(fileSettings, "joinMOTD", "Sends a custon message on player join."));
-        this.permsExtension = permsExtension;
+    }
+
+    @Override
+    public void onExtensionsReady(ExtensionManager em) {
+        this.permsExtension = (PermsExtension) em.getExtensions().get("perms");
+        this.em = em;
     }
 
     @Override
@@ -120,7 +127,7 @@ public class JoinMOTDExtension extends GenericExtension implements Extensions {
                 }
                 if (kv[0].strip().equals("click")) {
                     String click = kv[1].strip();
-                    msg.styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, click)));  // TODO check this...
+                    msg.styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, click)));
                 }
             }
         }
@@ -137,4 +144,8 @@ public class JoinMOTDExtension extends GenericExtension implements Extensions {
     }
 
     private record StyleData(int starts, int ends) { }
+
+    public ExtensionManager getEm() {
+        return em;
+    }
 }

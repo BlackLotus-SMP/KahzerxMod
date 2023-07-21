@@ -1,7 +1,5 @@
 package com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 
 import java.util.ArrayList;
@@ -90,7 +88,7 @@ public class DiscordSettings extends ExtensionSettings {
 
     @Override
     public String toString() {
-        return "DiscordSettings{" +
+        return "config{" +
                 "name='" + this.getName() + '\'' +
                 ", enabled=" + this.isEnabled() +
                 ", description='" + this.isEnabled() + '\'' +

@@ -1,5 +1,6 @@
 package com.kahzerx.kahzerxmod.extensions.cameraExtension;
 
+import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
@@ -15,16 +16,20 @@ import net.minecraft.world.GameMode;
 import java.util.HashMap;
 
 public class CameraExtension extends GenericExtension implements Extensions {
-    public final PermsExtension permsExtension;
+    public PermsExtension permsExtension;
 
-    public CameraExtension(HashMap<String, String> fileSettings, PermsExtension perms) {
+    public CameraExtension(HashMap<String, String> fileSettings) {
         super(new ExtensionSettings(fileSettings, "camera", "/c, spectator + night vision + conduit (stolen from carpet)."));
-        this.permsExtension = perms;
     }
 
     @Override
     public void onRegisterCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
         new CameraCommand().register(dispatcher, this);
+    }
+
+    @Override
+    public void onExtensionsReady(ExtensionManager em) {
+        this.permsExtension = (PermsExtension) em.getExtensions().get("perms");
     }
 
     @Override

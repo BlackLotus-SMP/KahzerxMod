@@ -1,5 +1,6 @@
 package com.kahzerx.kahzerxmod.extensions.shopExtension;
 
+import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
@@ -27,13 +28,17 @@ public class ShopExtension extends GenericExtension implements Extensions {
     private final Parcels parcels = new Parcels();
     private ShopDatabase db = new ShopDatabase();
     private MinecraftServer server;
-    private final PermsExtension permsExtension;
+    private PermsExtension permsExtension;
     private Timer timer;
     public static boolean isExtensionEnabled = false;
 
-    public ShopExtension(HashMap<String, String> fileSettings, PermsExtension permsExtension) {
+    public ShopExtension(HashMap<String, String> fileSettings) {
         super(new ExtensionSettings(fileSettings, "shop", "Enables currency system along with shop commands and helpers."));
-        this.permsExtension = permsExtension;
+    }
+
+    @Override
+    public void onExtensionsReady(ExtensionManager em) {
+        this.permsExtension = (PermsExtension) em.getExtensions().get("perms");
     }
 
     @Override
