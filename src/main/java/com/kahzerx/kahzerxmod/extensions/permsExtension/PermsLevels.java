@@ -2,6 +2,7 @@ package com.kahzerx.kahzerxmod.extensions.permsExtension;
 
 import java.util.Locale;
 
+// TODO customize
 public enum PermsLevels {
     TEST_MEMBER(1, "TEST_MEMBER"),
     MEMBER(2, "MEMBER"),
