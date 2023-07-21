@@ -18,10 +18,10 @@ public class SpoofCommand {
                         then(CommandManager.literal("enderChest").
                                 executes(context -> spoof.spoofEC(
                                         context.getSource(),
-                                        StringArgumentType.getString(context, "player")))).
-                        then(CommandManager.literal("inventory").
+                                        StringArgumentType.getString(context, "player"))))
+                        /* then(CommandManager.literal("inventory"). // TODO either fix the player interaction or disable completely as in readonly
                                 executes(context -> spoof.spoofInv(
                                         context.getSource(),
-                                        StringArgumentType.getString(context, "player"))))));
+                                        StringArgumentType.getString(context, "player"))))*/));
     }
 }

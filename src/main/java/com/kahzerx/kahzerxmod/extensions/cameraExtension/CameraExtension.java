@@ -1,5 +1,6 @@
 package com.kahzerx.kahzerxmod.extensions.cameraExtension;
 
+import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
@@ -12,12 +13,13 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.GameMode;
 
-public class CameraExtension extends GenericExtension implements Extensions {
-    public final PermsExtension permsExtension;
+import java.util.HashMap;
 
-    public CameraExtension(ExtensionSettings settings, PermsExtension permsExtension) {
-        super(settings);
-        this.permsExtension = permsExtension;
+public class CameraExtension extends GenericExtension implements Extensions {
+    public PermsExtension permsExtension;
+
+    public CameraExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "camera", "/c, spectator + night vision + conduit (stolen from carpet)."));
     }
 
     @Override
@@ -26,30 +28,23 @@ public class CameraExtension extends GenericExtension implements Extensions {
     }
 
     @Override
+    public void onExtensionsReady(ExtensionManager em) {
+        this.permsExtension = (PermsExtension) em.getExtensions().get("perms");
+    }
+
+    @Override
     public ExtensionSettings extensionSettings() {
         return this.getSettings();
     }
 
-    public int setCameraMode(ServerCommandSource src) throws CommandSyntaxException {
+    public int setCameraMode(ServerCommandSource src) {
         ServerPlayerEntity player = src.getPlayer();
         if (player == null) {
             return 1;
         }
         player.changeGameMode(GameMode.SPECTATOR);
-        player.addStatusEffect(new StatusEffectInstance(
-                StatusEffects.NIGHT_VISION,
-                999999,
-                0,
-                false,
-                false
-        ));
-        player.addStatusEffect(new StatusEffectInstance(
-                StatusEffects.CONDUIT_POWER,
-                999999,
-                0,
-                false,
-                false
-        ));
+        player.addStatusEffect(new StatusEffectInstance(StatusEffects.NIGHT_VISION, 999999, 0, false, false));
+        player.addStatusEffect(new StatusEffectInstance(StatusEffects.CONDUIT_POWER, 999999, 0, false, false));
         return 1;
     }
 }

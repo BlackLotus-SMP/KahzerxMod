@@ -13,20 +13,34 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Timer;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class DiscordWhitelistSyncExtension extends GenericExtension implements Extensions {
-    private final DiscordExtension discordExtension;
-    private final DiscordWhitelistExtension discordWhitelistExtension;
+    private DiscordExtension discordExtension;
+    private DiscordWhitelistExtension discordWhitelistExtension;
+
+    private ExtensionManager em = null;
+
     private Timer timer;
 
-    public DiscordWhitelistSyncExtension(ExtensionSettings settings, DiscordExtension discordExtension, DiscordWhitelistExtension discordWhitelistExtension) {
-        super(settings);
-        this.discordExtension = discordExtension;
-        this.discordWhitelistExtension = discordWhitelistExtension;
+    public DiscordWhitelistSyncExtension(HashMap<String, String> fileSettings) {
+        super(new DiscordWhitelistSyncSettings(fileSettings, "discordWhitelistSync", "Check if people that did !add have a given discord role, if not they will get automatically removed from whitelist, useful for sub twitch role. The groupID is the ID of the discord server/guild. The aggressive mode will force whitelist and discord database have the same users so any player added with /whitelist add will get removed on autosave."));
+    }
+
+    @Override
+    public void onExtensionsReady(ExtensionManager em) {
+        this.em = em;
+        this.discordExtension = (DiscordExtension) em.getExtensions().get("discord");
+        this.discordWhitelistExtension = (DiscordWhitelistExtension) em.getExtensions().get("discordWhitelist");
+        if (this.extensionSettings().isEnabled() && (!this.discordExtension.extensionSettings().isEnabled() || !this.discordWhitelistExtension.extensionSettings().isEnabled())) {
+            this.extensionSettings().setEnabled(false);
+            em.saveSettings();
+        }
     }
 
     @Override
@@ -66,7 +80,7 @@ public class DiscordWhitelistSyncExtension extends GenericExtension implements E
                                 executes(context -> {
                                     extensionSettings().setNotifyChannelID(LongArgumentType.getLong(context, "chatID"));
                                     context.getSource().sendFeedback(() -> Text.literal("[notifyChatID] > " + extensionSettings().getNotifyChannelID() + "."), false);
-                                    ExtensionManager.saveSettings();
+                                    this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
@@ -80,7 +94,7 @@ public class DiscordWhitelistSyncExtension extends GenericExtension implements E
                                 executes(context -> {
                                     extensionSettings().setGroupID(LongArgumentType.getLong(context, "groupID"));
                                     context.getSource().sendFeedback(() -> Text.literal("[groupID] > " + extensionSettings().getGroupID() + "."), false);
-                                    ExtensionManager.saveSettings();
+                                    this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
@@ -94,7 +108,7 @@ public class DiscordWhitelistSyncExtension extends GenericExtension implements E
                                 executes(context -> {
                                     extensionSettings().setAggressive(BoolArgumentType.getBool(context, "aggressive"));
                                     context.getSource().sendFeedback(() -> Text.literal("[aggressive] > " + extensionSettings().isAggressive() + "."), false);
-                                    ExtensionManager.saveSettings();
+                                    this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
@@ -112,7 +126,7 @@ public class DiscordWhitelistSyncExtension extends GenericExtension implements E
                                             } else {
                                                 extensionSettings().addValidRoleID(LongArgumentType.getLong(context, "roleID"));
                                                 context.getSource().sendFeedback(() -> Text.literal("ID added."), false);
-                                                ExtensionManager.saveSettings();
+                                                this.em.saveSettings();
                                             }
                                             return 1;
                                         }))).
@@ -122,7 +136,7 @@ public class DiscordWhitelistSyncExtension extends GenericExtension implements E
                                             if (extensionSettings().getValidRoles().contains(LongArgumentType.getLong(context, "roleID"))) {
                                                 extensionSettings().removeValidRoleID(LongArgumentType.getLong(context, "roleID"));
                                                 context.getSource().sendFeedback(() -> Text.literal("ID removed."), false);
-                                                ExtensionManager.saveSettings();
+                                                this.em.saveSettings();
                                             } else {
                                                 context.getSource().sendFeedback(() -> Text.literal("This ID doesn't exist."), false);
                                             }

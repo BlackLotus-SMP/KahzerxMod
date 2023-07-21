@@ -1,14 +1,28 @@
 package com.kahzerx.kahzerxmod.extensions;
 
-public class ExtensionSettings {
-    private String name;
-    private boolean enabled;
-    private String description;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
-    public ExtensionSettings(String name, boolean enabled, String description) {
+import java.util.HashMap;
+
+public class ExtensionSettings {
+    private final String name;
+    private boolean enabled;
+    private final String description;
+
+    public ExtensionSettings(HashMap<String, String> fileSettings, String name, String description) {
+        ExtensionSettings file = this.processFileSettings(fileSettings.getOrDefault(name, null), this.getClass());
         this.name = name;
-        this.enabled = enabled;
+        this.enabled = file != null && file.isEnabled();
         this.description = description;
+    }
+
+    protected ExtensionSettings processFileSettings(String settings, Class<? extends ExtensionSettings> c) {
+        if (settings == null) {
+            return null;
+        }
+        Gson gson = new GsonBuilder().create();
+        return gson.fromJson(settings, c);
     }
 
     public boolean isEnabled() {

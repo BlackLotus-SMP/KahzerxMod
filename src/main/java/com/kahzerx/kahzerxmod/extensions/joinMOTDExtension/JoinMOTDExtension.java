@@ -1,5 +1,6 @@
 package com.kahzerx.kahzerxmod.extensions.joinMOTDExtension;
 
+import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.kahzerx.kahzerxmod.extensions.permsExtension.PermsExtension;
@@ -13,13 +14,20 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class JoinMOTDExtension extends GenericExtension implements Extensions {
-    public final PermsExtension permsExtension;
-    public JoinMOTDExtension(JoinMOTDSettings settings, PermsExtension permsExtension) {
-        super(settings);
-        this.permsExtension = permsExtension;
+    public PermsExtension permsExtension;
+    private ExtensionManager em;
+    public JoinMOTDExtension(HashMap<String, String> fileSettings) {
+        super(new JoinMOTDSettings(fileSettings, "joinMOTD", "Sends a custon message on player join."));
+    }
+
+    @Override
+    public void onExtensionsReady(ExtensionManager em) {
+        this.permsExtension = (PermsExtension) em.getExtensions().get("perms");
+        this.em = em;
     }
 
     @Override
@@ -42,32 +50,28 @@ public class JoinMOTDExtension extends GenericExtension implements Extensions {
 
     public MutableText getFormatted(String message) {
         // /joinMOTD set awdawd [%1awdawd1]{click=/say a} \n[awdawd test]{display=test} a [%dawdawd1]{display=test2,click=/say a} a
-        message = message.replace('%', '\u00a7');
+        message = message.replace('%', '§');
         message = message.replace("\\n", "\n");
         List<StyleData> styled = new ArrayList<>();
         List<StyleData> styles = new ArrayList<>();
-        int posAtStyleOpen = -1;
         int posAtStyledOpen = -1;
+        int posAtStyleOpen = -1;
 
         for (int i = 0; i < message.length(); i++) {
             if (message.charAt(i) == '[') {
                 posAtStyledOpen = i;
             }
-            if (message.charAt(i) == ']') {
-                if (posAtStyledOpen != -1) {
-                    styled.add(new StyleData(posAtStyledOpen, i));
-                    posAtStyledOpen = -1;
-                }
+            if (message.charAt(i) == ']' && posAtStyledOpen != -1) {
+                styled.add(new StyleData(posAtStyledOpen, i));
+                posAtStyledOpen = -1;
             }
 
             if (message.charAt(i) == '{') {
                 posAtStyleOpen = i;
             }
-            if (message.charAt(i) == '}') {
-                if (posAtStyleOpen != -1) {
-                    styles.add(new StyleData(posAtStyleOpen, i));
-                    posAtStyleOpen = -1;
-                }
+            if (message.charAt(i) == '}' && posAtStyleOpen != -1) {
+                styles.add(new StyleData(posAtStyleOpen, i));
+                posAtStyleOpen = -1;
             }
         }
 
@@ -78,6 +82,7 @@ public class JoinMOTDExtension extends GenericExtension implements Extensions {
                 if (style_t.ends() + 1 == style_t2.starts()) {
                     correctStyled.add(style_t);
                     correctStyles.add(style_t2);
+                    break;
                 }
             }
         }
@@ -138,5 +143,9 @@ public class JoinMOTDExtension extends GenericExtension implements Extensions {
         return permsExtension;
     }
 
-    record StyleData(int starts, int ends) { }
+    private record StyleData(int starts, int ends) { }
+
+    public ExtensionManager getEm() {
+        return em;
+    }
 }

@@ -5,11 +5,13 @@ import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import net.minecraft.server.MinecraftServer;
 
+import java.util.HashMap;
+
 public class EndermanNoGriefExtension extends GenericExtension implements Extensions {
     public static boolean isExtensionEnabled = false;
 
-    public EndermanNoGriefExtension(ExtensionSettings settings) {
-        super(settings);
+    public EndermanNoGriefExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "endermanNoGrief", "Prevents endermans to pickup or place blocks (this will break enderman based farms)."));
     }
 
     @Override

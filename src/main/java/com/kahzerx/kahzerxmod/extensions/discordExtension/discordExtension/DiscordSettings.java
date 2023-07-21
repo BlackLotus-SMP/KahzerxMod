@@ -2,6 +2,8 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension;
 
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class DiscordSettings extends ExtensionSettings {
@@ -12,15 +14,16 @@ public class DiscordSettings extends ExtensionSettings {
     private long chatChannelID;
     private List<Long> allowedChats;
     private boolean shouldFeedback;
-    public DiscordSettings(String name, boolean enabled, String description, String token, boolean crossServerChat, String prefix, boolean running, long chatChannelID, List<Long> allowedChats, boolean shouldFeedback) {
-        super(name, enabled, description);
-        this.token = token;
-        this.crossServerChat = crossServerChat;
-        this.prefix = prefix;
-        this.running = running;
-        this.chatChannelID = chatChannelID;
-        this.allowedChats = allowedChats;
-        this.shouldFeedback = shouldFeedback;
+    public DiscordSettings(HashMap<String, String> fileSettings, String name, String description) {
+        super(fileSettings, name, description);
+        DiscordSettings file = (DiscordSettings) this.processFileSettings(fileSettings.getOrDefault(name, null), this.getClass());
+        this.token = file != null && file.getToken() != null ? file.getToken() : "";
+        this.crossServerChat = file != null && file.isCrossServerChat();
+        this.prefix = file != null && file.getPrefix() != null ? file.getPrefix() : "";  // TODO old ver: replaceAll(" ", "_") why
+        this.running = file != null && file.isRunning();
+        this.chatChannelID = file != null ? file.getChatChannelID() : 0L;
+        this.allowedChats = file != null && file.getAllowedChats() != null ? file.getAllowedChats() : new ArrayList<>();
+        this.shouldFeedback = file != null && file.isShouldFeedback();
     }
 
     public boolean isShouldFeedback() {
@@ -81,5 +84,21 @@ public class DiscordSettings extends ExtensionSettings {
 
     public void removeAllowedChatID(long chatID) {
         this.allowedChats.remove(chatID);
+    }
+
+    @Override
+    public String toString() {
+        return "config{" +
+                "name='" + this.getName() + '\'' +
+                ", enabled=" + this.isEnabled() +
+                ", description='" + this.isEnabled() + '\'' +
+                ", token='" + token + '\'' +
+                ", crossServerChat=" + crossServerChat +
+                ", prefix='" + prefix + '\'' +
+                ", running=" + running +
+                ", chatChannelID=" + chatChannelID +
+                ", allowedChats=" + allowedChats +
+                ", shouldFeedback=" + shouldFeedback +
+                '}';
     }
 }

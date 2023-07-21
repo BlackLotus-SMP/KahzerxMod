@@ -18,8 +18,8 @@ public class PrankExtension extends GenericExtension implements Extensions {
     private Connection conn;
     private MinecraftServer server;
 
-    public PrankExtension(ExtensionSettings settings) {
-        super(settings);
+    public PrankExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "pranks", "Sets a prank level on your name."));
     }
 
     @Override

@@ -7,11 +7,13 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 
+import java.util.HashMap;
+
 public class SlabExtension extends GenericExtension implements Extensions {
     public static boolean isExtensionEnabled = false;
 
-    public SlabExtension(ExtensionSettings settings) {
-        super(settings);
+    public SlabExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "slab", "Enchants the slab on your main hand with the /slab command so you can always place the upper slab."));
     }
 
     @Override

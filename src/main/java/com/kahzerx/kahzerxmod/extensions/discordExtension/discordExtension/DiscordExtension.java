@@ -18,12 +18,21 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
+import java.util.HashMap;
+
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class DiscordExtension extends GenericExtension implements Extensions {
-    public DiscordExtension(DiscordSettings settings) {
-        super(settings);
+    private ExtensionManager em = null;
+
+    public DiscordExtension(HashMap<String, String> fileSettings) {
+        super(new DiscordSettings(fileSettings, "discord", "Connects minecraft chat + some events with a discord chat (chatbridge). Prefix is necessary if you want crossServerChat to work properly and not having duplicated messages."));
+    }
+
+    @Override
+    public void onExtensionsReady(ExtensionManager em) {
+        this.em = em;
     }
 
     @Override
@@ -33,7 +42,7 @@ public class DiscordExtension extends GenericExtension implements Extensions {
         }
         if (extensionSettings().getPrefix().equals("")) {
             extensionSettings().setCrossServerChat(false);
-            ExtensionManager.saveSettings();
+            this.em.saveSettings();
         }
         DiscordListener.start(minecraftServer, extensionSettings().getToken(), String.valueOf(extensionSettings().getChatChannelID()), this);
     }
@@ -50,6 +59,7 @@ public class DiscordExtension extends GenericExtension implements Extensions {
         }
     }
 
+    // TODO messages with translation keys
     @Override
     public void onPlayerJoined(ServerPlayerEntity player) {
         boolean isBot = player.getClass() == KlonePlayerEntity.class;
@@ -113,6 +123,7 @@ public class DiscordExtension extends GenericExtension implements Extensions {
         PlayerUtils.reloadCommands();
     }
 
+    // TODO ugly prints...
     @Override
     public void settingsCommand(LiteralArgumentBuilder<ServerCommandSource> builder) {
         builder.
@@ -126,7 +137,7 @@ public class DiscordExtension extends GenericExtension implements Extensions {
                                                 extensionSettings().setToken(StringArgumentType.getString(context, "token"));
                                                 extensionSettings().setChatChannelID(LongArgumentType.getLong(context, "chatChannelID"));
                                                 context.getSource().sendFeedback(() -> Text.literal("Done!"), false);
-                                                ExtensionManager.saveSettings();
+                                                this.em.saveSettings();
                                             }
                                             return 1;
                                         })))).
@@ -136,7 +147,7 @@ public class DiscordExtension extends GenericExtension implements Extensions {
                                 DiscordListener.stop();
                                 this.extensionSettings().setRunning(false);
                                 context.getSource().sendFeedback(() -> Text.literal("Bot stopped!"), false);
-                                ExtensionManager.saveSettings();
+                                this.em.saveSettings();
                             } else {
                                 context.getSource().sendFeedback(() -> Text.literal("Bot already stopped."), false);
                             }
@@ -151,7 +162,7 @@ public class DiscordExtension extends GenericExtension implements Extensions {
                                 } else {
                                     context.getSource().sendFeedback(() -> Text.literal("Failed to start."), false);
                                 }
-                                ExtensionManager.saveSettings();
+                                this.em.saveSettings();
                             } else {
                                 context.getSource().sendFeedback(() -> Text.literal("But is already running."), false);
                             }
@@ -162,7 +173,7 @@ public class DiscordExtension extends GenericExtension implements Extensions {
                                 executes(context -> {
                                     extensionSettings().setShouldFeedback(BoolArgumentType.getBool(context, "feedback"));
                                     context.getSource().sendFeedback(() -> Text.literal("[shouldFeedback] > " + extensionSettings().isShouldFeedback() + "."), false);
-                                    ExtensionManager.saveSettings();
+                                    this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
@@ -174,7 +185,7 @@ public class DiscordExtension extends GenericExtension implements Extensions {
                                 executes(context -> {
                                     extensionSettings().setPrefix(StringArgumentType.getString(context, "prefix"));
                                     context.getSource().sendFeedback(() -> Text.literal("[Prefix] > " + extensionSettings().getPrefix() + "."), false);
-                                    ExtensionManager.saveSettings();
+                                    this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
@@ -193,7 +204,7 @@ public class DiscordExtension extends GenericExtension implements Extensions {
                                     }
                                     extensionSettings().setCrossServerChat(BoolArgumentType.getBool(context, "enabled"));
                                     context.getSource().sendFeedback(() -> Text.literal("[CrossServerChat] > " + extensionSettings().isCrossServerChat() + "."), false);
-                                    ExtensionManager.saveSettings();
+                                    this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
@@ -211,7 +222,7 @@ public class DiscordExtension extends GenericExtension implements Extensions {
                                             } else {
                                                 extensionSettings().addAllowedChatID(LongArgumentType.getLong(context, "chatID"));
                                                 context.getSource().sendFeedback(() -> Text.literal("ID added."), false);
-                                                ExtensionManager.saveSettings();
+                                                this.em.saveSettings();
                                             }
                                             return 1;
                                         }))).
@@ -221,7 +232,7 @@ public class DiscordExtension extends GenericExtension implements Extensions {
                                             if (extensionSettings().getAllowedChats().contains(LongArgumentType.getLong(context, "chatID"))) {
                                                 extensionSettings().removeAllowedChatID(LongArgumentType.getLong(context, "chatID"));
                                                 context.getSource().sendFeedback(() -> Text.literal("ID removed."), false);
-                                                ExtensionManager.saveSettings();
+                                                this.em.saveSettings();
                                             } else {
                                                 context.getSource().sendFeedback(() -> Text.literal("This ID doesn't exist."), false);
                                             }

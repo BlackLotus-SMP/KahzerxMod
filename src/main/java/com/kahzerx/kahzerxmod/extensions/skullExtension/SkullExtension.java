@@ -6,9 +6,11 @@ import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.server.command.ServerCommandSource;
 
+import java.util.HashMap;
+
 public class SkullExtension extends GenericExtension implements Extensions {
-    public SkullExtension(ExtensionSettings settings) {
-        super(settings);
+    public SkullExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "skull", "Gives player heads."));
     }
 
     @Override

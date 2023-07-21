@@ -2,7 +2,6 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension.discordAdminToolsExte
 
 import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.Extensions;
-import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordCommandsExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordListener;
@@ -21,22 +20,35 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 
+import java.util.HashMap;
+
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class DiscordAdminToolsExtension extends GenericExtension implements Extensions, DiscordCommandsExtension {
-    private final DiscordExtension discordExtension;
-    private final DiscordWhitelistExtension discordWhitelistExtension;
+    private DiscordExtension discordExtension;
+    private DiscordWhitelistExtension discordWhitelistExtension;
+
+    private ExtensionManager em = null;
 
     private final BanCommand banCommand = new BanCommand(DiscordListener.commandPrefix);
     private final PardonCommand pardonCommand = new PardonCommand(DiscordListener.commandPrefix);
     private final ExaddCommand exaddCommand = new ExaddCommand(DiscordListener.commandPrefix);
     private final ExremoveCommand exremoveCommand = new ExremoveCommand(DiscordListener.commandPrefix);
 
-    public DiscordAdminToolsExtension(ExtensionSettings settings, DiscordExtension discordExtension, DiscordWhitelistExtension discordWhitelistExtension) {
-        super(settings);
-        this.discordExtension = discordExtension;
-        this.discordWhitelistExtension = discordWhitelistExtension;
+    public DiscordAdminToolsExtension(HashMap<String, String> fileSettings) {
+        super(new DiscordAdminToolsSettings(fileSettings, "discordAdminTools", "Enables !ban, !pardon, !exadd, !exremove on discord AdminChats."));
+    }
+
+    @Override
+    public void onExtensionsReady(ExtensionManager em) {
+        this.em = em;
+        this.discordWhitelistExtension = (DiscordWhitelistExtension) em.getExtensions().get("discordWhitelist");
+        this.discordExtension = (DiscordExtension) em.getExtensions().get("discord");
+        if (this.extensionSettings().isEnabled() && (!this.discordWhitelistExtension.extensionSettings().isEnabled() || !this.discordExtension.extensionSettings().isEnabled())) {
+            this.extensionSettings().setEnabled(false);
+            em.saveSettings();
+        }
     }
 
     public DiscordExtension getDiscordExtension() {
@@ -109,6 +121,7 @@ public class DiscordAdminToolsExtension extends GenericExtension implements Exte
         return false;
     }
 
+    // TODO refactor prints
     @Override
     public void settingsCommand(LiteralArgumentBuilder<ServerCommandSource> builder) {
         builder.
@@ -117,7 +130,7 @@ public class DiscordAdminToolsExtension extends GenericExtension implements Exte
                                 executes(context -> {
                                     extensionSettings().setShouldFeedback(BoolArgumentType.getBool(context, "feedback"));
                                     context.getSource().sendFeedback(() -> Text.literal("[shouldFeedback] > " + extensionSettings().isShouldFeedback() + "."), false);
-                                    ExtensionManager.saveSettings();
+                                    this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
@@ -133,7 +146,7 @@ public class DiscordAdminToolsExtension extends GenericExtension implements Exte
                                             } else {
                                                 extensionSettings().addAdminChatID(LongArgumentType.getLong(context, "chatID"));
                                                 context.getSource().sendFeedback(() -> Text.literal("ID added."), false);
-                                                ExtensionManager.saveSettings();
+                                                this.em.saveSettings();
                                             }
                                             return 1;
                                         }))).
@@ -143,7 +156,7 @@ public class DiscordAdminToolsExtension extends GenericExtension implements Exte
                                             if (extensionSettings().getAdminChats().contains(LongArgumentType.getLong(context, "chatID"))) {
                                                 extensionSettings().removeAdminChatID(LongArgumentType.getLong(context, "chatID"));
                                                 context.getSource().sendFeedback(() -> Text.literal("ID removed."), false);
-                                                ExtensionManager.saveSettings();
+                                                this.em.saveSettings();
                                             } else {
                                                 context.getSource().sendFeedback(() -> Text.literal("This ID doesn't exist."), false);
                                             }

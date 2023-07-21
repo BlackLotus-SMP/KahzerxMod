@@ -51,8 +51,8 @@ public class SolExtension extends GenericExtension implements Extensions {
     private static final ItemStack PINK_LEMONADE;
     private static final ItemStack TODOROKI;
     private static final ItemStack FIJI;
-    public SolExtension(ExtensionSettings settings) {
-        super(settings);
+    public SolExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "sol", "Waifu!"));
     }
 
     static {

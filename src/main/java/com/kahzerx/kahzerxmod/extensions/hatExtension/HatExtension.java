@@ -6,9 +6,11 @@ import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.server.command.ServerCommandSource;
 
+import java.util.HashMap;
+
 public class HatExtension extends GenericExtension implements Extensions {
-    public HatExtension(ExtensionSettings settings) {
-        super(settings);
+    public HatExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "hat", "Puts whatever item you have in the main hand on your head."));
     }
 
     @Override

@@ -6,9 +6,11 @@ import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.server.command.ServerCommandSource;
 
+import java.util.HashMap;
+
 public class BocaExtension extends GenericExtension implements Extensions {
-    public BocaExtension(ExtensionSettings settings) {
-        super(settings);
+    public BocaExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "boca", "Enables /boca & /boquita command."));
     }
 
     @Override

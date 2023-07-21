@@ -2,6 +2,8 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistSyncE
 
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class DiscordWhitelistSyncSettings extends ExtensionSettings {
@@ -9,12 +11,13 @@ public class DiscordWhitelistSyncSettings extends ExtensionSettings {
     private List<Long> validRoles;
     private long groupID;
     private boolean aggressive;
-    public DiscordWhitelistSyncSettings(String name, boolean enabled, String description, long notifyChannelID, List<Long> validRoles, long groupID, boolean aggressive) {
-        super(name, enabled, description);
-        this.notifyChannelID = notifyChannelID;
-        this.validRoles = validRoles;
-        this.groupID = groupID;
-        this.aggressive = aggressive;
+    public DiscordWhitelistSyncSettings(HashMap<String, String> fileSettings, String name, String description) {
+        super(fileSettings, name, description);
+        DiscordWhitelistSyncSettings file = (DiscordWhitelistSyncSettings) this.processFileSettings(fileSettings.getOrDefault(name, null), this.getClass());
+        this.notifyChannelID = file != null ? file.getNotifyChannelID() : 0L;
+        this.validRoles = file != null && file.getValidRoles() != null ? file.getValidRoles() : new ArrayList<>();
+        this.groupID = file != null ? file.getGroupID() : 0L;
+        this.aggressive = file != null && file.isAggressive();
     }
 
     public List<Long> getValidRoles() {
@@ -51,5 +54,18 @@ public class DiscordWhitelistSyncSettings extends ExtensionSettings {
 
     public void removeValidRoleID(long chatID) {
         this.validRoles.remove(chatID);
+    }
+
+    @Override
+    public String toString() {
+        return "config{" +
+                "name='" + this.getName() + '\'' +
+                ", enabled=" + this.isEnabled() +
+                ", description='" + this.isEnabled() + '\'' +
+                ", notifyChannelID=" + notifyChannelID +
+                ", validRoles=" + validRoles +
+                ", groupID=" + groupID +
+                ", aggressive=" + aggressive +
+                '}';
     }
 }

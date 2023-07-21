@@ -15,6 +15,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 
 public class BlockInfoExtension extends GenericExtension implements Extensions {
@@ -22,8 +23,8 @@ public class BlockInfoExtension extends GenericExtension implements Extensions {
 
     public static final ArrayBlockingQueue<BlockActionLog> queue = new ArrayBlockingQueue<>(10_000);
     private BlockInfoLoggerThread logger = new BlockInfoLoggerThread("BLOCKINFO", this);
-    public BlockInfoExtension(ExtensionSettings settings) {
-        super(settings);
+    public BlockInfoExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "blockInfo", "Player action logging and /blockInfo command."));
     }
 
     @Override

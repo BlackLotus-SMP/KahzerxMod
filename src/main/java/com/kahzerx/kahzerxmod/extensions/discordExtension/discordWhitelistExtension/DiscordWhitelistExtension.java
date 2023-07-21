@@ -28,6 +28,7 @@ import net.minecraft.text.Text;
 import java.awt.*;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -35,19 +36,30 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class DiscordWhitelistExtension extends GenericExtension implements Extensions, DiscordCommandsExtension {
-    private final DiscordExtension discordExtension;
+    private DiscordExtension discordExtension;
     private Connection conn;
 
     public static boolean isExtensionEnabled = false;
+
+    private ExtensionManager em = null;
 
     private final AddCommand addCommand = new AddCommand(DiscordListener.commandPrefix);
     private final RemoveCommand removeCommand = new RemoveCommand(DiscordListener.commandPrefix);
     private final ListCommand listCommand = new ListCommand(DiscordListener.commandPrefix);
     private final InfoCommand infoCommand = new InfoCommand(DiscordListener.commandPrefix);
 
-    public DiscordWhitelistExtension(DiscordWhitelistSettings settings, DiscordExtension discordExtension) {
-        super(settings);
-        this.discordExtension = discordExtension;
+    public DiscordWhitelistExtension(HashMap<String, String> fileSettings) {
+        super(new DiscordWhitelistSettings(fileSettings, "discordWhitelist", "Enables !list, !add and !remove commands along with nPlayers that specifies how many minecraft players a discord user can add; There is also an optional discordRole that will be given to the discord user on !add and deleted on !remove."));
+    }
+
+    @Override
+    public void onExtensionsReady(ExtensionManager em) {
+        this.em = em;
+        this.discordExtension = (DiscordExtension) em.getExtensions().get("discord");
+        if (this.extensionSettings().isEnabled() && !this.discordExtension.extensionSettings().isEnabled()) {
+            this.extensionSettings().setEnabled(false);
+            em.saveSettings();
+        }
     }
 
     public DiscordExtension getDiscordExtension() {
@@ -414,6 +426,7 @@ public class DiscordWhitelistExtension extends GenericExtension implements Exten
         return false;
     }
 
+    // TODO refactor
     @Override
     public void settingsCommand(LiteralArgumentBuilder<ServerCommandSource> builder) {
         builder.
@@ -422,7 +435,7 @@ public class DiscordWhitelistExtension extends GenericExtension implements Exten
                                 executes(context -> {
                                     extensionSettings().setDiscordRoleID(LongArgumentType.getLong(context, "discordRoleID"));
                                     context.getSource().sendFeedback(() -> Text.literal("[discordRole] > " + extensionSettings().getDiscordRole() + "."), false);
-                                    ExtensionManager.saveSettings();
+                                    this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
@@ -436,7 +449,7 @@ public class DiscordWhitelistExtension extends GenericExtension implements Exten
                                 executes(context -> {
                                     extensionSettings().setNPlayers(IntegerArgumentType.getInteger(context, "nPlayers"));
                                     context.getSource().sendFeedback(() -> Text.literal("[players] > " + extensionSettings().getNPlayers() + "."), false);
-                                    ExtensionManager.saveSettings();
+                                    this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
@@ -454,7 +467,7 @@ public class DiscordWhitelistExtension extends GenericExtension implements Exten
                                             } else {
                                                 extensionSettings().addWhitelistChatID(LongArgumentType.getLong(context, "chatID"));
                                                 context.getSource().sendFeedback(() -> Text.literal("ID added."), false);
-                                                ExtensionManager.saveSettings();
+                                                this.em.saveSettings();
                                             }
                                             return 1;
                                         }))).
@@ -464,7 +477,7 @@ public class DiscordWhitelistExtension extends GenericExtension implements Exten
                                             if (extensionSettings().getWhitelistChats().contains(LongArgumentType.getLong(context, "chatID"))) {
                                                 extensionSettings().removeWhitelistChatID(LongArgumentType.getLong(context, "chatID"));
                                                 context.getSource().sendFeedback(() -> Text.literal("ID removed."), false);
-                                                ExtensionManager.saveSettings();
+                                                this.em.saveSettings();
                                             } else {
                                                 context.getSource().sendFeedback(() -> Text.literal("This ID doesn't exist."), false);
                                             }

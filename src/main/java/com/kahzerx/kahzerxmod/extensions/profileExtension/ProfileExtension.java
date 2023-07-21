@@ -1,5 +1,6 @@
 package com.kahzerx.kahzerxmod.extensions.profileExtension;
 
+import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
@@ -19,12 +20,17 @@ import net.minecraft.util.math.Direction;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 
+// TODO maybe customizable?
 public class ProfileExtension extends GenericExtension implements Extensions {
     public static HashMap<ServerPlayerEntity, GuiPlayer> guis = new HashMap<>();
-    private final ShopExtension shopExtension;
-    public ProfileExtension(ExtensionSettings settings, ShopExtension shopExtension) {
-        super(settings);
-        this.shopExtension = shopExtension;
+    private ShopExtension shopExtension;
+    public ProfileExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "profile", "Enables the /kProfile command."));
+    }
+
+    @Override
+    public void onExtensionsReady(ExtensionManager em) {
+        this.shopExtension = (ShopExtension) em.getExtensions().get("shop");
     }
 
     @Override

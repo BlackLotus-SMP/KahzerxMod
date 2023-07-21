@@ -1,5 +1,6 @@
 package com.kahzerx.kahzerxmod.extensions.whereExtension;
 
+import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
@@ -7,12 +8,18 @@ import com.kahzerx.kahzerxmod.extensions.permsExtension.PermsExtension;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.server.command.ServerCommandSource;
 
-public class WhereExtension extends GenericExtension implements Extensions {
-    private final PermsExtension permsExtension;
+import java.util.HashMap;
 
-    public WhereExtension(ExtensionSettings settings, PermsExtension perms) {
-        super(settings);
-        this.permsExtension = perms;
+public class WhereExtension extends GenericExtension implements Extensions {
+    private PermsExtension permsExtension;
+
+    public WhereExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "where", "Enables /where."));
+    }
+
+    @Override
+    public void onExtensionsReady(ExtensionManager em) {
+        this.permsExtension = (PermsExtension) em.getExtensions().get("perms");
     }
 
     public PermsExtension getPermsExtension() {

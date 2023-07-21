@@ -10,10 +10,11 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.Collection;
+import java.util.HashMap;
 
 public class MemberExtension extends GenericExtension implements Extensions {
-    public MemberExtension(ExtensionSettings settings) {
-        super(settings);
+    public MemberExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "member", "Gives member role on player first joined, it also creates member, mod and admin teams if not exist."));
     }
 
     @Override

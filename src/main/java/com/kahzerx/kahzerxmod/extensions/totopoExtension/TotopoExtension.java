@@ -11,10 +11,11 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;
 
 import java.awt.*;
+import java.util.HashMap;
 
 public class TotopoExtension extends GenericExtension implements Extensions {
-    public TotopoExtension(ExtensionSettings settings) {
-        super(settings);
+    public TotopoExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "totopo", "Enables /totopo command."));
     }
 
     @Override

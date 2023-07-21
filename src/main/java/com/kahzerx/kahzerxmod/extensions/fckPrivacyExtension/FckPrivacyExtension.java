@@ -7,11 +7,13 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.HashMap;
+
 public class FckPrivacyExtension extends GenericExtension implements Extensions {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public FckPrivacyExtension(ExtensionSettings settings) {
-        super(settings);
+    public FckPrivacyExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "fckPrivacy", "Saves every executed command including private messages in the logs file."));
     }
 
     @Override

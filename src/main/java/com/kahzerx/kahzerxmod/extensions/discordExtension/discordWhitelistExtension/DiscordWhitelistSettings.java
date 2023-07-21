@@ -2,17 +2,20 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExten
 
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class DiscordWhitelistSettings extends ExtensionSettings {
     private List<Long> whitelistChats;
     private long discordRoleID;
     private int nPlayers;
-    public DiscordWhitelistSettings(String name, boolean enabled, String description, List<Long> whitelistChats, long discordRoleID, int nPlayers) {
-        super(name, enabled, description);
-        this.whitelistChats = whitelistChats;
-        this.discordRoleID = discordRoleID;
-        this.nPlayers = nPlayers;
+    public DiscordWhitelistSettings(HashMap<String, String> fileSettings, String name, String description) {
+        super(fileSettings, name, description);
+        DiscordWhitelistSettings file = (DiscordWhitelistSettings) this.processFileSettings(fileSettings.getOrDefault(name, null), this.getClass());
+        this.whitelistChats = file != null && file.getWhitelistChats() != null ? file.getWhitelistChats() : new ArrayList<>();
+        this.discordRoleID = file != null ? file.getDiscordRole() : 0L;
+        this.nPlayers = file != null ? file.getNPlayers() : 1;
     }
 
     public List<Long> getWhitelistChats() {
@@ -41,5 +44,17 @@ public class DiscordWhitelistSettings extends ExtensionSettings {
 
     public void removeWhitelistChatID(long chatID) {
         this.whitelistChats.remove(chatID);
+    }
+
+    @Override
+    public String toString() {
+        return "config{" +
+                "name='" + this.getName() + '\'' +
+                ", enabled=" + this.isEnabled() +
+                ", description='" + this.isEnabled() + '\'' +
+                ", whitelistChats=" + whitelistChats +
+                ", discordRoleID=" + discordRoleID +
+                ", nPlayers=" + nPlayers +
+                '}';
     }
 }

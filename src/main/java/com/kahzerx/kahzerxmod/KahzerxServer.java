@@ -18,42 +18,32 @@ import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class KahzerxServer {
     public static MinecraftServer minecraftServer;
-    public static List<Extensions> extensions = new ArrayList<>();
-//    public static List<AbstractProfiler> profilers = new ArrayList<>();
     public static ServerDatabase db = new ServerDatabase();
     public static CommandDispatcher<ServerCommandSource> dispatcher;
     public static CommandRegistryAccess commandRegistryAccess;
+    private static final ExtensionManager extensionManager = new ExtensionManager();
 
     public static void onRunServer(MinecraftServer minecraftServer) {
-//        profilers.add(new ChunkProfiler());
-//        profilers.add(new BlockEntitiesProfiler());
-//        profilers.add(new EntityProfiler());
-//        profilers.add(new MSPTProfiler());
-//        profilers.add(new PlayersProfiler());
-//        profilers.add(new RamProfiler());
-//        profilers.add(new TPSProfiler());
         KahzerxServer.minecraftServer = minecraftServer;
-        ExtensionManager.manageExtensions(FileUtils.loadConfig(minecraftServer.getSavePath(WorldSavePath.ROOT).toString()));
-        Collections.sort(extensions);
+        extensionManager.loadExtensions(FileUtils.loadConfig(minecraftServer.getSavePath(WorldSavePath.ROOT).toString()));
+        extensionManager.getExtensions().forEach((k, e) -> e.onExtensionsReady(extensionManager));
+        extensionManager.getExtensions().forEach((k, e) -> e.onServerRun(minecraftServer));
 
-        extensions.forEach(e -> e.onServerRun(minecraftServer));
+        extensionManager.saveSettings();
 
-        ExtensionManager.saveSettings();
+        extensionManager.getExtensions().forEach((k, e) -> e.onRegisterCommands(dispatcher));
+        extensionManager.getExtensions().forEach((k, e) -> e.onRegisterCommands(dispatcher, commandRegistryAccess));
 
-        extensions.forEach(e -> e.onRegisterCommands(dispatcher));
-        extensions.forEach(e -> e.onRegisterCommands(dispatcher, commandRegistryAccess));
-
+        // TODO command of reload, from file, check diffs and apply
         LiteralArgumentBuilder<ServerCommandSource> settingsCommand = literal("KSettings").
-                requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(2));
-        for (Extensions ex : extensions) {
+                requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(2));  // TODO this has to be customizable for CMPs
+        for (Extensions ex : extensionManager.getExtensions().values()) {
             LiteralArgumentBuilder<ServerCommandSource> extensionSubCommand = literal(ex.extensionSettings().getName());
             extensionSubCommand.
                     then(literal("true").
@@ -64,7 +54,7 @@ public class KahzerxServer {
                                 }
                                 ex.extensionSettings().setEnabled(true);
                                 ex.onExtensionEnabled();
-                                ExtensionManager.saveSettings();
+                                extensionManager.saveSettings();
                                 context.getSource().sendFeedback(MarkEnum.TICK.appendMessage(ex.extensionSettings().getName() + " extension enabled"), false);
                                 return 1;
                             })).
@@ -76,7 +66,7 @@ public class KahzerxServer {
                                 }
                                 ex.extensionSettings().setEnabled(false);
                                 ex.onExtensionDisabled();
-                                ExtensionManager.saveSettings();
+                                extensionManager.saveSettings();
                                 context.getSource().sendFeedback(MarkEnum.TICK.appendMessage(ex.extensionSettings().getName() + " extension disabled"), false);
                                 return 1;
                             })).
@@ -92,34 +82,33 @@ public class KahzerxServer {
         }
         settingsCommand.executes(context -> {
             List<MutableText> extensionNames = new ArrayList<>();
-            for (Extensions ex : extensions) {
-                MutableText exData = Text.literal("- " + ex.extensionSettings().getName() + " ").styled(
+            for (Extensions ex : extensionManager.getExtensions().values()) {
+
+                MutableText exData = MarkEnum.DOT.appendText(Text.literal(ex.extensionSettings().getName() + " | ").styled(
                         style -> style.
                                 withBold(false).
                                 withUnderline(false).
                                 withColor(Formatting.WHITE).
-                                withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(ex.extensionSettings().getDescription()))));
-                exData.append(Text.literal("[True]").styled(
+                                withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(ex.extensionSettings().getDescription())))));
+                exData.append(Text.literal("true").styled(
                         style -> style.
                                 withBold(false).
-                                withUnderline(ex.extensionSettings().isEnabled()).
-                                withColor(Formatting.GREEN).
+                                withColor(ex.extensionSettings().isEnabled() ? Formatting.GREEN : Formatting.GRAY).
                                 withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(String.format("Enable %s", ex.extensionSettings().getName())))).
                                 withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/KSettings %s true", ex.extensionSettings().getName())))));
                 exData.append(Text.literal(" ").styled(
                         style -> style.
                                 withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(""))).
                                 withUnderline(false)));
-                exData.append(Text.literal("[False]").styled(
+                exData.append(Text.literal("false").styled(
                         style -> style.
                                 withBold(false).
-                                withUnderline(!ex.extensionSettings().isEnabled()).
-                                withColor(Formatting.RED).
+                                withColor(!ex.extensionSettings().isEnabled() ? Formatting.RED : Formatting.GRAY).
                                 withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(String.format("Disable %s", ex.extensionSettings().getName())))).
                                 withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/KSettings %s false", ex.extensionSettings().getName())))));
                 extensionNames.add(exData);
             }
-            context.getSource().sendFeedback(() -> Text.literal("All Settings").styled(style -> style.withBold(true)), false);
+            context.getSource().sendFeedback(() -> Text.literal("Settings").styled(style -> style.withBold(true).withUnderline(true).withColor(Formatting.GOLD)), false);
             for (Text t : extensionNames) {
                 context.getSource().sendFeedback(() -> t, false);
             }
@@ -132,12 +121,12 @@ public class KahzerxServer {
         db = new ServerDatabase();
         db.initializeConnection(minecraftServer.getSavePath(WorldSavePath.ROOT).toString());
         db.createPlayerTable();
-        extensions.forEach(e -> e.onCreateDatabase(db.getConnection()));
-        extensions.forEach(e -> e.onCreateDatabase(minecraftServer.getSavePath(WorldSavePath.ROOT).toString()));
+        extensionManager.getExtensions().forEach((k, e) -> e.onCreateDatabase(db.getConnection()));
+        extensionManager.getExtensions().forEach((k, e) -> e.onCreateDatabase(minecraftServer.getSavePath(WorldSavePath.ROOT).toString()));
     }
 
     public static void onServerStarted(MinecraftServer minecraftServer) {
-        extensions.forEach(e -> e.onServerStarted(minecraftServer));
+        extensionManager.getExtensions().forEach((k, e) -> e.onServerStarted(minecraftServer));
     }
 
     public static void onRegisterCommands(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess commandRegistryAccess) {
@@ -147,76 +136,71 @@ public class KahzerxServer {
     }
 
     public static void onStopServer() {
-        extensions.forEach(Extensions::onServerStop);
+        extensionManager.getExtensions().forEach((k, e) -> e.onServerStop());
         db.close();
     }
 
     public static void onAutoSave() {
-        extensions.forEach(Extensions::onAutoSave);
+        extensionManager.getExtensions().forEach((k, e) -> e.onAutoSave());
     }
 
     public static void onAutoSave(MinecraftServer server) {
-        extensions.forEach(e -> e.onAutoSave(server));
+        extensionManager.getExtensions().forEach((k, e) -> e.onAutoSave(server));
     }
 
     public static void onPlayerJoined(ServerPlayerEntity player) {
         db.getQuery().insertPlayerUUID(player.getUuidAsString(), player.getName().getString());
-        extensions.forEach(e -> e.onPlayerJoined(player));
+        extensionManager.getExtensions().forEach((k, e) -> e.onPlayerJoined(player));
     }
 
     public static void onPlayerConnected(ServerPlayerEntity player) {
-        extensions.forEach(e -> e.onPlayerConnected(player));
+        extensionManager.getExtensions().forEach((k, e) -> e.onPlayerConnected(player));
     }
 
     public static void onPlayerLeft(ServerPlayerEntity player) {
-        extensions.forEach(e -> e.onPlayerLeft(player));
+        extensionManager.getExtensions().forEach((k, e) -> e.onPlayerLeft(player));
     }
 
     public static void onPlayerDied(ServerPlayerEntity player) {
-        extensions.forEach(e -> e.onPlayerDied(player));
+        extensionManager.getExtensions().forEach((k, e) -> e.onPlayerDied(player));
     }
 
     public static void onPlayerBreakBlock(ServerPlayerEntity player, World world, BlockPos pos) {
-        extensions.forEach(e -> e.onPlayerBreakBlock(player, world, pos));
+        extensionManager.getExtensions().forEach((k, e) -> e.onPlayerBreakBlock(player, world, pos));
     }
 
     public static void onPlayerPlaceBlock(ServerPlayerEntity player, World world, BlockPos pos) {
-        extensions.forEach(e -> e.onPlayerPlaceBlock(player, world, pos));
+        extensionManager.getExtensions().forEach((k, e) -> e.onPlayerPlaceBlock(player, world, pos));
     }
 
     public static void onChatMessage(ServerPlayerEntity player, String chatMessage) {
-        extensions.forEach(e -> e.onChatMessage(player, chatMessage));
+        extensionManager.getExtensions().forEach((k, e) -> e.onChatMessage(player, chatMessage));
     }
 
     public static void onCommand(ServerPlayerEntity player, String command) {
-        extensions.forEach(e -> e.onCommand(player, command));
+        extensionManager.getExtensions().forEach((k, e) -> e.onCommand(player, command));
     }
 
     public static void onAdvancement(String advancement) {
-        extensions.forEach(e -> e.onAdvancement(advancement));
+        extensionManager.getExtensions().forEach((k, e) -> e.onAdvancement(advancement));
     }
 
     public static void onClick(ServerPlayerEntity player) {
-        extensions.forEach(e -> e.onClick(player));
+        extensionManager.getExtensions().forEach((k, e) -> e.onClick(player));
     }
 
     public static void onSleep(ServerPlayerEntity player) {
-        extensions.forEach(e -> e.onPlayerSleep(player));
+        extensionManager.getExtensions().forEach((k, e) -> e.onPlayerSleep(player));
     }
 
     public static void onWakeUp(ServerPlayerEntity player) {
-        extensions.forEach(e -> e.onPlayerWakeUp(player));
+        extensionManager.getExtensions().forEach((k, e) -> e.onPlayerWakeUp(player));
     }
 
     public static void onTick(MinecraftServer server) {
         if (server.getTicks() < 20) {
             return;
         }
-        extensions.forEach(e -> e.onTick(server));
-//        String id = DateUtils.getAcc();
-//        profilers.forEach(p -> {
-//            p.onTick(server, id);
-//            p.clearResults();
-//        });
+        extensionManager.getExtensions().forEach((k, e) -> e.onTick(server));
     }
 }

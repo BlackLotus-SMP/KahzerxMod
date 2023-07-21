@@ -16,9 +16,11 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.world.World;
 
+import java.util.HashMap;
+
 public class HereExtension extends GenericExtension implements Extensions {
-    public HereExtension(ExtensionSettings settings) {
-        super(settings);
+    public HereExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "here", "/here, print current location + glowing 5 seconds."));
     }
 
     @Override

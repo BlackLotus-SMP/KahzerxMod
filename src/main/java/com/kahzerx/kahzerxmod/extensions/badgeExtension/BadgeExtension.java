@@ -1,6 +1,7 @@
 package com.kahzerx.kahzerxmod.extensions.badgeExtension;
 
 import com.google.common.collect.Sets;
+import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
@@ -16,15 +17,19 @@ import java.sql.*;
 import java.util.*;
 
 public class BadgeExtension extends GenericExtension implements Extensions {
-    public final PermsExtension permsExtension;
+    public PermsExtension permsExtension;
     private Connection conn;
     public static boolean isExtensionEnabled = false;
     public static final HashMap<String, List<BadgeInstance>> playerBadges = new HashMap<>();
     private MinecraftServer server;
 
-    public BadgeExtension(ExtensionSettings settings, PermsExtension permsExtension) {
-        super(settings);
-        this.permsExtension = permsExtension;
+    public BadgeExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "badge", "Badge system, helpers can add badges to players that will display on chat(only last 3), and on chat hover."));
+    }
+
+    @Override
+    public void onExtensionsReady(ExtensionManager em) {
+        this.permsExtension = (PermsExtension) em.getExtensions().get("perms");
     }
 
     @Override

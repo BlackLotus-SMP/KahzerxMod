@@ -2,10 +2,8 @@ package com.kahzerx.kahzerxmod;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.internal.LinkedTreeMap;
 import com.kahzerx.kahzerxmod.config.KSettings;
-import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
-import com.kahzerx.kahzerxmod.extensions.achusExtension.AchusExtension;
-import com.kahzerx.kahzerxmod.extensions.afkExtension.AFKExtension;
 import com.kahzerx.kahzerxmod.extensions.backExtension.BackExtension;
 import com.kahzerx.kahzerxmod.extensions.badgeExtension.BadgeExtension;
 import com.kahzerx.kahzerxmod.extensions.bedTimeExtension.BedTimeExtension;
@@ -15,17 +13,9 @@ import com.kahzerx.kahzerxmod.extensions.cameraExtension.CameraExtension;
 import com.kahzerx.kahzerxmod.extensions.deathMsgExtension.DeathMsgExtension;
 import com.kahzerx.kahzerxmod.extensions.deepslateInstaMineExtension.DeepslateInstaMineExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordAdminToolsExtension.DiscordAdminToolsExtension;
-import com.kahzerx.kahzerxmod.extensions.discordExtension.discordAdminToolsExtension.DiscordAdminToolsJsonSettings;
-import com.kahzerx.kahzerxmod.extensions.discordExtension.discordAdminToolsExtension.DiscordAdminToolsSettings;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordExtension;
-import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordJsonSettings;
-import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordSettings;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension.DiscordWhitelistExtension;
-import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension.DiscordWhitelistJsonSettings;
-import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension.DiscordWhitelistSettings;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistSyncExtension.DiscordWhitelistSyncExtension;
-import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistSyncExtension.DiscordWhitelistSyncJsonSettings;
-import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistSyncExtension.DiscordWhitelistSyncSettings;
 import com.kahzerx.kahzerxmod.extensions.endermanNoGriefExtension.EndermanNoGriefExtension;
 import com.kahzerx.kahzerxmod.extensions.farmlandMyceliumExtension.FarmlandMyceliumExtension;
 import com.kahzerx.kahzerxmod.extensions.fbiExtension.FBIExtension;
@@ -36,15 +26,11 @@ import com.kahzerx.kahzerxmod.extensions.hereExtension.HereExtension;
 import com.kahzerx.kahzerxmod.extensions.homeExtension.HomeExtension;
 import com.kahzerx.kahzerxmod.extensions.itemFormattedExtension.ItemFormattedExtension;
 import com.kahzerx.kahzerxmod.extensions.joinMOTDExtension.JoinMOTDExtension;
-import com.kahzerx.kahzerxmod.extensions.joinMOTDExtension.JoinMOTDJsonSettings;
-import com.kahzerx.kahzerxmod.extensions.joinMOTDExtension.JoinMOTDSettings;
 import com.kahzerx.kahzerxmod.extensions.kloneExtension.KloneExtension;
 import com.kahzerx.kahzerxmod.extensions.maintenanceExtension.MaintenanceExtension;
 import com.kahzerx.kahzerxmod.extensions.memberExtension.MemberExtension;
-import com.kahzerx.kahzerxmod.extensions.modTPExtension.ModTPExtension;
 import com.kahzerx.kahzerxmod.extensions.opOnWhitelistExtension.OpOnWhitelistExtension;
 import com.kahzerx.kahzerxmod.extensions.permsExtension.PermsExtension;
-import com.kahzerx.kahzerxmod.extensions.pitoExtension.PitoExtension;
 import com.kahzerx.kahzerxmod.extensions.playerDropsSkullExtension.PlayerDropsSkullExtension;
 import com.kahzerx.kahzerxmod.extensions.prankExtension.PrankExtension;
 import com.kahzerx.kahzerxmod.extensions.profileExtension.ProfileExtension;
@@ -63,236 +49,102 @@ import com.kahzerx.kahzerxmod.extensions.survivalExtension.SurvivalExtension;
 import com.kahzerx.kahzerxmod.extensions.totopoExtension.TotopoExtension;
 import com.kahzerx.kahzerxmod.extensions.villagersFollowEmeraldExtension.VillagersFollowEmeraldExtension;
 import com.kahzerx.kahzerxmod.extensions.whereExtension.WhereExtension;
-import com.kahzerx.kahzerxmod.extensions.xiemarExtension.XiemarExtension;
 import com.kahzerx.kahzerxmod.utils.FileUtils;
 import net.minecraft.util.WorldSavePath;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class ExtensionManager {
-    public static void saveSettings() {
-        List<ExtensionSettings> settingsArray = new ArrayList<>();
-        for (Extensions ex : KahzerxServer.extensions) {
+    private static final Logger LOGGER = LogManager.getLogger();
+    private final SortedMap<String, Extensions> extensions = new TreeMap<>();
+
+    public SortedMap<String, Extensions> getExtensions() {
+        return this.extensions;
+    }
+
+    public void saveSettings() {
+        List<Object> settingsArray = new ArrayList<>();
+        for (Extensions ex : this.extensions.values()) {
             settingsArray.add(ex.extensionSettings());
         }
         KSettings settings = new KSettings(settingsArray);
         FileUtils.createConfig(KahzerxServer.minecraftServer.getSavePath(WorldSavePath.ROOT).toString(), settings);
     }
 
-    private static boolean isEnabled(HashMap<String, Boolean> found, String extension) {
-        return found.get(extension) != null ? found.get(extension) : false;
-    }
-
-    public static void manageExtensions(String settings) {
+    public void loadExtensions(String settings) {
+        LOGGER.info("Loading settings from file world/KConfig.json");
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         KSettings ks = gson.fromJson(settings, KSettings.class);
-        HashMap<String, Boolean> found = new HashMap<>();
+        HashMap<String, String> fileSettings = new HashMap<>();
 
         if (ks != null) {
-            for (ExtensionSettings es : ks.getSettings()) {
+            for (Object es : ks.settings()) {
                 if (es == null) {
                     continue;
                 }
-                found.put(es.getName(), es.isEnabled());
-            }
-        }
-
-        MemberExtension memberExtension = new MemberExtension(new ExtensionSettings("member", isEnabled(found, "member"), "Gives member role on player first joined, it also creates member, mod and admin teams if not exist."));
-        PermsExtension permsExtension = new PermsExtension(new ExtensionSettings("perms", isEnabled(found, "perms"), "Permission levels for other commands like /back, /c or /modTP. Enables /kPerms command."), memberExtension);
-
-        KahzerxServer.extensions.add(memberExtension);
-        KahzerxServer.extensions.add(permsExtension);
-        KahzerxServer.extensions.add(new HomeExtension(new ExtensionSettings("home", isEnabled(found, "home"), "/home and /setHome commands.")));
-        KahzerxServer.extensions.add(new BackExtension(new ExtensionSettings("back", isEnabled(found, "back"), "/back command to tp to the last death position."), permsExtension));
-        KahzerxServer.extensions.add(new CameraExtension(new ExtensionSettings("camera", isEnabled(found, "camera"), "/c, spectator + night vision + conduit (stolen from carpet)."), permsExtension));
-        KahzerxServer.extensions.add(new ModTPExtension(new ExtensionSettings("modTP", isEnabled(found, "modTP"), "Enables /modTP that allows players with mod perms to tp to other players."), permsExtension));
-        KahzerxServer.extensions.add(new HelperKickExtension(new ExtensionSettings("helperKick", isEnabled(found, "helperKick"), "Allows helpers and above to run /kick"), permsExtension));
-        KahzerxServer.extensions.add(new SurvivalExtension(new ExtensionSettings("survival", isEnabled(found, "survival"), "/s, survival - night vision - conduit (stolen from carpet).")));
-        KahzerxServer.extensions.add(new PitoExtension(new ExtensionSettings("pito", isEnabled(found, "pito"), "/pito ¯\\_(ツ)_/¯")));
-        KahzerxServer.extensions.add(new HereExtension(new ExtensionSettings("here", isEnabled(found, "here"), "/here, print current location + glowing 5 seconds.")));
-        KahzerxServer.extensions.add(new DeathMsgExtension(new ExtensionSettings("deathMessage", isEnabled(found, "deathMessage"), "Print death position when player dies.")));
-        KahzerxServer.extensions.add(new AFKExtension(new ExtensionSettings("afk", isEnabled(found, "afk"), "/afk idk everyone keeps asking for this thing, it literally kicks you from the server.")));
-        KahzerxServer.extensions.add(new RandomTPExtension(new ExtensionSettings("randomTP", isEnabled(found, "randomTP"), "randomTP in a 10k block radius."), permsExtension));
-        KahzerxServer.extensions.add(new BlockInfoExtension(new ExtensionSettings("blockInfo", isEnabled(found, "blockInfo"), "Player action logging and /blockInfo command.")));
-        KahzerxServer.extensions.add(new SeedExtension(new ExtensionSettings("seed", isEnabled(found, "seed"), "Enables seed command for everyone in the server.")));
-        KahzerxServer.extensions.add(new FckPrivacyExtension(new ExtensionSettings("fckPrivacy", isEnabled(found, "fckPrivacy"), "Saves every executed command including private messages in the logs file, like /msg name hello.")));
-        KahzerxServer.extensions.add(new SpoofExtension(new ExtensionSettings("spoof", isEnabled(found, "spoof"), "Enables /spoof command that allows OP players to see other connected players enderchest and inventories, player inventory may not work correctly so unless you know what you are doing is not recommended to move items from the slots.")));
-        KahzerxServer.extensions.add(new ScoreboardExtension(new ExtensionSettings("scoreboard", isEnabled(found, "scoreboard"), "Enables /sb command.")));
-        KahzerxServer.extensions.add(new SpawnExtension(new ExtensionSettings("spawn", isEnabled(found, "spawn"), "Enables /spawn.")));
-        KahzerxServer.extensions.add(new WhereExtension(new ExtensionSettings("where", isEnabled(found, "where"), "Enables /where."), permsExtension));
-        KahzerxServer.extensions.add(new BocaExtension(new ExtensionSettings("boca", isEnabled(found, "boca"), "Enables /boca & /boquita command.")));
-        KahzerxServer.extensions.add(new TotopoExtension(new ExtensionSettings("totopo", isEnabled(found, "totopo"), "Enables /totopo command.")));
-        KahzerxServer.extensions.add(new HatExtension(new ExtensionSettings("hat", isEnabled(found, "hat"), "Puts whatever item you have in the main hand on your head.")));
-        KahzerxServer.extensions.add(new EndermanNoGriefExtension(new ExtensionSettings("endermanNoGrief", isEnabled(found, "endermanNoGrief"), "Prevents endermans to pickup or place blocks (this will break enderman based farms).")));
-        KahzerxServer.extensions.add(new DeepslateInstaMineExtension(new ExtensionSettings("deepslateInstaMine", isEnabled(found, "deepslateInstaMine"), "Deepslate instamine as if it was stone.")));
-        KahzerxServer.extensions.add(new RenewableElytraExtension(new ExtensionSettings("renewableElytra", isEnabled(found, "renewableElytra"), "Phantoms killed by shulker have 25% chance of dropping elytras.")));
-        KahzerxServer.extensions.add(new VillagersFollowEmeraldExtension(new ExtensionSettings("villagersFollowEmeralds", isEnabled(found, "villagersFollowEmeralds"), "Villagers will follow any player holding emerald blocks.")));
-        KahzerxServer.extensions.add(new XiemarExtension(new ExtensionSettings("xiemar", isEnabled(found, "xiemar"), "Literally kills xiemar if connected.")));
-        KahzerxServer.extensions.add(new SolExtension(new ExtensionSettings("sol", isEnabled(found, "sol"), "Waifu!")));
-        KahzerxServer.extensions.add(new KloneExtension(new ExtensionSettings("klone", isEnabled(found, "klone"), "Clones your player to afk (will kick you); the bot will leave once you rejoin."), permsExtension));
-        KahzerxServer.extensions.add(new MaintenanceExtension(new ExtensionSettings("maintenance", isEnabled(found, "maintenance"), "Sets your server in maintenance mode so only op players can join.")));
-        KahzerxServer.extensions.add(new PrankExtension(new ExtensionSettings("pranks", isEnabled(found, "pranks"), "Sets a prank level on your name.")));
-        KahzerxServer.extensions.add(new SkullExtension(new ExtensionSettings("skull", isEnabled(found, "skull"), "Gives player heads.")));
-        KahzerxServer.extensions.add(new PlayerDropsSkullExtension(new ExtensionSettings("playerDropsSkull", isEnabled(found, "playerDropsSkull"), "Players have a 12% chance of dropping skull on death by trident lightning and a 30% by natural lightning.")));
-        KahzerxServer.extensions.add(new BadgeExtension(new ExtensionSettings("badge", isEnabled(found, "badge"), "Badge system, helpers can add badges to players that will display on chat(only last 3), and on chat hover."), permsExtension));
-        KahzerxServer.extensions.add(new ItemFormattedExtension(new ExtensionSettings("formattedItems",isEnabled(found, "formattedItems"), "Items renamed on anvils can set format if set on the usual mc formatting replacing § with %.")));
-        KahzerxServer.extensions.add(new SlabExtension(new ExtensionSettings("slab", isEnabled(found, "slab"), "Enchants the slab on your main hand with the /slab command so you can always place the upper slab.")));
-        KahzerxServer.extensions.add(new AchusExtension(new ExtensionSettings("achus", isEnabled(found, "achus"), "Achus!!")));
-        KahzerxServer.extensions.add(new SitExtension(new ExtensionSettings("sit", isEnabled(found, "sit"), "To sit anywhere.")));
-        KahzerxServer.extensions.add(new FarmlandMyceliumExtension(new ExtensionSettings("farmlandMycelium", isEnabled(found, "farmlandMycelium"), "Hoe can be used to farm mycelium.")));
-        KahzerxServer.extensions.add(new FBIExtension(new ExtensionSettings("fbi", isEnabled(found, "fbi"), "Allows ops and mods to be in the server without players noticing.")));
-
-        KahzerxServer.extensions.add(new OpOnWhitelistExtension(new ExtensionSettings("opOnWhitelist", isEnabled(found, "opOnWhitelist"), "Auto ops and deops on whitelist add and remove.")));
-        KahzerxServer.extensions.add(new BedTimeExtension(new ExtensionSettings("bedTime", isEnabled(found, "bedTime"), "Notifies when a player goes to sleep.")));
-
-        String message = "";
-        JoinMOTDJsonSettings jmjs = gson.fromJson(settings, JoinMOTDJsonSettings.class);
-        if (jmjs != null) {
-            for (JoinMOTDSettings jms : jmjs.getSettings()) {
-                if (jms == null) {
+                Object name = ((LinkedTreeMap<?, ?>) es).get("name");
+                if (name == null) {
                     continue;
                 }
-                if (jms.getName().equals("joinMOTD")) {
-                    message = jms.getMessage() != null ? jms.getMessage() : "";
-                    break;
-                }
+                fileSettings.put((String) name, gson.toJson(es));
             }
         }
-        JoinMOTDExtension joinMOTDExtension = new JoinMOTDExtension(new JoinMOTDSettings("joinMOTD", isEnabled(found, "joinMOTD"), "Sends a custon message on player join.", message), permsExtension);
-        KahzerxServer.extensions.add(joinMOTDExtension);
 
-        String token = "";
-        boolean crossServerChat = false;
-        String prefix = "";
-        boolean isRunning = false;
-        long chatChannelID = 0L;
-        boolean shouldFeedback = true;
-        List<Long> allowedChats = new ArrayList<>();
-        DiscordJsonSettings djs = gson.fromJson(settings, DiscordJsonSettings.class);
-        if (djs != null) {
-            for (DiscordSettings ds : djs.getSettings()) {
-                if (ds == null) {
-                    continue;
-                }
-                if (ds.getName().equals("discord")) {
-                    token = ds.getToken() != null ? ds.getToken() : "";
-                    crossServerChat = ds.isCrossServerChat();
-                    prefix = ds.getPrefix() != null ? ds.getPrefix().replaceAll(" ", "_") : "";
-                    isRunning = ds.isRunning();
-                    chatChannelID = ds.getChatChannelID();
-                    allowedChats = ds.getAllowedChats() != null ? ds.getAllowedChats() : new ArrayList<>();
-                    shouldFeedback = ds.isShouldFeedback();
-                    break;
-                }
-            }
-        }
-        DiscordExtension discordExtension = new DiscordExtension(
-                new DiscordSettings(
-                        "discord",
-                        isEnabled(found, "discord"),
-                        "Connects minecraft chat + some events with a discord chat (chatbridge). Prefix is necessary if you want crossServerChat to work properly and not having duplicated messages.",
-                        token,
-                        crossServerChat,
-                        prefix,
-                        isRunning,
-                        chatChannelID,
-                        allowedChats,
-                        shouldFeedback
-                ));
-        KahzerxServer.extensions.add(discordExtension);
+        // TODO way of making so the extensions register themselves so we dont need massive class of extensions.add(...)
+        // TODO modTP for perms!
 
-        long discordRoleID = 0L;
-        List<Long> whitelistChats = new ArrayList<>();
-        int nPlayers = 1;
-        DiscordWhitelistJsonSettings dwjs = gson.fromJson(settings, DiscordWhitelistJsonSettings.class);
-        if (dwjs != null) {
-            for (DiscordWhitelistSettings dws : dwjs.getSettings()) {
-                if (dws == null) {
-                    continue;
-                }
-                if (dws.getName().equals("discordWhitelist")) {
-                    discordRoleID = dws.getDiscordRole();
-                    whitelistChats = dws.getWhitelistChats() != null ? dws.getWhitelistChats() : new ArrayList<>();
-                    nPlayers = dws.getNPlayers() != 0 ? dws.getNPlayers() : 1;
-                    break;
-                }
-            }
-        }
-        DiscordWhitelistExtension discordWhitelistExtension = new DiscordWhitelistExtension(
-                new DiscordWhitelistSettings(
-                        "discordWhitelist",
-                        isEnabled(found, "discordWhitelist") && (discordExtension.extensionSettings().isEnabled()),
-                        "Enables !list, !add and !remove commands along with nPlayers that specifies how many minecraft players a discord user can add; There is also an optional discordRole that will be given to the discord user on !add and deleted on !remove.",
-                        whitelistChats,
-                        discordRoleID,
-                        nPlayers
-                ),
-                discordExtension);
-        KahzerxServer.extensions.add(discordWhitelistExtension);
+        this.registerExtension(new MemberExtension(fileSettings));
+        this.registerExtension(new PermsExtension(fileSettings));
+        this.registerExtension(new ShopExtension(fileSettings));
+        this.registerExtension(new HomeExtension(fileSettings));
+        this.registerExtension(new BackExtension(fileSettings));
+        this.registerExtension(new CameraExtension(fileSettings));
+        this.registerExtension(new HelperKickExtension(fileSettings));
+        this.registerExtension(new SurvivalExtension(fileSettings));
+        this.registerExtension(new HereExtension(fileSettings));
+        this.registerExtension(new DeathMsgExtension(fileSettings));
+        this.registerExtension(new RandomTPExtension(fileSettings));
+        this.registerExtension(new BlockInfoExtension(fileSettings));
+        this.registerExtension(new SeedExtension(fileSettings));
+        this.registerExtension(new FckPrivacyExtension(fileSettings));
+        this.registerExtension(new SpoofExtension(fileSettings));
+        this.registerExtension(new ScoreboardExtension(fileSettings));
+        this.registerExtension(new SpawnExtension(fileSettings));
+        this.registerExtension(new WhereExtension(fileSettings));
+        this.registerExtension(new BocaExtension(fileSettings));
+        this.registerExtension(new TotopoExtension(fileSettings));
+        this.registerExtension(new HatExtension(fileSettings));
+        this.registerExtension(new EndermanNoGriefExtension(fileSettings));
+        this.registerExtension(new DeepslateInstaMineExtension(fileSettings));
+        this.registerExtension(new RenewableElytraExtension(fileSettings));
+        this.registerExtension(new VillagersFollowEmeraldExtension(fileSettings));
+        this.registerExtension(new SolExtension(fileSettings));
+        this.registerExtension(new KloneExtension(fileSettings));
+        this.registerExtension(new MaintenanceExtension(fileSettings));
+        this.registerExtension(new PrankExtension(fileSettings));
+        this.registerExtension(new SkullExtension(fileSettings));
+        this.registerExtension(new PlayerDropsSkullExtension(fileSettings));
+        this.registerExtension(new BadgeExtension(fileSettings));
+        this.registerExtension(new ItemFormattedExtension(fileSettings));
+        this.registerExtension(new SlabExtension(fileSettings));
+        this.registerExtension(new SitExtension(fileSettings));
+        this.registerExtension(new FarmlandMyceliumExtension(fileSettings));
+        this.registerExtension(new FBIExtension(fileSettings));
+        this.registerExtension(new OpOnWhitelistExtension(fileSettings));
+        this.registerExtension(new BedTimeExtension(fileSettings));
+        this.registerExtension(new ProfileExtension(fileSettings));
+        this.registerExtension(new JoinMOTDExtension(fileSettings));
+        this.registerExtension(new DiscordExtension(fileSettings));
+        this.registerExtension(new DiscordWhitelistExtension(fileSettings));
+        this.registerExtension(new DiscordAdminToolsExtension(fileSettings));
+        this.registerExtension(new DiscordWhitelistSyncExtension(fileSettings));
+        LOGGER.info("Settings loaded!");
+    }
 
-        List<Long> adminChats = new ArrayList<>();
-        boolean feedback = true;
-        DiscordAdminToolsJsonSettings datjs = gson.fromJson(settings, DiscordAdminToolsJsonSettings.class);
-        if (dwjs != null) {
-            for (DiscordAdminToolsSettings dats : datjs.getSettings()) {
-                if (dats == null) {
-                    continue;
-                }
-                if (dats.getName().equals("discordAdminTools")) {
-                    adminChats = dats.getAdminChats() != null ? dats.getAdminChats() : new ArrayList<>();
-                    feedback = dats.isShouldFeedback();
-                    break;
-                }
-            }
-        }
-        DiscordAdminToolsExtension discordAdminToolsExtension = new DiscordAdminToolsExtension(
-                new DiscordAdminToolsSettings(
-                        "discordAdminTools",
-                        isEnabled(found, "discordAdminTools") && (discordExtension.extensionSettings().isEnabled()) && (discordWhitelistExtension.extensionSettings().isEnabled()),
-                        "Enables !ban, !pardon, !exadd, !exremove on discord AdminChats.",
-                        adminChats,
-                        feedback
-                ),
-                discordExtension,
-                discordWhitelistExtension);
-        KahzerxServer.extensions.add(discordAdminToolsExtension);
-
-        List<Long> validRoles = new ArrayList<>();
-        long notifyChannelID = 0L;
-        long groupID = 0L;
-        boolean aggressive = false;
-        DiscordWhitelistSyncJsonSettings dwsjs = gson.fromJson(settings, DiscordWhitelistSyncJsonSettings.class);
-        if (dwsjs != null) {
-            for (DiscordWhitelistSyncSettings dwss : dwsjs.getSettings()) {
-                if (dwss == null) {
-                    continue;
-                }
-                if (dwss.getName().equals("discordWhitelistSync")) {
-                    validRoles = dwss.getValidRoles() != null ? dwss.getValidRoles() : new ArrayList<>();
-                    notifyChannelID = dwss.getNotifyChannelID();
-                    groupID = dwss.getGroupID();
-                    aggressive = dwss.isAggressive();
-                }
-            }
-        }
-        KahzerxServer.extensions.add(new DiscordWhitelistSyncExtension(
-                new DiscordWhitelistSyncSettings(
-                        "discordWhitelistSync",
-                        isEnabled(found, "discordWhitelistSync") && (discordExtension.extensionSettings().isEnabled()) && (discordWhitelistExtension.extensionSettings().isEnabled()),
-                        "Check if people that did !add have a given discord role, if not they will get automatically removed from whitelist, useful for sub twitch role. The groupID is the ID of the discord server/guild. The aggressive mode will force whitelist and discord database have the same users so any player added with /whitelist add will get removed on autosave.",
-                        notifyChannelID,
-                        validRoles,
-                        groupID,
-                        aggressive
-                ),
-                discordExtension,
-                discordWhitelistExtension));
-
-        ShopExtension shopExtension = new ShopExtension(new ExtensionSettings("shop", isEnabled(found, "shop"), "Enables currency system along with shop commands and helpers."), permsExtension);
-        KahzerxServer.extensions.add(shopExtension);
-        ProfileExtension profileExtension = new ProfileExtension(new ExtensionSettings("profile", isEnabled(found, "profile"), "Enables the /profile command."), shopExtension);
-        KahzerxServer.extensions.add(profileExtension);
+    private void registerExtension(Extensions extension) {
+        LOGGER.info(extension.extensionSettings());
+        this.extensions.put(extension.extensionSettings().getName(), extension);
     }
 }

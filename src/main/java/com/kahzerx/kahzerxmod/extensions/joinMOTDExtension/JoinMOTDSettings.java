@@ -2,11 +2,14 @@ package com.kahzerx.kahzerxmod.extensions.joinMOTDExtension;
 
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 
+import java.util.HashMap;
+
 public class JoinMOTDSettings extends ExtensionSettings {
     private String message;
-    public JoinMOTDSettings(String name, boolean enabled, String description, String message) {
-        super(name, enabled, description);
-        this.message = message;
+    public JoinMOTDSettings(HashMap<String, String> fileSettings, String name, String description) {
+        super(fileSettings, name, description);
+        JoinMOTDSettings file = (JoinMOTDSettings) this.processFileSettings(fileSettings.getOrDefault(name, null), this.getClass());
+        this.message = file != null && file.getMessage() != null ? file.getMessage() : "";
     }
 
     public void setMessage(String message) {
@@ -15,5 +18,15 @@ public class JoinMOTDSettings extends ExtensionSettings {
 
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String toString() {
+        return "config{" +
+                "name='" + this.getName() + '\'' +
+                ", enabled=" + this.isEnabled() +
+                ", description='" + this.getDescription() + '\'' +
+                ", message='" + this.getMessage() + '\'' +
+                '}';
     }
 }

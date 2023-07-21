@@ -18,7 +18,8 @@ public enum MarkEnum {
     OTAKU_COIN("\uD83D\uDD25", Formatting.RED),
     SLEEP("zZz", Formatting.BLUE),
     DIAMOND_LIKE("✧", Formatting.AQUA),
-    NETHERITE_LIKE("✦", Formatting.GRAY);
+    NETHERITE_LIKE("✦", Formatting.GRAY),
+    DOT("•", Formatting.WHITE);
 
     private final String identifier;
     private final Formatting formatting;

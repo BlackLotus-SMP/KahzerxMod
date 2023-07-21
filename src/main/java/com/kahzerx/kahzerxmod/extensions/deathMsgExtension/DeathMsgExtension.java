@@ -7,9 +7,11 @@ import com.kahzerx.kahzerxmod.utils.DimUtils;
 import com.kahzerx.kahzerxmod.utils.MarkEnum;
 import net.minecraft.server.network.ServerPlayerEntity;
 
+import java.util.HashMap;
+
 public class DeathMsgExtension extends GenericExtension implements Extensions {
-    public DeathMsgExtension(ExtensionSettings settings) {
-        super(settings);
+    public DeathMsgExtension(HashMap<String, String> fileSettings) {
+        super(new ExtensionSettings(fileSettings, "deathMessage", "Print death position when player dies."));
     }
 
     @Override

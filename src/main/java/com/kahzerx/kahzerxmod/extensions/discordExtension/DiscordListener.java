@@ -19,6 +19,7 @@ import javax.security.auth.login.LoginException;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO refactor
 public class DiscordListener extends ListenerAdapter {
     public static List<DiscordCommandsExtension> discordExtensions = new ArrayList<>();
     public static final String commandPrefix = "!";
