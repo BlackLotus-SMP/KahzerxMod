@@ -59,6 +59,11 @@ import java.util.*;
 public class ExtensionManager {
     private static final Logger LOGGER = LogManager.getLogger();
     private final SortedMap<String, Extensions> extensions = new TreeMap<>();
+    private final String SETTINGS_BASE_COMMAND;
+
+    public ExtensionManager(String settingsBaseCommand) {
+        this.SETTINGS_BASE_COMMAND = settingsBaseCommand;
+    }
 
     public SortedMap<String, Extensions> getExtensions() {
         return this.extensions;
@@ -146,5 +151,9 @@ public class ExtensionManager {
     private void registerExtension(Extensions extension) {
         LOGGER.info(extension.extensionSettings());
         this.extensions.put(extension.extensionSettings().getName(), extension);
+    }
+
+    public String getSettingsBaseCommand() {
+        return this.SETTINGS_BASE_COMMAND;
     }
 }

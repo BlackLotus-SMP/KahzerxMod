@@ -2,19 +2,22 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistSyncE
 
 import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.Extensions;
-import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension.DiscordWhitelistExtension;
+import com.kahzerx.kahzerxmod.utils.MarkEnum;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Timer;
 
 import static net.minecraft.server.command.CommandManager.argument;
@@ -78,15 +81,15 @@ public class DiscordWhitelistSyncExtension extends GenericExtension implements E
                 then(literal("notifyChatID").
                         then(argument("chatID", LongArgumentType.longArg()).
                                 executes(context -> {
-                                    extensionSettings().setNotifyChannelID(LongArgumentType.getLong(context, "chatID"));
-                                    context.getSource().sendFeedback(() -> Text.literal("[notifyChatID] > " + extensionSettings().getNotifyChannelID() + "."), false);
+                                    this.extensionSettings().setNotifyChannelID(LongArgumentType.getLong(context, "chatID"));
+                                    context.getSource().sendFeedback(() -> this.notifyChannelText(true), false);
                                     this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
-                            String help = "Channel where you get notified when someone gets removed from the whitelist.";
-                            context.getSource().sendFeedback(() -> Text.literal(help), false);
-                            context.getSource().sendFeedback(() -> Text.literal("[notifyChatID] > " + extensionSettings().getNotifyChannelID() + "."), false);
+                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/" + "notifyChatID\n").styled(style -> style.withBold(true)).
+                                    append(MarkEnum.INFO.appendMsg("Channel where you get notified when someone gets removed from the whitelist\n", Formatting.GRAY).styled(style -> style.withBold(false))).
+                                    append(this.notifyChannelText(false)), false);
                             return 1;
                         })).
                 then(literal("groupID").
@@ -152,5 +155,22 @@ public class DiscordWhitelistSyncExtension extends GenericExtension implements E
                             context.getSource().sendFeedback(() -> Text.literal(help), false);
                             return 1;
                         }));
+    }
+
+    private MutableText notifyChannelText(boolean isNew) {
+        long actualChannelID = this.extensionSettings().getNotifyChannelID();
+        MutableText channel;
+        if (actualChannelID != 0) {
+            channel = Text.literal(String.format("%d", this.extensionSettings().getNotifyChannelID())).styled(style -> style.
+                    withColor(Formatting.GREEN).
+                    withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to edit!\nSet 0 to disable!"))));  // TODO validate if this works
+        } else {
+            channel = Text.literal("Not set!").styled(style -> style.
+                    withColor(Formatting.RED).
+                    withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to add!"))));
+        }
+        channel.styled(style -> style.
+                withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/%s %s notifyChatID %s", this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), actualChannelID != 0 ? String.format("%d", actualChannelID) : ""))));
+        return (isNew ? MarkEnum.TICK.appendMsg("New ", Formatting.WHITE) : Text.literal("")).styled(style -> style.withBold(false)).append(Text.literal("notifyChatID: ").styled(style -> style.withColor(Formatting.WHITE))).append(channel);
     }
 }
