@@ -114,6 +114,8 @@ public class DiscordExtension extends GenericExtension implements Extensions {
         PlayerUtils.reloadCommands();
     }
 
+    // TODO update whitelist, admintools & sync if this gets disabled!
+
     @Override
     public void onExtensionDisabled() {
         if (extensionSettings().isRunning()) {
@@ -123,7 +125,6 @@ public class DiscordExtension extends GenericExtension implements Extensions {
         PlayerUtils.reloadCommands();
     }
 
-    // TODO ugly prints...
     @Override
     public void settingsCommand(LiteralArgumentBuilder<ServerCommandSource> builder) {
         builder.
