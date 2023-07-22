@@ -87,7 +87,7 @@ public class DiscordWhitelistSyncExtension extends GenericExtension implements E
                                     return 1;
                                 })).
                         executes(context -> {
-                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/" + "notifyChatID\n").styled(style -> style.withBold(true)).
+                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/notifyChatID\n").styled(style -> style.withBold(true)).
                                     append(MarkEnum.INFO.appendMsg("Channel where you get notified when someone gets removed from the whitelist\n", Formatting.GRAY).styled(style -> style.withBold(false))).
                                     append(this.getLongSettingMessage(false, "notifyChatID", this.extensionSettings().getNotifyChannelID())), false);
                             return 1;
@@ -101,7 +101,7 @@ public class DiscordWhitelistSyncExtension extends GenericExtension implements E
                                     return 1;
                                 })).
                         executes(context -> {
-                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/" + "groupID\n").styled(style -> style.withBold(true)).
+                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/groupID\n").styled(style -> style.withBold(true)).
                                     append(MarkEnum.INFO.appendMsg("ServerID, to know where to check members\n", Formatting.GRAY).styled(style -> style.withBold(false))).
                                     append(this.getLongSettingMessage(false, "groupID", this.extensionSettings().getGroupID())), false);
                             return 1;
@@ -110,25 +110,26 @@ public class DiscordWhitelistSyncExtension extends GenericExtension implements E
                         then(argument("aggressive", BoolArgumentType.bool()).
                                 executes(context -> {
                                     extensionSettings().setAggressive(BoolArgumentType.getBool(context, "aggressive"));
-                                    context.getSource().sendFeedback(() -> this.getBooleanSettingMessage(true, "aggressive", this.extensionSettings().isAggressive()), false);
+                                    context.getSource().sendFeedback(() -> this.getAggressiveBooleanSettingMessage(true, this.extensionSettings().isAggressive()), false);
                                     this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
-                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/" + "aggressive\n").styled(style -> style.withBold(true)).
+                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/aggressive\n").styled(style -> style.withBold(true)).
                                     append(MarkEnum.INFO.appendMsg("Full whitelist/database sync\n", Formatting.GRAY).styled(style -> style.withBold(false))).
-                                    append(this.getBooleanSettingMessage(false, "aggressive", this.extensionSettings().isAggressive())), false);
+                                    append(this.getAggressiveBooleanSettingMessage(false, this.extensionSettings().isAggressive())), false);
                             return 1;
                         })).
                 then(literal("validRoles").
                         then(literal("add").
                                 then(argument("roleID", LongArgumentType.longArg()).
                                         executes(context -> {
-                                            if (extensionSettings().getValidRoles().contains(LongArgumentType.getLong(context, "roleID"))) {
-                                                context.getSource().sendFeedback(() -> Text.literal("ID already added."), false);
+                                            long role = LongArgumentType.getLong(context, "roleID");
+                                            if (extensionSettings().getValidRoles().contains(role)) {
+                                                context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendText(this.formatLongID("The role with ID ", role, " was already on the list", true, false)), false);
                                             } else {
-                                                extensionSettings().addValidRoleID(LongArgumentType.getLong(context, "roleID"));
-                                                context.getSource().sendFeedback(() -> Text.literal("ID added."), false);
+                                                extensionSettings().addValidRoleID(role);
+                                                context.getSource().sendFeedback(() -> MarkEnum.TICK.appendText(this.formatLongID("The role with ID ", role, " has been added", true, true)), false);
                                                 this.em.saveSettings();
                                             }
                                             return 1;
@@ -136,23 +137,51 @@ public class DiscordWhitelistSyncExtension extends GenericExtension implements E
                         then(literal("remove").
                                 then(argument("roleID", LongArgumentType.longArg()).
                                         executes(context -> {
-                                            if (extensionSettings().getValidRoles().contains(LongArgumentType.getLong(context, "roleID"))) {
-                                                extensionSettings().removeValidRoleID(LongArgumentType.getLong(context, "roleID"));
-                                                context.getSource().sendFeedback(() -> Text.literal("ID removed."), false);
+                                            long role = LongArgumentType.getLong(context, "roleID");
+                                            if (extensionSettings().getValidRoles().contains(role)) {
+                                                extensionSettings().removeValidRoleID(role);
+                                                context.getSource().sendFeedback(() -> MarkEnum.TICK.appendText(this.formatLongID("The role with ID ", role, " has been removed", false, true)), false);
                                                 this.em.saveSettings();
                                             } else {
-                                                context.getSource().sendFeedback(() -> Text.literal("This ID doesn't exist."), false);
+                                                context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendText(this.formatLongID("The role with ID ", role," does not exist!", false, false)), false);
                                             }
                                             return 1;
                                         }))).
                         then(literal("list").
                                 executes(context -> {
-                                    context.getSource().sendFeedback(() -> Text.literal(extensionSettings().getValidRoles().toString()), false);
+                                    MutableText roles = Text.literal("");
+                                    if (this.extensionSettings().getValidRoles().size() == 0) {
+                                        roles.append(Text.literal("Not set!").styled(style -> style.
+                                                withColor(Formatting.RED).
+                                                withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to add!"))).
+                                                withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/%s %s validRoles add ", this.em.getSettingsBaseCommand(), this.extensionSettings().getName())))));
+                                    } else {
+                                        int roleCount = this.extensionSettings().getValidRoles().size();
+                                        for (int i = 0; i < this.extensionSettings().getValidRoles().size(); i++) {
+                                            long role = this.extensionSettings().getValidRoles().get(i);
+                                            roles.
+                                                    append(MarkEnum.DOT.appendText(Text.literal(String.format("%d", role)).styled(style -> style.
+                                                            withBold(false).
+                                                            withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(String.format("Click to copy %d", role)))).
+                                                            withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, String.format("%d", role)))), Formatting.GRAY)).
+                                                    append(Text.literal(" ")).
+                                                    append(MarkEnum.CROSS.getFormattedIdentifier().styled(style -> style.
+                                                            withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(String.format("Click to delete %d", role)))).
+                                                            withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/%s %s validRoles remove %d", this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), role))))).
+                                                    append(i == roleCount-1 ? Text.literal("") : Text.literal("\n"));
+                                        }
+                                    }
+                                    context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/validRoles/list" + "\n").styled(style -> style.withBold(true)).
+                                            append(roles), false);
                                     return 1;
                                 })).
                         executes(context -> {
-                            String help = "Role list that a member needs to have (at least one) so dont get kicked from the whitelist (ex: sub role).";
-                            context.getSource().sendFeedback(() -> Text.literal(help), false);
+                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/validRoles\n").styled(style -> style.withBold(true)).
+                                    append(MarkEnum.INFO.appendMsg("Role list that a member needs to have (at least one) so dont get kicked from the whitelist (ex: sub role)\n", Formatting.GRAY).styled(style -> style.withBold(false))).
+                                    append(Text.literal("[Roles]").styled(style -> style.
+                                            withColor(Formatting.DARK_GRAY).
+                                            withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to display the already added valid role IDs"))).
+                                            withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/%s %s validRoles list", this.em.getSettingsBaseCommand(), this.extensionSettings().getName()))))), false);
                             return 1;
                         }));
     }
@@ -178,11 +207,25 @@ public class DiscordWhitelistSyncExtension extends GenericExtension implements E
         return sett;
     }
 
-    private MutableText getBooleanSettingMessage(boolean isNew, String subcommand, boolean enabled) {
+    private MutableText formatLongID(String prefix, long id, String suffix, boolean add, boolean applied) {
+        return Text.literal(prefix).styled(style -> style.withColor(Formatting.WHITE)).
+                append(Text.literal(String.format("%d", id)).styled(style -> style.
+                        withColor(Formatting.LIGHT_PURPLE).
+                        withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to copy ID to clipboard"))).
+                        withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, String.format("%d", id))))).
+                append(Text.literal(suffix).styled(style -> style.withColor(Formatting.WHITE))).
+                append(Text.literal(" ")).
+                append(applied ? ((add ? MarkEnum.CROSS.getFormattedIdentifier() : MarkEnum.TICK.getFormattedIdentifier()).styled(style -> style.
+                        withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, add ? Text.literal(String.format("Click to remove %d", id)) : Text.literal(String.format("Click to add %d", id)))).
+                        withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/%s %s validRoles %s %d", this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), add ? "remove" : "add", id))))
+                ) : Text.literal(""));
+    }
+
+    private MutableText getAggressiveBooleanSettingMessage(boolean isNew, boolean enabled) {
         MutableText s = this.booleanSetting(enabled);
         s.styled(style -> style.
-                withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/%s %s %s %b", this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), subcommand, enabled))));
-        return (isNew ? MarkEnum.TICK.appendMsg("Set ", Formatting.WHITE) : Text.literal("")).styled(style -> style.withBold(false)).append(Text.literal(String.format("%s: ", subcommand)).styled(style -> style.withColor(Formatting.WHITE))).append(s);
+                withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/%s %s %s %b", this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "aggressive", enabled))));
+        return (isNew ? MarkEnum.TICK.appendMsg("Set ", Formatting.WHITE) : Text.literal("")).styled(style -> style.withBold(false)).append(Text.literal(String.format("%s: ", "aggressive")).styled(style -> style.withColor(Formatting.WHITE))).append(s);
     }
 
     private MutableText booleanSetting(boolean enabled) {
