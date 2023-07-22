@@ -110,14 +110,14 @@ public class DiscordWhitelistSyncExtension extends GenericExtension implements E
                         then(argument("aggressive", BoolArgumentType.bool()).
                                 executes(context -> {
                                     extensionSettings().setAggressive(BoolArgumentType.getBool(context, "aggressive"));
-                                    context.getSource().sendFeedback(() -> Text.literal("[aggressive] > " + extensionSettings().isAggressive() + "."), false);
+                                    context.getSource().sendFeedback(() -> this.getBooleanSettingMessage(true, "aggressive", this.extensionSettings().isAggressive()), false);
                                     this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
-                            String help = "Full whitelist/database sync.";
-                            context.getSource().sendFeedback(() -> Text.literal(help), false);
-                            context.getSource().sendFeedback(() -> Text.literal("[aggressive] > " + extensionSettings().isAggressive() + "."), false);
+                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/" + "aggressive\n").styled(style -> style.withBold(true)).
+                                    append(MarkEnum.INFO.appendMsg("Full whitelist/database sync\n", Formatting.GRAY).styled(style -> style.withBold(false))).
+                                    append(this.getBooleanSettingMessage(false, "aggressive", this.extensionSettings().isAggressive())), false);
                             return 1;
                         })).
                 then(literal("validRoles").
@@ -164,17 +164,30 @@ public class DiscordWhitelistSyncExtension extends GenericExtension implements E
         return (isNew ? MarkEnum.TICK.appendMsg("New ", Formatting.WHITE) : Text.literal("")).styled(style -> style.withBold(false)).append(Text.literal(String.format("%s: ", subcommand)).styled(style -> style.withColor(Formatting.WHITE))).append(s);
     }
 
-    private MutableText longSetting(long actualGroupID) {
-        MutableText group;
-        if (actualGroupID != 0) {
-            group = Text.literal(String.format("%d", actualGroupID)).styled(style -> style.
+    private MutableText longSetting(long actualID) {
+        MutableText sett;
+        if (actualID != 0) {
+            sett = Text.literal(String.format("%d", actualID)).styled(style -> style.
                     withColor(Formatting.GREEN).
                     withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to edit!\nSet 0 to disable!"))));
         } else {
-            group = Text.literal("Not set!").styled(style -> style.
+            sett = Text.literal("Not set!").styled(style -> style.
                     withColor(Formatting.RED).
                     withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to add!"))));
         }
-        return group;
+        return sett;
+    }
+
+    private MutableText getBooleanSettingMessage(boolean isNew, String subcommand, boolean enabled) {
+        MutableText s = this.booleanSetting(enabled);
+        s.styled(style -> style.
+                withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/%s %s %s %b", this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), subcommand, enabled))));
+        return (isNew ? MarkEnum.TICK.appendMsg("Set ", Formatting.WHITE) : Text.literal("")).styled(style -> style.withBold(false)).append(Text.literal(String.format("%s: ", subcommand)).styled(style -> style.withColor(Formatting.WHITE))).append(s);
+    }
+
+    private MutableText booleanSetting(boolean enabled) {
+        return Text.literal(String.format("%b", enabled)).styled(style -> style.
+                withColor(enabled ? Formatting.GREEN : Formatting.RED).
+                withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to modify!"))));
     }
 }
