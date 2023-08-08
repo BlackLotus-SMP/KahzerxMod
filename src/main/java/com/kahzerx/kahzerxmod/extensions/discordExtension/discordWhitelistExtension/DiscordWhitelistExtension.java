@@ -518,8 +518,8 @@ public class DiscordWhitelistExtension extends DiscordGenericExtension implement
                                             long chat = this.extensionSettings().getWhitelistChats().get(i);
                                             chats.
                                                     append(MarkEnum.DOT.appendText(Text.literal(String.format("%d", chat)).styled(style -> style.
-                                                            withBold(false).
                                                             withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(String.format("Click to copy %d", chat)))).
+                                                            withBold(false).
                                                             withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, String.format("%d", chat)))), Formatting.GRAY)).
                                                     append(Text.literal(" ")).
                                                     append(MarkEnum.CROSS.getFormattedIdentifier().styled(style -> style.
