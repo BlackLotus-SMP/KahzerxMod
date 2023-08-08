@@ -8,7 +8,7 @@ import java.util.List;
 
 public class DiscordWhitelistSyncSettings extends ExtensionSettings {
     private long notifyChannelID;
-    private List<Long> validRoles;
+    private final List<Long> validRoles;
     private long groupID;
     private boolean aggressive;
     public DiscordWhitelistSyncSettings(HashMap<String, String> fileSettings, String name, String description) {

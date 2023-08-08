@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class DiscordWhitelistSettings extends ExtensionSettings {
-    private List<Long> whitelistChats;
+    private final List<Long> whitelistChats;
     private long discordRoleID;
     private int nPlayers;
     public DiscordWhitelistSettings(HashMap<String, String> fileSettings, String name, String description) {

@@ -10,9 +10,8 @@ public class DiscordSettings extends ExtensionSettings {
     private String token;
     private boolean crossServerChat;
     private String prefix;
-    private boolean running;
     private long chatChannelID;
-    private List<Long> allowedChats;
+    private final List<Long> allowedChats;
     private boolean shouldFeedback;
     public DiscordSettings(HashMap<String, String> fileSettings, String name, String description) {
         super(fileSettings, name, description);
@@ -20,7 +19,6 @@ public class DiscordSettings extends ExtensionSettings {
         this.token = file != null && file.getToken() != null ? file.getToken() : "";
         this.crossServerChat = file != null && file.isCrossServerChat();
         this.prefix = file != null && file.getPrefix() != null ? file.getPrefix() : "";  // TODO old ver: replaceAll(" ", "_") why
-        this.running = file != null && file.isRunning();
         this.chatChannelID = file != null ? file.getChatChannelID() : 0L;
         this.allowedChats = file != null && file.getAllowedChats() != null ? file.getAllowedChats() : new ArrayList<>();
         this.shouldFeedback = file != null && file.isShouldFeedback();
@@ -46,16 +44,8 @@ public class DiscordSettings extends ExtensionSettings {
         return prefix;
     }
 
-    public boolean isRunning() {
-        return running;
-    }
-
     public long getChatChannelID() {
         return chatChannelID;
-    }
-
-    public void setRunning(boolean running) {
-        this.running = running;
     }
 
     public List<Long> getAllowedChats() {
@@ -95,7 +85,6 @@ public class DiscordSettings extends ExtensionSettings {
                 ", token='" + token + '\'' +
                 ", crossServerChat=" + crossServerChat +
                 ", prefix='" + prefix + '\'' +
-                ", running=" + running +
                 ", chatChannelID=" + chatChannelID +
                 ", allowedChats=" + allowedChats +
                 ", shouldFeedback=" + shouldFeedback +

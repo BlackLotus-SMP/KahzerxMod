@@ -60,9 +60,7 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
 
     @Override
     public void onServerStop() {
-        if (extensionSettings().isRunning()) {
-            DiscordListener.stop();
-        }
+        DiscordListener.stop();
     }
 
     // TODO messages with translation keys
@@ -112,9 +110,6 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
 
     @Override
     public void onExtensionEnabled() {
-        if (!extensionSettings().isEnabled()) {
-            return;
-        }
         DiscordListener.start(KahzerxServer.minecraftServer, extensionSettings().getToken(), String.valueOf(extensionSettings().getChatChannelID()), this);
         DiscordListener.sendSysMessage("**Server is ON**", this.extensionSettings().getPrefix());
         PlayerUtils.reloadCommands();
@@ -124,10 +119,7 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
 
     @Override
     public void onExtensionDisabled() {
-        if (extensionSettings().isRunning()) {
-            DiscordListener.stop();
-        }
-        this.extensionSettings().setRunning(false);
+        DiscordListener.stop();
         PlayerUtils.reloadCommands();
     }
 
@@ -144,7 +136,7 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
                                         context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendMsg("This discord token is already set!"), false);
                                         return 1;
                                     }
-                                    boolean wasRunning = this.extensionSettings().isRunning();
+                                    boolean wasRunning = this.extensionSettings().isEnabled();
                                     if (wasRunning) {
                                         DiscordListener.stop();
                                         context.getSource().sendFeedback(() -> MarkEnum.INFO.appendMsg("Stopping the discord bot..."), false);
@@ -168,6 +160,10 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
                                 suggests((c, b) -> suggestMatching(new String[]{"0"}, b)).
                                 executes(context -> {
                                     this.extensionSettings().setChatChannelID(LongArgumentType.getLong(context, "chatChannelID"));
+                                    if (this.extensionSettings().getChatChannelID() == 0) {
+                                        DiscordListener.stop();
+                                        context.getSource().sendFeedback(() -> MarkEnum.INFO.appendMsg("Stopping the discord bot..."), false);
+                                    }
                                     context.getSource().sendFeedback(() -> this.getLongSettingMessage(true, "channelID", this.extensionSettings().getChatChannelID(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName()), false);
                                     this.em.saveSettings();
                                     return 1;
@@ -194,22 +190,26 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
                         })).
                 then(literal("prefix").
                         then(argument("prefix", StringArgumentType.string()).
+                                suggests((c, b) -> suggestMatching(new String[]{"SMP", "CMP"}, b)).
                                 executes(context -> {
-                                    extensionSettings().setPrefix(StringArgumentType.getString(context, "prefix"));
-                                    context.getSource().sendFeedback(() -> Text.literal("[Prefix] > " + extensionSettings().getPrefix() + "."), false);
+                                    String prefix = StringArgumentType.getString(context, "prefix");
+                                    if (prefix.equals("0")) {
+                                        prefix = "";
+                                    }
+                                    extensionSettings().setPrefix(prefix);
+                                    context.getSource().sendFeedback(() -> this.getStringSettingMessage(true, this.extensionSettings().getPrefix(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "prefix"), false);
                                     this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
-                            String help = "Server prefix.";
-                            context.getSource().sendFeedback(() -> Text.literal(help), false);
-                            String prefix = extensionSettings().getPrefix();
-                            context.getSource().sendFeedback(() -> Text.literal(prefix.equals("") ? "There is no prefix." : "[Prefix] > " + extensionSettings().getPrefix() + "."), false);
+                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/prefix\n").styled(style -> style.withBold(true)).
+                                    append(MarkEnum.INFO.appendMsg("Server prefix\n", Formatting.GRAY).styled(style -> style.withBold(false))).
+                                    append(this.getStringSettingMessage(false, this.extensionSettings().getPrefix(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "prefix")), false);
                             return 1;
                         })).
                 then(literal("crossServerChat").
                         then(argument("enabled", BoolArgumentType.bool()).
-                                executes(context -> {  // TODO on read config, evaluate if prefix exists, if not, disable crossServerChat
+                                executes(context -> {
                                     if (!this.extensionSettings().isCrossServerChat() && this.extensionSettings().getPrefix().equals("")) {
                                         context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendText(Text.literal("You need to set a ").
                                                 append(Text.literal("prefix").styled(style -> style.
