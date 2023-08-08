@@ -2,7 +2,7 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistSyncE
 
 import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.Extensions;
-import com.kahzerx.kahzerxmod.extensions.GenericExtension;
+import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordGenericExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension.DiscordWhitelistExtension;
 import com.kahzerx.kahzerxmod.utils.MarkEnum;
@@ -24,7 +24,7 @@ import static net.minecraft.command.CommandSource.suggestMatching;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
-public class DiscordWhitelistSyncExtension extends GenericExtension implements Extensions {
+public class DiscordWhitelistSyncExtension extends DiscordGenericExtension implements Extensions {
     private DiscordExtension discordExtension;
     private DiscordWhitelistExtension discordWhitelistExtension;
 
@@ -84,14 +84,14 @@ public class DiscordWhitelistSyncExtension extends GenericExtension implements E
                                 suggests((c, b) -> suggestMatching(new String[]{"0"}, b)).
                                 executes(context -> {
                                     this.extensionSettings().setNotifyChannelID(LongArgumentType.getLong(context, "chatID"));
-                                    context.getSource().sendFeedback(() -> this.getLongSettingMessage(true, "notifyChatID", this.extensionSettings().getNotifyChannelID()), false);
+                                    context.getSource().sendFeedback(() -> this.getLongSettingMessage(true, "notifyChatID", this.extensionSettings().getNotifyChannelID(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName()), false);
                                     this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
                             context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/notifyChatID\n").styled(style -> style.withBold(true)).
                                     append(MarkEnum.INFO.appendMsg("Channel where you get notified when someone gets removed from the whitelist\n", Formatting.GRAY).styled(style -> style.withBold(false))).
-                                    append(this.getLongSettingMessage(false, "notifyChatID", this.extensionSettings().getNotifyChannelID())), false);
+                                    append(this.getLongSettingMessage(false, "notifyChatID", this.extensionSettings().getNotifyChannelID(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName())), false);
                             return 1;
                         })).
                 then(literal("groupID").
@@ -99,14 +99,14 @@ public class DiscordWhitelistSyncExtension extends GenericExtension implements E
                                 suggests((c, b) -> suggestMatching(new String[]{"0"}, b)).
                                 executes(context -> {
                                     extensionSettings().setGroupID(LongArgumentType.getLong(context, "groupID"));
-                                    context.getSource().sendFeedback(() -> this.getLongSettingMessage(true, "groupID", this.extensionSettings().getGroupID()), false);
+                                    context.getSource().sendFeedback(() -> this.getLongSettingMessage(true, "groupID", this.extensionSettings().getGroupID(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName()), false);
                                     this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
                             context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/groupID\n").styled(style -> style.withBold(true)).
                                     append(MarkEnum.INFO.appendMsg("ServerID, to know where to check members\n", Formatting.GRAY).styled(style -> style.withBold(false))).
-                                    append(this.getLongSettingMessage(false, "groupID", this.extensionSettings().getGroupID())), false);
+                                    append(this.getLongSettingMessage(false, "groupID", this.extensionSettings().getGroupID(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName())), false);
                             return 1;
                         })).
                 then(literal("aggressive").
@@ -200,27 +200,6 @@ public class DiscordWhitelistSyncExtension extends GenericExtension implements E
                                             withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/%s %s validRoles list", this.em.getSettingsBaseCommand(), this.extensionSettings().getName()))))), false);
                             return 1;
                         }));
-    }
-
-    private MutableText getLongSettingMessage(boolean isNew, String subcommand, long actualID) {
-        MutableText s = this.longSetting(actualID);
-        s.styled(style -> style.
-                withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/%s %s %s %s", this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), subcommand, actualID != 0 ? String.format("%d", actualID) : ""))));
-        return (isNew ? MarkEnum.TICK.appendMsg("New ", Formatting.WHITE) : Text.literal("")).styled(style -> style.withBold(false)).append(Text.literal(String.format("%s: ", subcommand)).styled(style -> style.withColor(Formatting.WHITE))).append(s);
-    }
-
-    private MutableText longSetting(long actualID) {
-        MutableText sett;
-        if (actualID != 0) {
-            sett = Text.literal(String.format("%d", actualID)).styled(style -> style.
-                    withColor(Formatting.GREEN).
-                    withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to edit!\nSet 0 to disable!"))));
-        } else {
-            sett = Text.literal("Not set!").styled(style -> style.
-                    withColor(Formatting.RED).
-                    withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to add!"))));
-        }
-        return sett;
     }
 
     private MutableText formatLongID(String prefix, long id, String suffix, boolean add, boolean applied) {

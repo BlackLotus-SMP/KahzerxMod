@@ -3,8 +3,8 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExten
 import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.database.ServerQuery;
-import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordCommandsExtension;
+import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordGenericExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordListener;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.commands.AddCommand;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.commands.InfoCommand;
@@ -13,6 +13,7 @@ import com.kahzerx.kahzerxmod.extensions.discordExtension.commands.RemoveCommand
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordUtils;
+import com.kahzerx.kahzerxmod.utils.MarkEnum;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
@@ -24,6 +25,7 @@ import net.minecraft.server.*;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 import java.awt.*;
 import java.sql.*;
@@ -32,10 +34,11 @@ import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import static net.minecraft.command.CommandSource.suggestMatching;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
-public class DiscordWhitelistExtension extends GenericExtension implements Extensions, DiscordCommandsExtension {
+public class DiscordWhitelistExtension extends DiscordGenericExtension implements Extensions, DiscordCommandsExtension {
     private DiscordExtension discordExtension;
     private Connection conn;
 
@@ -426,36 +429,37 @@ public class DiscordWhitelistExtension extends GenericExtension implements Exten
         return false;
     }
 
-    // TODO refactor
     @Override
     public void settingsCommand(LiteralArgumentBuilder<ServerCommandSource> builder) {
-        builder.
+        builder.  // TODO Interact with the description and add functionality maybe other than just if its enabled and the description
                 then(literal("discordRoleID").
                         then(argument("discordRole", LongArgumentType.longArg()).
+                                suggests((c, b) -> suggestMatching(new String[]{"0"}, b)).
                                 executes(context -> {
-                                    extensionSettings().setDiscordRoleID(LongArgumentType.getLong(context, "discordRoleID"));
-                                    context.getSource().sendFeedback(() -> Text.literal("[discordRole] > " + extensionSettings().getDiscordRole() + "."), false);
+                                    extensionSettings().setDiscordRoleID(LongArgumentType.getLong(context, "discordRole"));
+                                    context.getSource().sendFeedback(() -> this.getLongSettingMessage(true, "discordRoleID", this.extensionSettings().getDiscordRole(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName()), false);
                                     this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
-                            String help = "Role that gets added to every discord user that !add s.";
-                            context.getSource().sendFeedback(() -> Text.literal(help), false);
-                            context.getSource().sendFeedback(() -> Text.literal("[discordRole] > " + extensionSettings().getDiscordRole() + "."), false);
+                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/discordRoleID\n").styled(style -> style.withBold(true)).
+                                    append(MarkEnum.INFO.appendMsg("Role that gets added to every discord user that runs the !add command successfully\n", Formatting.GRAY).styled(style -> style.withBold(false))).
+                                    append(this.getLongSettingMessage(false, "discordRoleID", this.extensionSettings().getDiscordRole(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName())), false);
                             return 1;
                         })).
                 then(literal("nPlayers").
                         then(argument("nPlayers", IntegerArgumentType.integer()).
+                                suggests((c, b) -> suggestMatching(new String[]{"0"}, b)).
                                 executes(context -> {
                                     extensionSettings().setNPlayers(IntegerArgumentType.getInteger(context, "nPlayers"));
-                                    context.getSource().sendFeedback(() -> Text.literal("[players] > " + extensionSettings().getNPlayers() + "."), false);
+                                    context.getSource().sendFeedback(() -> this.getLongSettingMessage(true, "nPlayers", this.extensionSettings().getNPlayers(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName()), false);
                                     this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
-                            String help = "Amount of players a discord user can add to the whitelist.";
-                            context.getSource().sendFeedback(() -> Text.literal(help), false);
-                            context.getSource().sendFeedback(() -> Text.literal("[players] > " + extensionSettings().getNPlayers() + "."), false);
+                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/nPlayers\n").styled(style -> style.withBold(true)).
+                                    append(MarkEnum.INFO.appendMsg("Amount of players a discord user can add to the whitelist\n", Formatting.GRAY).styled(style -> style.withBold(false))).
+                                    append(this.getLongSettingMessage(false, "nPlayers", this.extensionSettings().getNPlayers(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName())), false);
                             return 1;
                         })).
                 then(literal("whitelistChats").
