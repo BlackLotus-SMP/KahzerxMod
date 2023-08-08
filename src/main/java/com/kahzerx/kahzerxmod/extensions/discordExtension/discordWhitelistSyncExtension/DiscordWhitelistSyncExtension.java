@@ -20,6 +20,7 @@ import net.minecraft.util.Formatting;
 import java.util.HashMap;
 import java.util.Timer;
 
+import static net.minecraft.command.CommandSource.suggestMatching;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -77,9 +78,10 @@ public class DiscordWhitelistSyncExtension extends GenericExtension implements E
 
     @Override
     public void settingsCommand(LiteralArgumentBuilder<ServerCommandSource> builder) {
-        builder.
+        builder.  // TODO Interact with the description and add functionality maybe other than just if its enabled and the description
                 then(literal("notifyChatID").
                         then(argument("chatID", LongArgumentType.longArg()).
+                                suggests((c, b) -> suggestMatching(new String[]{"0"}, b)).
                                 executes(context -> {
                                     this.extensionSettings().setNotifyChannelID(LongArgumentType.getLong(context, "chatID"));
                                     context.getSource().sendFeedback(() -> this.getLongSettingMessage(true, "notifyChatID", this.extensionSettings().getNotifyChannelID()), false);
@@ -94,6 +96,7 @@ public class DiscordWhitelistSyncExtension extends GenericExtension implements E
                         })).
                 then(literal("groupID").
                         then(argument("groupID", LongArgumentType.longArg()).
+                                suggests((c, b) -> suggestMatching(new String[]{"0"}, b)).
                                 executes(context -> {
                                     extensionSettings().setGroupID(LongArgumentType.getLong(context, "groupID"));
                                     context.getSource().sendFeedback(() -> this.getLongSettingMessage(true, "groupID", this.extensionSettings().getGroupID()), false);
@@ -123,6 +126,7 @@ public class DiscordWhitelistSyncExtension extends GenericExtension implements E
                 then(literal("validRoles").
                         then(literal("add").
                                 then(argument("roleID", LongArgumentType.longArg()).
+                                        suggests((c, b) -> suggestMatching(new String[]{"1234"}, b)).
                                         executes(context -> {
                                             long role = LongArgumentType.getLong(context, "roleID");
                                             if (extensionSettings().getValidRoles().contains(role)) {
@@ -136,6 +140,7 @@ public class DiscordWhitelistSyncExtension extends GenericExtension implements E
                                         }))).
                         then(literal("remove").
                                 then(argument("roleID", LongArgumentType.longArg()).
+                                        suggests((c, b) -> suggestMatching(this.extensionSettings().getValidRoles().stream().map(Object::toString), b)).
                                         executes(context -> {
                                             long role = LongArgumentType.getLong(context, "roleID");
                                             if (extensionSettings().getValidRoles().contains(role)) {
@@ -150,14 +155,24 @@ public class DiscordWhitelistSyncExtension extends GenericExtension implements E
                         then(literal("list").
                                 executes(context -> {
                                     MutableText roles = Text.literal("");
-                                    if (this.extensionSettings().getValidRoles().size() == 0) {
+                                    int roleCount = this.extensionSettings().getValidRoles().size();
+                                    if (roleCount == 0) {
                                         roles.append(Text.literal("Not set!").styled(style -> style.
                                                 withColor(Formatting.RED).
                                                 withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to add!"))).
                                                 withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/%s %s validRoles add ", this.em.getSettingsBaseCommand(), this.extensionSettings().getName())))));
                                     } else {
-                                        int roleCount = this.extensionSettings().getValidRoles().size();
-                                        for (int i = 0; i < this.extensionSettings().getValidRoles().size(); i++) {
+                                        roles.
+                                                append(Text.literal("[+]").styled(style -> style.
+                                                        withColor(Formatting.GREEN).
+                                                        withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to add!"))).
+                                                        withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/%s %s validRoles add ", this.em.getSettingsBaseCommand(), this.extensionSettings().getName()))))).
+                                                append(Text.literal(" ")).
+                                                append(Text.literal("[-]\n").styled(style -> style.
+                                                        withColor(Formatting.RED).
+                                                        withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to remove!"))).
+                                                        withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/%s %s validRoles remove ", this.em.getSettingsBaseCommand(), this.extensionSettings().getName())))));
+                                        for (int i = 0; i < roleCount; i++) {
                                             long role = this.extensionSettings().getValidRoles().get(i);
                                             roles.
                                                     append(MarkEnum.DOT.appendText(Text.literal(String.format("%d", role)).styled(style -> style.
