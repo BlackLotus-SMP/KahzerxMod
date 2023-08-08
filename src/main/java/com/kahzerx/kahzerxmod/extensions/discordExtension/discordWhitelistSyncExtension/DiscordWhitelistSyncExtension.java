@@ -113,14 +113,14 @@ public class DiscordWhitelistSyncExtension extends DiscordGenericExtension imple
                         then(argument("aggressive", BoolArgumentType.bool()).
                                 executes(context -> {
                                     extensionSettings().setAggressive(BoolArgumentType.getBool(context, "aggressive"));
-                                    context.getSource().sendFeedback(() -> this.getAggressiveBooleanSettingMessage(true, this.extensionSettings().isAggressive()), false);
+                                    context.getSource().sendFeedback(() -> this.getAggressiveBooleanSettingMessage(true, this.extensionSettings().isAggressive(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "aggressive"), false);
                                     this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
                             context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/aggressive\n").styled(style -> style.withBold(true)).
                                     append(MarkEnum.INFO.appendMsg("Full whitelist/database sync\n", Formatting.GRAY).styled(style -> style.withBold(false))).
-                                    append(this.getAggressiveBooleanSettingMessage(false, this.extensionSettings().isAggressive())), false);
+                                    append(this.getAggressiveBooleanSettingMessage(false, this.extensionSettings().isAggressive(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "aggressive")), false);
                             return 1;
                         })).
                 then(literal("validRoles").
@@ -200,18 +200,5 @@ public class DiscordWhitelistSyncExtension extends DiscordGenericExtension imple
                                             withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/%s %s validRoles list", this.em.getSettingsBaseCommand(), this.extensionSettings().getName()))))), false);
                             return 1;
                         }));
-    }
-
-    private MutableText getAggressiveBooleanSettingMessage(boolean isNew, boolean enabled) {
-        MutableText s = this.booleanSetting(enabled);
-        s.styled(style -> style.
-                withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/%s %s %s %b", this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "aggressive", enabled))));
-        return (isNew ? MarkEnum.TICK.appendMsg("Set ", Formatting.WHITE) : Text.literal("")).styled(style -> style.withBold(false)).append(Text.literal(String.format("%s: ", "aggressive")).styled(style -> style.withColor(Formatting.WHITE))).append(s);
-    }
-
-    private MutableText booleanSetting(boolean enabled) {
-        return Text.literal(String.format("%b", enabled)).styled(style -> style.
-                withColor(enabled ? Formatting.GREEN : Formatting.RED).
-                withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to modify!"))));
     }
 }

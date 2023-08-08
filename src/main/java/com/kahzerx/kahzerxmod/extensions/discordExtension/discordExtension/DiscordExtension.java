@@ -25,6 +25,7 @@ import net.minecraft.util.Formatting;
 
 import java.util.HashMap;
 
+import static net.minecraft.command.CommandSource.suggestMatching;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -134,30 +135,60 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
     @Override
     public void settingsCommand(LiteralArgumentBuilder<ServerCommandSource> builder) {
         builder.  // TODO Interact with the description and add functionality maybe other than just if its enabled and the description
-                then(literal("setBot").
+                then(literal("token").
                         then(argument("token", StringArgumentType.string()).
-                                then(argument("chatChannelID", LongArgumentType.longArg()).
-                                        executes(context -> {
-                                            if (DiscordListener.chatbridge) {
-                                                context.getSource().sendFeedback(() -> Text.literal("Stop the bot before you make any changes..."), false);
-                                            } else {
-                                                extensionSettings().setToken(StringArgumentType.getString(context, "token"));
-                                                extensionSettings().setChatChannelID(LongArgumentType.getLong(context, "chatChannelID"));
-                                                context.getSource().sendFeedback(() -> Text.literal("Done!"), false);
-                                                this.em.saveSettings();
-                                            }
-                                            return 1;
-                                        })))).
-                then(literal("shouldFeedback").
-                        then(argument("feedback", BoolArgumentType.bool()).
+                                suggests((c, b) -> suggestMatching(new String[]{"0"}, b)).
                                 executes(context -> {
-                                    extensionSettings().setShouldFeedback(BoolArgumentType.getBool(context, "feedback"));
-                                    context.getSource().sendFeedback(() -> Text.literal("[shouldFeedback] > " + extensionSettings().isShouldFeedback() + "."), false);
+                                    String tok = StringArgumentType.getString(context, "token");
+                                    if (tok.equals(this.extensionSettings().getToken())) {
+                                        context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendMsg("This discord token is already set!"), false);
+                                        return 1;
+                                    }
+                                    boolean wasRunning = this.extensionSettings().isRunning();
+                                    if (wasRunning) {
+                                        DiscordListener.stop();
+                                        context.getSource().sendFeedback(() -> MarkEnum.INFO.appendMsg("Stopping the discord bot..."), false);
+                                    }
+                                    if (tok.equals("0")) {
+                                        context.getSource().sendFeedback(() -> MarkEnum.TICK.appendMsg("Discord Bot disabled!"), false);
+                                        return 1;
+                                    }
+                                    this.extensionSettings().setToken(tok);
+                                    context.getSource().sendFeedback(() -> this.getStringSettingMessage(true, "token", this.extensionSettings().getToken(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName()), false);
+                                    this.em.saveSettings();
+                                    if (wasRunning) {
+                                        // TODO start
+                                        context.getSource().sendFeedback(() -> MarkEnum.INFO.appendMsg("Restarting the discord bot..."), false);
+                                    }
+                                    return 1;
+                                }))).
+                then(literal("channelID").
+                        then(argument("chatChannelID", LongArgumentType.longArg()).
+                                suggests((c, b) -> suggestMatching(new String[]{"0"}, b)).
+                                executes(context -> {
+                                    this.extensionSettings().setChatChannelID(LongArgumentType.getLong(context, "chatChannelID"));
+                                    context.getSource().sendFeedback(() -> this.getLongSettingMessage(true, "channelID", this.extensionSettings().getChatChannelID(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName()), false);
                                     this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
-                            context.getSource().sendFeedback(() -> Text.literal("[shouldFeedback] > " + extensionSettings().isShouldFeedback() + "."), false);
+                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/channelID\n").styled(style -> style.withBold(true)).
+                                    append(MarkEnum.INFO.appendMsg("channelID, where chat messages should go to\n", Formatting.GRAY).styled(style -> style.withBold(false))).
+                                    append(this.getLongSettingMessage(false, "channelID", this.extensionSettings().getChatChannelID(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName())), false);
+                            return 1;
+                        })).
+                then(literal("shouldFeedback").
+                        then(argument("feedback", BoolArgumentType.bool()).
+                                executes(context -> {
+                                    this.extensionSettings().setShouldFeedback(BoolArgumentType.getBool(context, "feedback"));
+                                    context.getSource().sendFeedback(() -> this.getAggressiveBooleanSettingMessage(true, this.extensionSettings().isShouldFeedback(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "aggressive"), false);
+                                    this.em.saveSettings();
+                                    return 1;
+                                })).
+                        executes(context -> {
+                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/shouldFeedback\n").styled(style -> style.withBold(true)).
+                                    append(MarkEnum.INFO.appendMsg("The bot should respond to user commands\n", Formatting.GRAY).styled(style -> style.withBold(false))).
+                                    append(this.getAggressiveBooleanSettingMessage(false, this.extensionSettings().isShouldFeedback(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "shouldFeedback")), false);
                             return 1;
                         })).
                 then(literal("chatBridgePrefix").
