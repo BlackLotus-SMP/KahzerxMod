@@ -3,10 +3,11 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension;
 import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.KahzerxServer;
-import com.kahzerx.kahzerxmod.extensions.GenericExtension;
+import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordGenericExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordListener;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordSendCommand;
 import com.kahzerx.kahzerxmod.klone.KlonePlayerEntity;
+import com.kahzerx.kahzerxmod.utils.MarkEnum;
 import com.kahzerx.kahzerxmod.utils.PlayerUtils;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
@@ -16,14 +17,18 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 import java.util.HashMap;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
-public class DiscordExtension extends GenericExtension implements Extensions {
+public class DiscordExtension extends DiscordGenericExtension implements Extensions {
     private ExtensionManager em = null;
 
     public DiscordExtension(HashMap<String, String> fileSettings) {
@@ -128,7 +133,7 @@ public class DiscordExtension extends GenericExtension implements Extensions {
     // TODO ugly prints
     @Override
     public void settingsCommand(LiteralArgumentBuilder<ServerCommandSource> builder) {
-        builder.
+        builder.  // TODO Interact with the description and add functionality maybe other than just if its enabled and the description
                 then(literal("setBot").
                         then(argument("token", StringArgumentType.string()).
                                 then(argument("chatChannelID", LongArgumentType.longArg()).
@@ -143,33 +148,6 @@ public class DiscordExtension extends GenericExtension implements Extensions {
                                             }
                                             return 1;
                                         })))).
-                then(literal("stop").
-                        executes(context -> {
-                            if (DiscordListener.chatbridge) {
-                                DiscordListener.stop();
-                                this.extensionSettings().setRunning(false);
-                                context.getSource().sendFeedback(() -> Text.literal("Bot stopped!"), false);
-                                this.em.saveSettings();
-                            } else {
-                                context.getSource().sendFeedback(() -> Text.literal("Bot already stopped."), false);
-                            }
-                            return 1;
-                        })).
-                then(literal("start").
-                        executes(context -> {
-                            if (!DiscordListener.chatbridge) {
-                                DiscordListener.start(KahzerxServer.minecraftServer, extensionSettings().getToken(), String.valueOf(extensionSettings().getChatChannelID()), this);
-                                if (DiscordListener.chatbridge) {
-                                    context.getSource().sendFeedback(() -> Text.literal("Started!"), false);
-                                } else {
-                                    context.getSource().sendFeedback(() -> Text.literal("Failed to start."), false);
-                                }
-                                this.em.saveSettings();
-                            } else {
-                                context.getSource().sendFeedback(() -> Text.literal("But is already running."), false);
-                            }
-                            return 1;
-                        })).
                 then(literal("shouldFeedback").
                         then(argument("feedback", BoolArgumentType.bool()).
                                 executes(context -> {
@@ -219,11 +197,12 @@ public class DiscordExtension extends GenericExtension implements Extensions {
                         then(literal("add").
                                 then(argument("chatID", LongArgumentType.longArg()).
                                         executes(context -> {
-                                            if (extensionSettings().getAllowedChats().contains(LongArgumentType.getLong(context, "chatID"))) {
-                                                context.getSource().sendFeedback(() -> Text.literal("ID already added."), false);
+                                            long chat = LongArgumentType.getLong(context, "chatID");
+                                            if (extensionSettings().getAllowedChats().contains(chat)) {
+                                                context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendText(this.formatLongID("The chat ID ", chat, " was already on the list", true, false, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "allowedChats")), false);
                                             } else {
-                                                extensionSettings().addAllowedChatID(LongArgumentType.getLong(context, "chatID"));
-                                                context.getSource().sendFeedback(() -> Text.literal("ID added."), false);
+                                                extensionSettings().addAllowedChatID(chat);
+                                                context.getSource().sendFeedback(() -> MarkEnum.TICK.appendText(this.formatLongID("The chat with ID ", chat, " has been", true, true, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "allowedChats")), false);
                                                 this.em.saveSettings();
                                             }
                                             return 1;
@@ -231,23 +210,62 @@ public class DiscordExtension extends GenericExtension implements Extensions {
                         then(literal("remove").
                                 then(argument("chatID", LongArgumentType.longArg()).
                                         executes(context -> {
-                                            if (extensionSettings().getAllowedChats().contains(LongArgumentType.getLong(context, "chatID"))) {
-                                                extensionSettings().removeAllowedChatID(LongArgumentType.getLong(context, "chatID"));
-                                                context.getSource().sendFeedback(() -> Text.literal("ID removed."), false);
+                                            long chat = LongArgumentType.getLong(context, "chatID");
+                                            if (extensionSettings().getAllowedChats().contains(chat)) {
+                                                this.extensionSettings().removeAllowedChatID(chat);
+                                                context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendText(this.formatLongID("The chat with ID ", chat, " has been", false, true, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "allowedChats")), false);
                                                 this.em.saveSettings();
                                             } else {
-                                                context.getSource().sendFeedback(() -> Text.literal("This ID doesn't exist."), false);
+                                                context.getSource().sendFeedback(() -> MarkEnum.TICK.appendText(this.formatLongID("The chat ID ", chat, " does not exist!", false, false, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "allowedChats")), false);
                                             }
                                             return 1;
                                         }))).
                         then(literal("list").
                                 executes(context -> {
-                                    context.getSource().sendFeedback(() -> Text.literal(extensionSettings().getAllowedChats().toString()), false);
+                                    MutableText chats = Text.literal("");
+                                    int chatCount = this.extensionSettings().getAllowedChats().size();
+                                    if (chatCount == 0) {
+                                        chats.append(Text.literal("Not set!").styled(style -> style.
+                                                withColor(Formatting.RED).
+                                                withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to add!"))).
+                                                withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/%s %s allowedChats add ", this.em.getSettingsBaseCommand(), this.extensionSettings().getName())))));
+                                    } else {
+                                        chats.
+                                                append(Text.literal("[+]").styled(style -> style.
+                                                        withColor(Formatting.GREEN).
+                                                        withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to add!"))).
+                                                        withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/%s %s allowedChats add ", this.em.getSettingsBaseCommand(), this.extensionSettings().getName()))))).
+                                                append(Text.literal(" ")).
+                                                append(Text.literal("[-]\n").styled(style -> style.
+                                                        withColor(Formatting.RED).
+                                                        withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to remove!"))).
+                                                        withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/%s %s allowedChats remove ", this.em.getSettingsBaseCommand(), this.extensionSettings().getName())))));
+                                        for (int i = 0; i < chatCount; i++) {
+                                            long chat = this.extensionSettings().getAllowedChats().get(i);
+                                            chats.
+                                                    append(MarkEnum.DOT.appendText(Text.literal(String.format("%d", chat)).styled(style -> style.
+                                                            withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(String.format("Click to copy %d", chat)))).
+                                                            withBold(false).
+                                                            withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, String.format("%d", chat)))), Formatting.GRAY)).
+                                                    append(Text.literal(" ")).
+                                                    append(MarkEnum.CROSS.getFormattedIdentifier().styled(style -> style.
+                                                            withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(String.format("Click to delete %d", chat)))).
+                                                            withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/%s %s allowedChats remove %d", this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), chat))))).
+                                                    append(i == chatCount-1 ? Text.literal("") : Text.literal("\n"));
+                                        }
+                                    }
+                                    context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/allowedChats/list" + "\n").styled(style -> style.withBold(true)).
+                                            append(chats), false);
                                     return 1;
                                 })).
                         executes(context -> {
-                            String help = "ChatIDs where !online work.";
-                            context.getSource().sendFeedback(() -> Text.literal(help), false);
+                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/allowedChats\n").styled(style -> style.withBold(true)).
+                                    append(MarkEnum.INFO.appendMsg("Chats where !online work\n", Formatting.GRAY).styled(style -> style.withBold(false))).
+                                    append(Text.literal("[Chats]").styled(style -> style.
+                                            withColor(Formatting.DARK_GRAY).
+                                            withUnderline(true).
+                                            withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to display the already added whitelist chat IDs"))).
+                                            withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/%s %s allowedChats list", this.em.getSettingsBaseCommand(), this.extensionSettings().getName()))))), false);
                             return 1;
                         }));
     }
