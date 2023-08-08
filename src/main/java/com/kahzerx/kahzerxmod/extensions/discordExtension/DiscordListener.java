@@ -67,7 +67,6 @@ public class DiscordListener extends ListenerAdapter {
             chatbridge = true;
         } catch (LoginException | InterruptedException e) {
             e.printStackTrace();
-            System.err.println("REMEMBER TO SET A BOT CORRECTLY!");
         }
     }
 

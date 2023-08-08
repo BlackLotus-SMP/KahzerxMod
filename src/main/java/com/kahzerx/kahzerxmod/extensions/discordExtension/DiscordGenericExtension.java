@@ -77,7 +77,7 @@ public abstract class DiscordGenericExtension extends GenericExtension {
         return sett;
     }
 
-    protected MutableText getAggressiveBooleanSettingMessage(boolean isNew, boolean enabled, String baseCommand, String extensionName, String subcommand) {
+    protected MutableText getBooleanSettingMessage(boolean isNew, boolean enabled, String baseCommand, String extensionName, String subcommand) {
         MutableText s = this.booleanSetting(enabled);
         s.styled(style -> style.
                 withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/%s %s %s %b", baseCommand, extensionName, subcommand, enabled))));

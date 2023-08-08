@@ -150,6 +150,7 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
                                         context.getSource().sendFeedback(() -> MarkEnum.INFO.appendMsg("Stopping the discord bot..."), false);
                                     }
                                     if (tok.equals("0")) {
+                                        this.extensionSettings().setToken("");
                                         context.getSource().sendFeedback(() -> MarkEnum.TICK.appendMsg("Discord Bot disabled!"), false);
                                         return 1;
                                     }
@@ -157,7 +158,7 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
                                     context.getSource().sendFeedback(() -> this.getStringSettingMessage(true, "token", this.extensionSettings().getToken(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName()), false);
                                     this.em.saveSettings();
                                     if (wasRunning) {
-                                        // TODO start
+                                        // TODO start discord bot
                                         context.getSource().sendFeedback(() -> MarkEnum.INFO.appendMsg("Restarting the discord bot..."), false);
                                     }
                                     return 1;
@@ -181,17 +182,17 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
                         then(argument("feedback", BoolArgumentType.bool()).
                                 executes(context -> {
                                     this.extensionSettings().setShouldFeedback(BoolArgumentType.getBool(context, "feedback"));
-                                    context.getSource().sendFeedback(() -> this.getAggressiveBooleanSettingMessage(true, this.extensionSettings().isShouldFeedback(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "aggressive"), false);
+                                    context.getSource().sendFeedback(() -> this.getBooleanSettingMessage(true, this.extensionSettings().isShouldFeedback(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "shouldFeedback"), false);
                                     this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
                             context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/shouldFeedback\n").styled(style -> style.withBold(true)).
                                     append(MarkEnum.INFO.appendMsg("The bot should respond to user commands\n", Formatting.GRAY).styled(style -> style.withBold(false))).
-                                    append(this.getAggressiveBooleanSettingMessage(false, this.extensionSettings().isShouldFeedback(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "shouldFeedback")), false);
+                                    append(this.getBooleanSettingMessage(false, this.extensionSettings().isShouldFeedback(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "shouldFeedback")), false);
                             return 1;
                         })).
-                then(literal("chatBridgePrefix").
+                then(literal("prefix").
                         then(argument("prefix", StringArgumentType.string()).
                                 executes(context -> {
                                     extensionSettings().setPrefix(StringArgumentType.getString(context, "prefix"));
@@ -208,20 +209,25 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
                         })).
                 then(literal("crossServerChat").
                         then(argument("enabled", BoolArgumentType.bool()).
-                                executes(context -> {
-                                    if (extensionSettings().getPrefix().equals("")) {
-                                        context.getSource().sendFeedback(() -> Text.literal("You need to set a prefix!"), false);
+                                executes(context -> {  // TODO on read config, evaluate if prefix exists, if not, disable crossServerChat
+                                    if (!this.extensionSettings().isCrossServerChat() && this.extensionSettings().getPrefix().equals("")) {
+                                        context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendText(Text.literal("You need to set a ").
+                                                append(Text.literal("prefix").styled(style -> style.
+                                                        withColor(Formatting.DARK_GREEN).
+                                                        withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to set a prefix"))).
+                                                        withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/%s %s prefix ", this.em.getSettingsBaseCommand(), this.extensionSettings().getName()))))).
+                                                append(Text.literal(" first!"))), false);
                                         return 1;
                                     }
                                     extensionSettings().setCrossServerChat(BoolArgumentType.getBool(context, "enabled"));
-                                    context.getSource().sendFeedback(() -> Text.literal("[CrossServerChat] > " + extensionSettings().isCrossServerChat() + "."), false);
+                                    context.getSource().sendFeedback(() -> this.getBooleanSettingMessage(true, this.extensionSettings().isShouldFeedback(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "crossServerChat"), false);
                                     this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
-                            String help = "Same bot(same token) on same chatID and different prefix on many servers will connect their chats.";
-                            context.getSource().sendFeedback(() -> Text.literal(help), false);
-                            context.getSource().sendFeedback(() -> Text.literal("[CrossServerChat] > " + extensionSettings().isCrossServerChat() + "."), false);
+                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/crossServerChat\n").styled(style -> style.withBold(true)).
+                                    append(MarkEnum.INFO.appendMsg("Same bot(same token) on same chatID and different prefix on many servers will connect their chats\n", Formatting.GRAY).styled(style -> style.withBold(false))).
+                                    append(this.getBooleanSettingMessage(false, this.extensionSettings().isCrossServerChat(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "crossServerChat")), false);
                             return 1;
                         })).
                 then(literal("allowedChats").
