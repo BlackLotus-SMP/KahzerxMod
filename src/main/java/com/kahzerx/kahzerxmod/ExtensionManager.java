@@ -69,6 +69,7 @@ public class ExtensionManager {
         return this.extensions;
     }
 
+    // TODO force func call on setters?
     public void saveSettings() {
         List<Object> settingsArray = new ArrayList<>();
         for (Extensions ex : this.extensions.values()) {

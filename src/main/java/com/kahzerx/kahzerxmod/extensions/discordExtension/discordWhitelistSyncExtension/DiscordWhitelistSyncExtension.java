@@ -130,10 +130,10 @@ public class DiscordWhitelistSyncExtension extends DiscordGenericExtension imple
                                         executes(context -> {
                                             long role = LongArgumentType.getLong(context, "roleID");
                                             if (extensionSettings().getValidRoles().contains(role)) {
-                                                context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendText(this.formatLongID("The role ID ", role, " was already on the list", true, false)), false);
+                                                context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendText(this.formatLongID("The role ID ", role, " was already on the list", true, false, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "validRoles")), false);
                                             } else {
                                                 extensionSettings().addValidRoleID(role);
-                                                context.getSource().sendFeedback(() -> MarkEnum.TICK.appendText(this.formatLongID("The role with ID ", role, " has been", true, true)), false);
+                                                context.getSource().sendFeedback(() -> MarkEnum.TICK.appendText(this.formatLongID("The role with ID ", role, " has been", true, true, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "validRoles")), false);
                                                 this.em.saveSettings();
                                             }
                                             return 1;
@@ -145,10 +145,10 @@ public class DiscordWhitelistSyncExtension extends DiscordGenericExtension imple
                                             long role = LongArgumentType.getLong(context, "roleID");
                                             if (extensionSettings().getValidRoles().contains(role)) {
                                                 extensionSettings().removeValidRoleID(role);
-                                                context.getSource().sendFeedback(() -> MarkEnum.TICK.appendText(this.formatLongID("The role with ID ", role, " has been", false, true)), false);
+                                                context.getSource().sendFeedback(() -> MarkEnum.TICK.appendText(this.formatLongID("The role with ID ", role, " has been", false, true, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "validRoles")), false);
                                                 this.em.saveSettings();
                                             } else {
-                                                context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendText(this.formatLongID("The role ID ", role," does not exist!", false, false)), false);
+                                                context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendText(this.formatLongID("The role ID ", role," does not exist!", false, false, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "validRoles")), false);
                                             }
                                             return 1;
                                         }))).
@@ -200,27 +200,6 @@ public class DiscordWhitelistSyncExtension extends DiscordGenericExtension imple
                                             withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/%s %s validRoles list", this.em.getSettingsBaseCommand(), this.extensionSettings().getName()))))), false);
                             return 1;
                         }));
-    }
-
-    private MutableText formatLongID(String prefix, long id, String suffix, boolean add, boolean applied) {
-        return Text.literal(prefix).styled(style -> style.withColor(Formatting.WHITE)).
-                append(Text.literal(String.format("%d", id)).styled(style -> style.
-                        withColor(Formatting.DARK_GREEN).
-                        withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to copy ID to clipboard"))).
-                        withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, String.format("%d", id))))).
-                append(Text.literal(suffix).styled(style -> style.withColor(Formatting.WHITE))).
-                append(Text.literal(" ")).
-                append(applied ?
-                        (add ?
-                            Text.literal("added").styled(style -> style.
-                                    withColor(Formatting.GREEN).
-                                    withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(String.format("Click to remove %d", id)))).
-                                    withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/%s %s validRoles %s %d", this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "remove", id)))) :
-                            Text.literal("removed").styled(style -> style.
-                                    withColor(Formatting.RED).
-                                    withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(String.format("Click to add %d", id)))).
-                                    withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/%s %s validRoles %s %d", this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "add", id))))) :
-                        Text.literal(""));
     }
 
     private MutableText getAggressiveBooleanSettingMessage(boolean isNew, boolean enabled) {

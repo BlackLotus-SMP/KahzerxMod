@@ -24,6 +24,9 @@ import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.minecraft.server.*;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
@@ -465,36 +468,78 @@ public class DiscordWhitelistExtension extends DiscordGenericExtension implement
                 then(literal("whitelistChats").
                         then(literal("add").
                                 then(argument("chatID", LongArgumentType.longArg()).
+                                        suggests((c, b) -> suggestMatching(new String[]{"1234"}, b)).
                                         executes(context -> {
-                                            if (extensionSettings().getWhitelistChats().contains(LongArgumentType.getLong(context, "chatID"))) {
-                                                context.getSource().sendFeedback(() -> Text.literal("ID already added."), false);
+                                            long chat = LongArgumentType.getLong(context, "chatID");
+                                            if (extensionSettings().getWhitelistChats().contains(chat)) {
+                                                context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendText(this.formatLongID("The chat ID ", chat, " was already on the list", true, false, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "whitelistChats")), false);
                                             } else {
-                                                extensionSettings().addWhitelistChatID(LongArgumentType.getLong(context, "chatID"));
-                                                context.getSource().sendFeedback(() -> Text.literal("ID added."), false);
+                                                extensionSettings().addWhitelistChatID(chat);
+                                                context.getSource().sendFeedback(() -> MarkEnum.TICK.appendText(this.formatLongID("The chat with ID ", chat, " has been", true, true, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "whitelistChats")), false);
                                                 this.em.saveSettings();
                                             }
                                             return 1;
                                         }))).
                         then(literal("remove").
                                 then(argument("chatID", LongArgumentType.longArg()).
+                                        suggests((c, b) -> suggestMatching(this.extensionSettings().getWhitelistChats().stream().map(Object::toString), b)).
                                         executes(context -> {
-                                            if (extensionSettings().getWhitelistChats().contains(LongArgumentType.getLong(context, "chatID"))) {
-                                                extensionSettings().removeWhitelistChatID(LongArgumentType.getLong(context, "chatID"));
-                                                context.getSource().sendFeedback(() -> Text.literal("ID removed."), false);
+                                            long chat = LongArgumentType.getLong(context, "chatID");
+                                            if (extensionSettings().getWhitelistChats().contains(chat)) {
+                                                this.extensionSettings().removeWhitelistChatID(chat);
+                                                context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendText(this.formatLongID("The chat with ID ", chat, " has been", false, true, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "whitelistChats")), false);
                                                 this.em.saveSettings();
                                             } else {
-                                                context.getSource().sendFeedback(() -> Text.literal("This ID doesn't exist."), false);
+                                                context.getSource().sendFeedback(() -> MarkEnum.TICK.appendText(this.formatLongID("The chat ID ", chat, " does not exist!", false, false, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "whitelistChats")), false);
                                             }
                                             return 1;
                                         }))).
                         then(literal("list").
                                 executes(context -> {
-                                    context.getSource().sendFeedback(() -> Text.literal(extensionSettings().getWhitelistChats().toString()), false);
+                                    MutableText chats = Text.literal("");
+                                    int chatCount = this.extensionSettings().getWhitelistChats().size();
+                                    if (chatCount == 0) {
+                                        chats.append(Text.literal("Not set!").styled(style -> style.
+                                                withColor(Formatting.RED).
+                                                withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to add!"))).
+                                                withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/%s %s whitelistChats add ", this.em.getSettingsBaseCommand(), this.extensionSettings().getName())))));
+                                    } else {
+                                        chats.
+                                                append(Text.literal("[+]").styled(style -> style.
+                                                        withColor(Formatting.GREEN).
+                                                        withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to add!"))).
+                                                        withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/%s %s whitelistChats add ", this.em.getSettingsBaseCommand(), this.extensionSettings().getName()))))).
+                                                append(Text.literal(" ")).
+                                                append(Text.literal("[-]\n").styled(style -> style.
+                                                        withColor(Formatting.RED).
+                                                        withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to remove!"))).
+                                                        withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/%s %s whitelistChats remove ", this.em.getSettingsBaseCommand(), this.extensionSettings().getName())))));
+                                        for (int i = 0; i < chatCount; i++) {
+                                            long chat = this.extensionSettings().getWhitelistChats().get(i);
+                                            chats.
+                                                    append(MarkEnum.DOT.appendText(Text.literal(String.format("%d", chat)).styled(style -> style.
+                                                            withBold(false).
+                                                            withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(String.format("Click to copy %d", chat)))).
+                                                            withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, String.format("%d", chat)))), Formatting.GRAY)).
+                                                    append(Text.literal(" ")).
+                                                    append(MarkEnum.CROSS.getFormattedIdentifier().styled(style -> style.
+                                                            withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(String.format("Click to delete %d", chat)))).
+                                                            withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/%s %s whitelistChats remove %d", this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), chat))))).
+                                                    append(i == chatCount-1 ? Text.literal("") : Text.literal("\n"));
+                                        }
+                                    }
+                                    context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/whitelistChats/list" + "\n").styled(style -> style.withBold(true)).
+                                            append(chats), false);
                                     return 1;
                                 })).
                         executes(context -> {
-                            String help = "ChatIDs where !add, !remove y !list work.";
-                            context.getSource().sendFeedback(() -> Text.literal(help), false);
+                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/whitelistChats\n").styled(style -> style.withBold(true)).
+                                    append(MarkEnum.INFO.appendMsg("Chats where !info, !add, !remove y !list work\n", Formatting.GRAY).styled(style -> style.withBold(false))).
+                                    append(Text.literal("[Chats]").styled(style -> style.
+                                            withColor(Formatting.DARK_GRAY).
+                                            withUnderline(true).
+                                            withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to display the already added whitelist chat IDs"))).
+                                            withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/%s %s whitelistChats list", this.em.getSettingsBaseCommand(), this.extensionSettings().getName()))))), false);
                             return 1;
                         }));
     }

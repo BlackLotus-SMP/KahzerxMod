@@ -42,6 +42,7 @@ public class KahzerxServer {
         extensionManager.getExtensions().forEach((k, e) -> e.onRegisterCommands(dispatcher, commandRegistryAccess));
 
         // TODO command of reload, from file, check diffs and apply
+        // TODO refactor so you know which extension depends on which extension for dep tree on disable
         LiteralArgumentBuilder<ServerCommandSource> settingsCommand = literal(SETTINGS_BASE_COMMAND).
                 requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(2));  // TODO this has to be customizable for CMPs
         for (Extensions ex : extensionManager.getExtensions().values()) {
