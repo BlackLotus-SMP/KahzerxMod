@@ -3,8 +3,8 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension;
 import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.KahzerxServer;
+import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordBot;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordGenericExtension;
-import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordListener;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordSendCommand;
 import com.kahzerx.kahzerxmod.klone.KlonePlayerEntity;
 import com.kahzerx.kahzerxmod.utils.MarkEnum;
@@ -31,6 +31,7 @@ import static net.minecraft.server.command.CommandManager.literal;
 
 public class DiscordExtension extends DiscordGenericExtension implements Extensions {
     private ExtensionManager em = null;
+    private DiscordBot bot;
 
     public DiscordExtension(HashMap<String, String> fileSettings) {
         super(new DiscordSettings(fileSettings, "discord", "Connects minecraft chat + some events with a discord chat (chatbridge). Prefix is necessary if you want crossServerChat to work properly and not having duplicated messages."));
@@ -50,17 +51,22 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
             extensionSettings().setCrossServerChat(false);
             this.em.saveSettings();
         }
-        DiscordListener.start(minecraftServer, extensionSettings().getToken(), String.valueOf(extensionSettings().getChatChannelID()), this);
+        this.bot = new DiscordBot(minecraftServer, this);
+        this.getBot().start();
+    }
+
+    public DiscordBot getBot() {
+        return bot;
     }
 
     @Override
     public void onServerStarted(MinecraftServer minecraftServer) {
-        DiscordListener.sendSysMessage("**Server is ON**", this.extensionSettings().getPrefix());
+        this.getBot().sendSysMessage("**Server is ON**", this.extensionSettings().getPrefix());
     }
 
     @Override
     public void onServerStop() {
-        DiscordListener.stop();
+        this.getBot().stop();
     }
 
     // TODO messages with translation keys
@@ -68,34 +74,34 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
     public void onPlayerJoined(ServerPlayerEntity player) {
         boolean isBot = player.getClass() == KlonePlayerEntity.class;
         String msg = ":arrow_right: **" + player.getName().getString().replace("_", "\\_") + (isBot ? " [Bot]" : "") + " joined the game!**";
-        DiscordListener.sendSysMessage(msg, this.extensionSettings().getPrefix());
+        this.getBot().sendSysMessage(msg, this.extensionSettings().getPrefix());
     }
 
     @Override
     public void onPlayerLeft(ServerPlayerEntity player) {
         boolean isBot = player.getClass() == KlonePlayerEntity.class;
         String msg = ":arrow_left: **" + player.getName().getString().replace("_", "\\_") + (isBot ? " [Bot]" : "") + " left the game!**";
-        DiscordListener.sendSysMessage(msg, this.extensionSettings().getPrefix());
+        this.getBot().sendSysMessage(msg, this.extensionSettings().getPrefix());
     }
 
     @Override
     public void onPlayerDied(ServerPlayerEntity player) {
         boolean isBot = player.getClass() == KlonePlayerEntity.class;
         String msg = ":skull_crossbones: **" + player.getDamageTracker().getDeathMessage().getString().replace("_", "\\_") + (isBot ? " [Bot]" : "") + "**";
-        DiscordListener.sendSysMessage(msg, this.extensionSettings().getPrefix());
+        this.getBot().sendSysMessage(msg, this.extensionSettings().getPrefix());
     }
 
     @Override
     public void onChatMessage(ServerPlayerEntity player, String chatMessage) {
         if (chatMessage.startsWith("/me ") || !chatMessage.startsWith("/")) {
-            DiscordListener.sendChatMessage(player, chatMessage, this.extensionSettings().getPrefix());
+            this.getBot().sendChatMessage(player, chatMessage, this.extensionSettings().getPrefix());
         }
     }
 
     @Override
     public void onAdvancement(String advancement) {
         String msg = ":confetti_ball: **" + advancement + "**";
-        DiscordListener.sendSysMessage(msg, this.extensionSettings().getPrefix());
+        this.getBot().sendSysMessage(msg, this.extensionSettings().getPrefix());
     }
 
     @Override
@@ -110,8 +116,9 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
 
     @Override
     public void onExtensionEnabled() {
-        DiscordListener.start(KahzerxServer.minecraftServer, extensionSettings().getToken(), String.valueOf(extensionSettings().getChatChannelID()), this);
-        DiscordListener.sendSysMessage("**Server is ON**", this.extensionSettings().getPrefix());
+        this.bot = new DiscordBot(KahzerxServer.minecraftServer, this);
+        this.getBot().start();
+        this.getBot().sendSysMessage("**Server is ON**", this.extensionSettings().getPrefix());
         PlayerUtils.reloadCommands();
     }
 
@@ -119,7 +126,7 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
 
     @Override
     public void onExtensionDisabled() {
-        DiscordListener.stop();
+        this.getBot().stop();
         PlayerUtils.reloadCommands();
     }
 
@@ -138,7 +145,7 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
                                     }
                                     boolean wasRunning = this.extensionSettings().isEnabled();
                                     if (wasRunning) {
-                                        DiscordListener.stop();
+                                        this.getBot().stop();
                                         context.getSource().sendFeedback(() -> MarkEnum.INFO.appendMsg("Stopping the discord bot..."), false);
                                     }
                                     if (tok.equals("0")) {
@@ -150,8 +157,8 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
                                     context.getSource().sendFeedback(() -> this.getStringSettingMessage(true, "token", this.extensionSettings().getToken(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName()), false);
                                     this.em.saveSettings();
                                     if (wasRunning) {
-                                        // TODO start discord bot
                                         context.getSource().sendFeedback(() -> MarkEnum.INFO.appendMsg("Restarting the discord bot..."), false);
+                                        this.getBot().start();
                                     }
                                     return 1;
                                 }))).
@@ -161,9 +168,10 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
                                 executes(context -> {
                                     this.extensionSettings().setChatChannelID(LongArgumentType.getLong(context, "chatChannelID"));
                                     if (this.extensionSettings().getChatChannelID() == 0) {
-                                        DiscordListener.stop();
+                                        this.getBot().stop();
                                         context.getSource().sendFeedback(() -> MarkEnum.INFO.appendMsg("Stopping the discord bot..."), false);
                                     }
+                                    this.getBot().onUpdateChannelID();
                                     context.getSource().sendFeedback(() -> this.getLongSettingMessage(true, "channelID", this.extensionSettings().getChatChannelID(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName()), false);
                                     this.em.saveSettings();
                                     return 1;
