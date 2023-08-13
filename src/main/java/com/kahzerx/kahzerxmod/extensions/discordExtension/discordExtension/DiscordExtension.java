@@ -6,6 +6,8 @@ import com.kahzerx.kahzerxmod.KahzerxServer;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordBot;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordGenericExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordSendCommand;
+import com.kahzerx.kahzerxmod.extensions.discordExtension.commands.OnlineCommand;
+import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordUtils;
 import com.kahzerx.kahzerxmod.klone.KlonePlayerEntity;
 import com.kahzerx.kahzerxmod.utils.MarkEnum;
 import com.kahzerx.kahzerxmod.utils.PlayerUtils;
@@ -14,6 +16,7 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -35,9 +38,11 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
     private static final Logger LOGGER = LogManager.getLogger();
     private ExtensionManager em = null;
     private DiscordBot bot;
+    private final OnlineCommand onlineCommand = new OnlineCommand();
 
     public DiscordExtension(HashMap<String, String> fileSettings) {
         super(new DiscordSettings(fileSettings, "discord", "Connects minecraft chat + some events with a discord chat (chatbridge). Prefix is necessary if you want crossServerChat to work properly and not having duplicated messages."));
+        this.addCommands(onlineCommand);
     }
 
     @Override
@@ -62,6 +67,23 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
             this.em.saveSettings();
             this.onExtensionDisabled();
         }
+    }
+
+    @Override
+    protected boolean processCommands(MessageReceivedEvent event, String message, MinecraftServer server) {
+        if (!this.extensionSettings().isEnabled()) {
+            return false;
+        }
+        if (!DiscordUtils.isAllowed(event.getChannel().getIdLong(), this.extensionSettings().getAllowedChats())) {
+            if (message.startsWith(this.onlineCommand.getCommandPrefix() + this.onlineCommand.getBody())) {
+                return true;
+            }
+        }
+        if (message.equals(this.onlineCommand.getCommandPrefix() + this.onlineCommand.getBody())) {
+            this.onlineCommand.execute(event, server, this.extensionSettings().getPrefix(), this.extensionSettings().getAllowedChats());
+            return true;
+        }
+        return false;
     }
 
     public DiscordBot getBot() {

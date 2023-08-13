@@ -51,7 +51,7 @@ public class GenericCommand {
         return commandPrefix;
     }
 
-    public void setPrefix(String commandPrefix) {
+    public void setCommandPrefix(String commandPrefix) {
         this.commandPrefix = commandPrefix;
     }
 

@@ -9,6 +9,7 @@ import com.kahzerx.kahzerxmod.utils.MarkEnum;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.ClickEvent;
@@ -200,5 +201,10 @@ public class DiscordWhitelistSyncExtension extends DiscordGenericExtension imple
                                             withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/%s %s validRoles list", this.em.getSettingsBaseCommand(), this.extensionSettings().getName()))))), false);
                             return 1;
                         }));
+    }
+
+    @Override
+    protected boolean processCommands(MessageReceivedEvent event, String message, MinecraftServer server) {
+        return false;
     }
 }

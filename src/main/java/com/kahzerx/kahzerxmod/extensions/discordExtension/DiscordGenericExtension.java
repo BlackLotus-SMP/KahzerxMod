@@ -2,16 +2,33 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension;
 
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
+import com.kahzerx.kahzerxmod.extensions.discordExtension.commands.GenericCommand;
 import com.kahzerx.kahzerxmod.utils.MarkEnum;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public abstract class DiscordGenericExtension extends GenericExtension {
+    private final ArrayList<GenericCommand> commands = new ArrayList<>();
     public DiscordGenericExtension(ExtensionSettings settings) {
         super(settings);
+    }
+
+    protected abstract boolean processCommands(MessageReceivedEvent event, String message, MinecraftServer server);
+
+    protected void addCommands(GenericCommand... c) {
+        this.commands.addAll(Arrays.asList(c));
+    }
+
+    public ArrayList<GenericCommand> getCommands() {
+        return commands;
     }
 
     protected MutableText formatLongID(String prefix, long id, String suffix, boolean add, boolean applied, String baseCommand, String extensionName, String subcommand) {

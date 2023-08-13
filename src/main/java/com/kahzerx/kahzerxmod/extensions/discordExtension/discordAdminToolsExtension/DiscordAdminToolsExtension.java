@@ -2,9 +2,7 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension.discordAdminToolsExte
 
 import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.Extensions;
-import com.kahzerx.kahzerxmod.extensions.GenericExtension;
-import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordCommandsExtension;
-import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordListener;
+import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordGenericExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.commands.BanCommand;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.commands.ExaddCommand;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.commands.ExremoveCommand;
@@ -25,19 +23,20 @@ import java.util.HashMap;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
-public class DiscordAdminToolsExtension extends GenericExtension implements Extensions, DiscordCommandsExtension {
+public class DiscordAdminToolsExtension extends DiscordGenericExtension implements Extensions {
     private DiscordExtension discordExtension;
     private DiscordWhitelistExtension discordWhitelistExtension;
 
     private ExtensionManager em = null;
 
-    private final BanCommand banCommand = new BanCommand(DiscordListener.commandPrefix);
-    private final PardonCommand pardonCommand = new PardonCommand(DiscordListener.commandPrefix);
-    private final ExaddCommand exaddCommand = new ExaddCommand(DiscordListener.commandPrefix);
-    private final ExremoveCommand exremoveCommand = new ExremoveCommand(DiscordListener.commandPrefix);
+    private final BanCommand banCommand = new BanCommand();
+    private final PardonCommand pardonCommand = new PardonCommand();
+    private final ExaddCommand exaddCommand = new ExaddCommand();
+    private final ExremoveCommand exremoveCommand = new ExremoveCommand();
 
     public DiscordAdminToolsExtension(HashMap<String, String> fileSettings) {
         super(new DiscordAdminToolsSettings(fileSettings, "discordAdminTools", "Enables !ban, !pardon, !exadd, !exremove on discord AdminChats."));
+        this.addCommands(this.banCommand, this.pardonCommand, this.exaddCommand, this.exremoveCommand);
     }
 
     @Override
@@ -57,16 +56,7 @@ public class DiscordAdminToolsExtension extends GenericExtension implements Exte
 
     @Override
     public void onServerRun(MinecraftServer minecraftServer) {
-        if (!this.getSettings().isEnabled()) {
-            return;
-        }
-        if (!discordExtension.getSettings().isEnabled()) {
-            return;
-        }
-        if (!discordWhitelistExtension.getSettings().isEnabled()) {
-            return;
-        }
-        DiscordListener.discordExtensions.add(this);
+        this.getDiscordExtension().getBot().addExtensions(this);
     }
 
     @Override
@@ -76,46 +66,43 @@ public class DiscordAdminToolsExtension extends GenericExtension implements Exte
 
     @Override
     public void onExtensionEnabled() {
-        if (!DiscordListener.discordExtensions.contains(this)) {
-            DiscordListener.discordExtensions.add(this);
-        }
+        this.getDiscordExtension().getBot().addExtensions(this);
+
     }
 
     @Override
-    public void onExtensionDisabled() {
-        DiscordListener.discordExtensions.remove(this);
-    }
+    public void onExtensionDisabled() {}
 
     @Override
     public boolean processCommands(MessageReceivedEvent event, String message, MinecraftServer server) {
         if (!this.getSettings().isEnabled()) {
             return false;
         }
-        if (!discordExtension.getSettings().isEnabled()) {
+        if (!this.getDiscordExtension().getSettings().isEnabled()) {
             return false;
         }
-        if (!discordWhitelistExtension.getSettings().isEnabled()) {
+        if (!this.discordWhitelistExtension.getSettings().isEnabled()) {
             return false;
         }
         if (!DiscordUtils.isAllowed(event.getChannel().getIdLong(), this.extensionSettings().getAdminChats())) {
-            if (message.startsWith(DiscordListener.commandPrefix + banCommand.getBody())
-                    || message.startsWith(DiscordListener.commandPrefix + pardonCommand.getBody())
-                    || message.startsWith(DiscordListener.commandPrefix + exaddCommand.getBody())
-                    || message.startsWith(DiscordListener.commandPrefix + exremoveCommand.getBody())) {
+            if (message.startsWith(this.banCommand.getCommandPrefix() + this.banCommand.getBody())
+                    || message.startsWith(this.pardonCommand.getCommandPrefix() + this.pardonCommand.getBody())
+                    || message.startsWith(this.exaddCommand.getCommandPrefix() + this.exaddCommand.getBody())
+                    || message.startsWith(this.exremoveCommand.getCommandPrefix() + this.exremoveCommand.getBody())) {
                 return true;
             }
         }
-        if (message.startsWith(DiscordListener.commandPrefix + banCommand.getBody() + " ")) {
-            banCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), discordWhitelistExtension, this);
+        if (message.startsWith(this.banCommand.getCommandPrefix() + this.banCommand.getBody() + " ")) {
+            this.banCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), discordWhitelistExtension, this);
             return true;
-        } else if (message.startsWith(DiscordListener.commandPrefix + pardonCommand.getBody() + " ")) {
-            pardonCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), discordWhitelistExtension, this);
+        } else if (message.startsWith(this.pardonCommand.getCommandPrefix() + this.pardonCommand.getBody() + " ")) {
+            this.pardonCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), discordWhitelistExtension, this);
             return true;
-        } else if (message.startsWith(DiscordListener.commandPrefix + exaddCommand.getBody() + " ")) {
-            exaddCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), discordWhitelistExtension, this);
+        } else if (message.startsWith(this.exaddCommand.getCommandPrefix() + this.exaddCommand.getBody() + " ")) {
+            this.exaddCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), discordWhitelistExtension, this);
             return true;
-        } else if (message.startsWith(DiscordListener.commandPrefix + exremoveCommand.getBody() + " ")) {
-            exremoveCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), discordWhitelistExtension, this);
+        } else if (message.startsWith(this.exremoveCommand.getCommandPrefix() + this.exremoveCommand.getBody() + " ")) {
+            this.exremoveCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), discordWhitelistExtension, this);
             return true;
         }
         return false;

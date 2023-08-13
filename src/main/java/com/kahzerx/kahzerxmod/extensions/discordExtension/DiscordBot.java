@@ -2,7 +2,7 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension;
 
 import club.minnced.discord.webhook.WebhookClient;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
-import com.kahzerx.kahzerxmod.extensions.discordExtension.commands.OnlineCommand;
+import com.kahzerx.kahzerxmod.extensions.discordExtension.commands.GenericCommand;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
 import net.dv8tion.jda.api.JDA;
@@ -18,15 +18,13 @@ import javax.security.auth.login.LoginException;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO refactor
 public class DiscordBot extends ListenerAdapter implements DiscordBotInterface {
     private final MinecraftServer server;
     private final DiscordExtension discordExtension;
-    private final String PREFIX = "!";  // TODO custom?
-    private final OnlineCommand onlineCommand = new OnlineCommand(PREFIX);
+    private String prefix = "!";  // TODO custom?
     private JDA jda = null;
     private WebhookClient whc;
-    private final List<DiscordCommandsExtension> discordExtensions = new ArrayList<>();
+    private final List<DiscordGenericExtension> discordExtensions = new ArrayList<>();
 
     public DiscordBot(MinecraftServer server, DiscordExtension discordExtension) {  // TODO slash commands?
         this.server = server;
@@ -43,6 +41,15 @@ public class DiscordBot extends ListenerAdapter implements DiscordBotInterface {
             this.jda = null;
             e.printStackTrace();
             return false;
+        }
+    }
+
+    public void updatePrefix(String prefix) {  // TODO update prefix on command
+        this.prefix = prefix;
+        for (DiscordGenericExtension extension : this.discordExtensions) {
+            for (GenericCommand command : extension.getCommands()) {
+                command.setCommandPrefix(prefix);
+            }
         }
     }
 
@@ -75,17 +82,14 @@ public class DiscordBot extends ListenerAdapter implements DiscordBotInterface {
         }
     }
 
-    public void addExtensions(DiscordCommandsExtension... extensions) {
-        for (DiscordCommandsExtension e : extensions) {
+    public void addExtensions(DiscordGenericExtension... extensions) {
+        for (DiscordGenericExtension e : extensions) {
             if (!this.discordExtensions.contains(e)) {
                 this.discordExtensions.add(e);
             }
-        }
-    }
-
-    public void removeExtensions(DiscordCommandsExtension... extensions) {
-        for (DiscordCommandsExtension e : extensions) {
-            this.discordExtensions.remove(e);
+            for (GenericCommand command : e.getCommands()) {
+                command.setCommandPrefix(prefix);
+            }
         }
     }
 
@@ -104,12 +108,7 @@ public class DiscordBot extends ListenerAdapter implements DiscordBotInterface {
         }
 
         String message = event.getMessage().getContentRaw();
-        if (message.equals(this.PREFIX + onlineCommand.getBody())) {
-            onlineCommand.execute(event, server, this.discordExtension.extensionSettings().getPrefix(), this.discordExtension.extensionSettings().getAllowedChats());
-            return;
-        }
-
-        for (DiscordCommandsExtension extension : this.discordExtensions) {  // TODO slash commands?
+        for (DiscordGenericExtension extension : this.discordExtensions) {  // TODO slash commands?
             if (extension.processCommands(event, message, server)) {
                 return;
             }

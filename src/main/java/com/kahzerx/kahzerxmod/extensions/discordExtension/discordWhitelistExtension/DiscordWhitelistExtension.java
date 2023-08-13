@@ -3,7 +3,6 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExten
 import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.database.ServerQuery;
-import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordCommandsExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordGenericExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.commands.AddCommand;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.commands.InfoCommand;
@@ -40,7 +39,7 @@ import static net.minecraft.command.CommandSource.suggestMatching;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
-public class DiscordWhitelistExtension extends DiscordGenericExtension implements Extensions, DiscordCommandsExtension {
+public class DiscordWhitelistExtension extends DiscordGenericExtension implements Extensions {
     private DiscordExtension discordExtension;
     private Connection conn;
 
@@ -54,7 +53,8 @@ public class DiscordWhitelistExtension extends DiscordGenericExtension implement
     private final InfoCommand infoCommand = new InfoCommand();
 
     public DiscordWhitelistExtension(HashMap<String, String> fileSettings) {
-        super(new DiscordWhitelistSettings(fileSettings, "discordWhitelist", "Enables !list, !add and !remove commands along with nPlayers that specifies how many minecraft players a discord user can add; There is also an optional discordRole that will be given to the discord user on !add and deleted on !remove."));
+        super(new DiscordWhitelistSettings(fileSettings, "discordWhitelist", "Enables !list, !info, !add and !remove commands along with nPlayers that specifies how many minecraft players a discord user can add; There is also an optional discordRole that will be given to the discord user on !add and deleted on !remove."));
+        this.addCommands(this.addCommand, this.removeCommand, this.listCommand, this.infoCommand);
     }
 
     @Override
@@ -102,13 +102,13 @@ public class DiscordWhitelistExtension extends DiscordGenericExtension implement
 
     @Override
     public void onServerRun(MinecraftServer minecraftServer) {
+        this.getDiscordExtension().getBot().addExtensions(this);
         if (!this.getSettings().isEnabled()) {
             return;
         }
         if (!discordExtension.getSettings().isEnabled()) {
             return;
         }
-        DiscordListener.discordExtensions.add(this);
         isExtensionEnabled = true;
     }
 
@@ -380,14 +380,12 @@ public class DiscordWhitelistExtension extends DiscordGenericExtension implement
 
     @Override
     public void onExtensionEnabled() {
-        this.getDiscordExtension().getBot().addExtensions(this);
         this.onCreateDatabase(this.conn);
         isExtensionEnabled = true;
     }
 
     @Override
     public void onExtensionDisabled() {
-        this.getDiscordExtension().getBot().removeExtensions(this);
         isExtensionEnabled = false;
     }
 
@@ -396,14 +394,14 @@ public class DiscordWhitelistExtension extends DiscordGenericExtension implement
         if (!this.getSettings().isEnabled()) {
             return false;
         }
-        if (!discordExtension.getSettings().isEnabled()) {
+        if (!this.getDiscordExtension().getSettings().isEnabled()) {
             return false;
         }
         if (!DiscordUtils.isAllowed(event.getChannel().getIdLong(), this.extensionSettings().getWhitelistChats())) {
-            if (message.startsWith(DiscordListener.commandPrefix + addCommand.getBody())
-                    || message.startsWith(DiscordListener.commandPrefix + removeCommand.getBody())
-                    || message.startsWith(DiscordListener.commandPrefix + listCommand.getBody())
-                    || message.startsWith(DiscordListener.commandPrefix + infoCommand.getBody())) {
+            if (message.startsWith(this.addCommand.getCommandPrefix() + this.addCommand.getBody())
+                    || message.startsWith(this.removeCommand.getCommandPrefix() + this.removeCommand.getBody())
+                    || message.startsWith(this.listCommand.getCommandPrefix() + this.listCommand.getBody())
+                    || message.startsWith(this.infoCommand.getCommandPrefix() + this.infoCommand.getBody())) {
                 EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**This is not the channel!!! >:(**"}, discordExtension.extensionSettings().getPrefix(), true, Color.RED, true, getDiscordExtension().extensionSettings().isShouldFeedback());
                 if (embed != null) {
                     event.getMessage().delete().queueAfter(2, TimeUnit.SECONDS);
@@ -413,16 +411,16 @@ public class DiscordWhitelistExtension extends DiscordGenericExtension implement
                 return true;
             }
         }
-        if (message.startsWith(DiscordListener.commandPrefix + addCommand.getBody() + " ")) {
+        if (message.startsWith(this.addCommand.getCommandPrefix() + addCommand.getBody() + " ")) {
             addCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), this);
             return true;
-        } else if (message.startsWith(DiscordListener.commandPrefix + removeCommand.getBody() + " ")) {
+        } else if (message.startsWith(this.removeCommand.getCommandPrefix() + removeCommand.getBody() + " ")) {
             removeCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), this);
             return true;
-        } else if (message.equals(DiscordListener.commandPrefix + listCommand.getBody())) {
+        } else if (message.equals(this.listCommand.getCommandPrefix() + listCommand.getBody())) {
             listCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), this);
             return true;
-        } else if (message.startsWith(DiscordListener.commandPrefix + infoCommand.getBody())) {
+        } else if (message.startsWith(this.infoCommand.getCommandPrefix() + infoCommand.getBody())) {
             infoCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), this);
             return true;
         }
