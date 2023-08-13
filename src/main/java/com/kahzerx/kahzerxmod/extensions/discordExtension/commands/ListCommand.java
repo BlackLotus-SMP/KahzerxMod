@@ -14,8 +14,8 @@ import java.util.List;
 
 
 public class ListCommand extends GenericCommand {
-    public ListCommand(String prefix) {
-        super("list", DiscordPermission.WHITELIST_CHAT, prefix + "list");
+    public ListCommand() {
+        super("list", DiscordPermission.WHITELIST_CHAT, false);
     }
 
     @Override

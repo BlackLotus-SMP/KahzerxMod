@@ -16,8 +16,8 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class PardonCommand extends GenericCommand {
-    public PardonCommand(String prefix) {
-        super("pardon", DiscordPermission.ADMIN_CHAT, prefix + "pardon <playerName>");
+    public PardonCommand() {
+        super("pardon", DiscordPermission.ADMIN_CHAT);
     }
 
     @Override

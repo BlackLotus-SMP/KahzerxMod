@@ -14,8 +14,8 @@ import java.util.Objects;
 import static com.kahzerx.kahzerxmod.extensions.fbiExtension.FBIExtension.getHiddenPlayers;
 
 public class OnlineCommand extends GenericCommand {
-    public OnlineCommand(String prefix) {
-        super("online", DiscordPermission.ALLOWED_CHAT, prefix + "online");
+    public OnlineCommand() {
+        super("online", DiscordPermission.ALLOWED_CHAT, false);
     }
 
     @Override

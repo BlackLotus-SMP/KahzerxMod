@@ -16,8 +16,8 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class ExaddCommand extends GenericCommand {
-    public ExaddCommand(String prefix) {
-        super("exadd", DiscordPermission.ADMIN_CHAT, prefix + "exadd <playerName>");
+    public ExaddCommand() {
+        super("exadd", DiscordPermission.ADMIN_CHAT);
     }
 
     @Override

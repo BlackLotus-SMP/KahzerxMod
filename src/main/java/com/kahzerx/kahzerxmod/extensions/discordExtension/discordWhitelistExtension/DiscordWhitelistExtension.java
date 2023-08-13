@@ -5,7 +5,6 @@ import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.database.ServerQuery;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordCommandsExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordGenericExtension;
-import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordListener;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.commands.AddCommand;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.commands.InfoCommand;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.commands.ListCommand;
@@ -49,10 +48,10 @@ public class DiscordWhitelistExtension extends DiscordGenericExtension implement
 
     private ExtensionManager em = null;
 
-    private final AddCommand addCommand = new AddCommand(DiscordListener.commandPrefix);
-    private final RemoveCommand removeCommand = new RemoveCommand(DiscordListener.commandPrefix);
-    private final ListCommand listCommand = new ListCommand(DiscordListener.commandPrefix);
-    private final InfoCommand infoCommand = new InfoCommand(DiscordListener.commandPrefix);
+    private final AddCommand addCommand = new AddCommand();
+    private final RemoveCommand removeCommand = new RemoveCommand();
+    private final ListCommand listCommand = new ListCommand();
+    private final InfoCommand infoCommand = new InfoCommand();
 
     public DiscordWhitelistExtension(HashMap<String, String> fileSettings) {
         super(new DiscordWhitelistSettings(fileSettings, "discordWhitelist", "Enables !list, !add and !remove commands along with nPlayers that specifies how many minecraft players a discord user can add; There is also an optional discordRole that will be given to the discord user on !add and deleted on !remove."));
@@ -381,16 +380,14 @@ public class DiscordWhitelistExtension extends DiscordGenericExtension implement
 
     @Override
     public void onExtensionEnabled() {
-        if (!DiscordListener.discordExtensions.contains(this)) {
-            DiscordListener.discordExtensions.add(this);
-        }
+        this.getDiscordExtension().getBot().addExtensions(this);
         this.onCreateDatabase(this.conn);
         isExtensionEnabled = true;
     }
 
     @Override
     public void onExtensionDisabled() {
-        DiscordListener.discordExtensions.remove(this);
+        this.getDiscordExtension().getBot().removeExtensions(this);
         isExtensionEnabled = false;
     }
 

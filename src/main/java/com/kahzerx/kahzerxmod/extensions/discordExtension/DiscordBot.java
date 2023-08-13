@@ -75,6 +75,20 @@ public class DiscordBot extends ListenerAdapter implements DiscordBotInterface {
         }
     }
 
+    public void addExtensions(DiscordCommandsExtension... extensions) {
+        for (DiscordCommandsExtension e : extensions) {
+            if (!this.discordExtensions.contains(e)) {
+                this.discordExtensions.add(e);
+            }
+        }
+    }
+
+    public void removeExtensions(DiscordCommandsExtension... extensions) {
+        for (DiscordCommandsExtension e : extensions) {
+            this.discordExtensions.remove(e);
+        }
+    }
+
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         if (event.getMessage().getContentDisplay().equals("")) {

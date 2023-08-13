@@ -16,8 +16,8 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class BanCommand extends GenericCommand {
-    public BanCommand(String prefix) {
-        super("ban", DiscordPermission.ADMIN_CHAT, prefix + "ban <playerName>");
+    public BanCommand() {
+        super("ban", DiscordPermission.ADMIN_CHAT);
     }
 
     @Override

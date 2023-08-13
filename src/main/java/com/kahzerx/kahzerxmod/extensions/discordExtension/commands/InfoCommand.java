@@ -31,8 +31,8 @@ import java.util.UUID;
 
 public class InfoCommand extends GenericCommand {
 
-    public InfoCommand(String prefix) {
-        super("info", DiscordPermission.WHITELIST_CHAT, prefix + "info <playerName> o " + prefix + "info");
+    public InfoCommand() {
+        super("info", DiscordPermission.WHITELIST_CHAT);
     }
 
     public void execute(MessageReceivedEvent event, MinecraftServer server, String serverPrefix, DiscordWhitelistExtension extension){
