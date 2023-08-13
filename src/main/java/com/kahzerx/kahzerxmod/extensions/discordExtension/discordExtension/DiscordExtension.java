@@ -255,15 +255,32 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
                                     if (prefix.equals("0")) {
                                         prefix = "";
                                     }
-                                    extensionSettings().setPrefix(prefix);
+                                    this.extensionSettings().setPrefix(prefix);
                                     context.getSource().sendFeedback(() -> this.getStringSettingMessage(true, this.extensionSettings().getPrefix(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "prefix"), false);
                                     this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
                             context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/prefix\n").styled(style -> style.withBold(true)).
-                                    append(MarkEnum.INFO.appendMsg("Server prefix\n", Formatting.GRAY).styled(style -> style.withBold(false))).
+                                    append(MarkEnum.INFO.appendMsg("Server prefix/name\n", Formatting.GRAY).styled(style -> style.withBold(false))).
                                     append(this.getStringSettingMessage(false, this.extensionSettings().getPrefix(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "prefix")), false);
+                            return 1;
+                        })).
+                then(literal("commandPrefix").
+                        then(argument("prefix", StringArgumentType.string()).
+                                suggests((c, b) -> suggestMatching(new String[]{"!", ";", "."}, b)).
+                                executes(context -> {
+                                    String prefix = StringArgumentType.getString(context, "prefix");
+                                    this.extensionSettings().setCommandPrefix(prefix);
+                                    this.getBot().updatePrefix(prefix);
+                                    context.getSource().sendFeedback(() -> this.getStringSettingMessage(true, this.extensionSettings().getPrefix(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "commandPrefix"), false);
+                                    this.em.saveSettings();
+                                    return 1;
+                                })).
+                        executes(context -> {
+                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/commandPrefix\n").styled(style -> style.withBold(true)).
+                                    append(MarkEnum.INFO.appendMsg("Discord command prefix\n", Formatting.GRAY).styled(style -> style.withBold(false))).
+                                    append(this.getStringSettingMessage(false, this.extensionSettings().getPrefix(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "commandPrefix")), false);
                             return 1;
                         })).
                 then(literal("crossServerChat").
