@@ -22,6 +22,8 @@ import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 
@@ -30,6 +32,7 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class DiscordExtension extends DiscordGenericExtension implements Extensions {
+    private static final Logger LOGGER = LogManager.getLogger();
     private ExtensionManager em = null;
     private DiscordBot bot;
 
@@ -52,7 +55,13 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
             this.em.saveSettings();
         }
         this.bot = new DiscordBot(minecraftServer, this);
-        this.getBot().start();
+        boolean started = this.getBot().start();
+        if (!started) {
+            LOGGER.error("Unable to start discord extension!");
+            this.extensionSettings().setEnabled(false);
+            this.em.saveSettings();
+            this.onExtensionDisabled();
+        }
     }
 
     public DiscordBot getBot() {
@@ -117,7 +126,14 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
     @Override
     public void onExtensionEnabled() {
         this.bot = new DiscordBot(KahzerxServer.minecraftServer, this);
-        this.getBot().start();
+        boolean started = this.getBot().start();
+        if (!started) {
+            LOGGER.error("Unable to start discord extension!");
+            this.extensionSettings().setEnabled(false);
+            this.em.saveSettings();
+            this.onExtensionDisabled();
+            return;
+        }
         this.getBot().sendSysMessage("**Server is ON**", this.extensionSettings().getPrefix());
         PlayerUtils.reloadCommands();
     }
@@ -130,7 +146,6 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
         PlayerUtils.reloadCommands();
     }
 
-    // TODO ugly prints
     @Override
     public void settingsCommand(LiteralArgumentBuilder<ServerCommandSource> builder) {
         builder.  // TODO Interact with the description and add functionality maybe other than just if its enabled and the description
@@ -158,7 +173,15 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
                                     this.em.saveSettings();
                                     if (wasRunning) {
                                         context.getSource().sendFeedback(() -> MarkEnum.INFO.appendMsg("Restarting the discord bot..."), false);
-                                        this.getBot().start();
+                                        boolean started = this.getBot().start();
+                                        if (!started) {
+                                            LOGGER.error("Unable to start discord extension!");
+                                            context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendMsg("There has been an error trying to start the discord bot, check the console for more information"), false);
+                                            this.extensionSettings().setEnabled(false);
+                                            this.em.saveSettings();
+                                            this.onExtensionDisabled();
+                                            return 1;
+                                        }
                                     }
                                     return 1;
                                 }))).
@@ -171,9 +194,13 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
                                         this.getBot().stop();
                                         context.getSource().sendFeedback(() -> MarkEnum.INFO.appendMsg("Stopping the discord bot..."), false);
                                     }
-                                    this.getBot().onUpdateChannelID();
                                     context.getSource().sendFeedback(() -> this.getLongSettingMessage(true, "channelID", this.extensionSettings().getChatChannelID(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName()), false);
                                     this.em.saveSettings();
+                                    boolean webhooksUpdated = this.getBot().onUpdateChannelID();
+                                    if (!webhooksUpdated) {
+                                        context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendMsg("There has been an error trying to use this chat channel ID, check the console for more information"), false);
+                                        this.onExtensionDisabled();
+                                    }
                                     return 1;
                                 })).
                         executes(context -> {

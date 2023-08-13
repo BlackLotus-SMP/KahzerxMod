@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 // TODO refactor
-public class DiscordBot extends ListenerAdapter {
+public class DiscordBot extends ListenerAdapter implements DiscordBotInterface {
     private final MinecraftServer server;
     private final DiscordExtension discordExtension;
     private final String PREFIX = "!";  // TODO custom?
@@ -33,23 +33,27 @@ public class DiscordBot extends ListenerAdapter {
         this.discordExtension = discordExtension;
     }
 
-    public void setJda(JDA jda) {
-        this.jda = jda;
-    }
-
     public boolean start() {
         try {
             this.jda = JDABuilder.createDefault(discordExtension.extensionSettings().getToken()).addEventListeners(this).build();
             this.jda.awaitReady();
             this.updateWebHooks();
             return true;
-        } catch (LoginException | InterruptedException ignored) {
+        } catch (LoginException | InterruptedException e) {
+            this.jda = null;
+            e.printStackTrace();
             return false;
         }
     }
 
-    public void onUpdateChannelID() {
-        this.updateWebHooks();
+    public boolean onUpdateChannelID() {
+        try {
+            this.updateWebHooks();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     private void updateWebHooks() {
@@ -61,15 +65,13 @@ public class DiscordBot extends ListenerAdapter {
         for (Webhook webdook : webhookList) {
             if (webdook.getName().equals("ChatBridge")) {
                 webhookFlag = true;
-                String WebhookUrl = webdook.getUrl();
-                this.whc = WebhookClient.withUrl(WebhookUrl);
+                this.whc = WebhookClient.withUrl(webdook.getUrl());
                 break;
             }
         }
         if (!webhookFlag) {
             Webhook webook = jda.getTextChannelById(this.discordExtension.extensionSettings().getChatChannelID()).createWebhook("ChatBridge").complete();
-            String WebhookUrl = webook.getUrl();
-            this.whc = WebhookClient.withUrl(WebhookUrl);
+            this.whc = WebhookClient.withUrl(webook.getUrl());
         }
     }
 
@@ -111,7 +113,7 @@ public class DiscordBot extends ListenerAdapter {
     }
 
     public void sendChatMessage(ServerPlayerEntity player, String msg, String prefix) {
-        if (!this.jda.getStatus().isInit()) {
+        if (this.jda == null || !this.jda.getStatus().isInit()) {
             return;
         }
         WebhookMessageBuilder builder = new WebhookMessageBuilder();
@@ -128,7 +130,7 @@ public class DiscordBot extends ListenerAdapter {
     }
 
     public void sendSysMessage(String msg, String prefix) {
-        if (!this.jda.getStatus().isInit()) {
+        if (this.jda == null || !this.jda.getStatus().isInit()) {
             return;
         }
         WebhookMessageBuilder builder = new WebhookMessageBuilder();
@@ -143,8 +145,8 @@ public class DiscordBot extends ListenerAdapter {
     }
 
     public void stop() {
-        if (jda != null) {
-            jda.shutdownNow();
+        if (this.jda != null) {
+            this.jda.shutdownNow();
         }
     }
 }
