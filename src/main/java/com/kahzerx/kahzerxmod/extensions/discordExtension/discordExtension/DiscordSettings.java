@@ -95,6 +95,7 @@ public class DiscordSettings extends ExtensionSettings {
                 ", token='" + token + '\'' +
                 ", crossServerChat=" + crossServerChat +
                 ", prefix='" + prefix + '\'' +
+                ", commandPrefix='" + commandPrefix + '\'' +
                 ", chatChannelID=" + chatChannelID +
                 ", allowedChats=" + allowedChats +
                 ", shouldFeedback=" + shouldFeedback +
