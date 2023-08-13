@@ -33,12 +33,10 @@ import com.kahzerx.kahzerxmod.extensions.opOnWhitelistExtension.OpOnWhitelistExt
 import com.kahzerx.kahzerxmod.extensions.permsExtension.PermsExtension;
 import com.kahzerx.kahzerxmod.extensions.playerDropsSkullExtension.PlayerDropsSkullExtension;
 import com.kahzerx.kahzerxmod.extensions.prankExtension.PrankExtension;
-import com.kahzerx.kahzerxmod.extensions.profileExtension.ProfileExtension;
 import com.kahzerx.kahzerxmod.extensions.randomTPExtension.RandomTPExtension;
 import com.kahzerx.kahzerxmod.extensions.renewableElytraExtension.RenewableElytraExtension;
 import com.kahzerx.kahzerxmod.extensions.scoreboardExtension.ScoreboardExtension;
 import com.kahzerx.kahzerxmod.extensions.seedExtension.SeedExtension;
-import com.kahzerx.kahzerxmod.extensions.shopExtension.ShopExtension;
 import com.kahzerx.kahzerxmod.extensions.sitExtension.SitExtension;
 import com.kahzerx.kahzerxmod.extensions.skullExtension.SkullExtension;
 import com.kahzerx.kahzerxmod.extensions.slabExtension.SlabExtension;
@@ -103,7 +101,6 @@ public class ExtensionManager {
 
         this.registerExtension(new MemberExtension(fileSettings));
         this.registerExtension(new PermsExtension(fileSettings));
-        this.registerExtension(new ShopExtension(fileSettings));
         this.registerExtension(new HomeExtension(fileSettings));
         this.registerExtension(new BackExtension(fileSettings));
         this.registerExtension(new CameraExtension(fileSettings));
@@ -140,7 +137,7 @@ public class ExtensionManager {
         this.registerExtension(new FBIExtension(fileSettings));
         this.registerExtension(new OpOnWhitelistExtension(fileSettings));
         this.registerExtension(new BedTimeExtension(fileSettings));
-        this.registerExtension(new ProfileExtension(fileSettings));
+        // TODO bring back profile extension!
         this.registerExtension(new JoinMOTDExtension(fileSettings));
         this.registerExtension(new DiscordExtension(fileSettings));
         this.registerExtension(new DiscordWhitelistExtension(fileSettings));

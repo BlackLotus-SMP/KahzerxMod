@@ -50,13 +50,13 @@ public class DiscordAdminToolsExtension extends DiscordGenericExtension implemen
         }
     }
 
-    public DiscordExtension getDiscordExtension() {
-        return discordExtension;
+    @Override
+    public void onServerStarted(MinecraftServer minecraftServer) {
+        this.getDiscordExtension().getBot().addExtensions(this);
     }
 
-    @Override
-    public void onServerRun(MinecraftServer minecraftServer) {
-        this.getDiscordExtension().getBot().addExtensions(this);
+    public DiscordExtension getDiscordExtension() {
+        return discordExtension;
     }
 
     @Override
@@ -65,10 +65,7 @@ public class DiscordAdminToolsExtension extends DiscordGenericExtension implemen
     }
 
     @Override
-    public void onExtensionEnabled() {
-        this.getDiscordExtension().getBot().addExtensions(this);
-
-    }
+    public void onExtensionEnabled() {}
 
     @Override
     public void onExtensionDisabled() {}

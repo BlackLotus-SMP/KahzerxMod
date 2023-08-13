@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 public class GenericCommand {
     private final String body;
     private final DiscordPermission permission;
-    private String commandPrefix = "!";
+    private String commandPrefix = "";
     private final boolean needsPlayerParameter;
 
     public GenericCommand(String body, DiscordPermission permission) {

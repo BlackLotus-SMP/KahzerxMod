@@ -1,6 +1,5 @@
 package com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistSyncExtension;
 
-import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordListener;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension.DiscordWhitelistExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
@@ -44,7 +43,7 @@ public class DiscordWhitelistSyncThread extends TimerTask {
 
     @Override
     public void run() {
-        if (DiscordListener.jda == null) {
+        if (this.discordExtension.getBot().isReady()) {  // TODO check if it works
             return;
         }
         if (!this.discordExtension.extensionSettings().isEnabled() || !this.discordWhitelistExtension.extensionSettings().isEnabled() || !this.discordWhitelistSyncExtension.extensionSettings().isEnabled()) {
@@ -78,7 +77,7 @@ public class DiscordWhitelistSyncThread extends TimerTask {
         if (validRoles.isEmpty()) {
             return;
         }
-        Guild guild = DiscordListener.jda.getGuildById(discordWhitelistSyncExtension.extensionSettings().getGroupID());
+        Guild guild = this.discordExtension.getBot().getGuild(discordWhitelistSyncExtension.extensionSettings().getGroupID());
         if (guild == null) {
             LOGGER.error("WRONG SERVER GROUP ID");
             return;

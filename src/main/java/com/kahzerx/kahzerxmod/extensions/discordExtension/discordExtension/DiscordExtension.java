@@ -52,14 +52,15 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
 
     @Override
     public void onServerRun(MinecraftServer minecraftServer) {
+        this.bot = new DiscordBot(minecraftServer, this);
         if (!extensionSettings().isEnabled()) {
             return;
         }
         if (extensionSettings().getPrefix().equals("")) {
             extensionSettings().setCrossServerChat(false);
             this.em.saveSettings();
+            return;
         }
-        this.bot = new DiscordBot(minecraftServer, this);
         boolean started = this.getBot().start();
         if (!started) {
             LOGGER.error("Unable to start discord extension!");
@@ -92,6 +93,7 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
 
     @Override
     public void onServerStarted(MinecraftServer minecraftServer) {
+        this.getBot().addExtensions(this);
         this.getBot().sendSysMessage("**Server is ON**", this.extensionSettings().getPrefix());
     }
 

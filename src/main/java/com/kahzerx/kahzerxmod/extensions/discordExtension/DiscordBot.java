@@ -7,6 +7,7 @@ import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.Disco
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -126,7 +127,7 @@ public class DiscordBot extends ListenerAdapter implements DiscordBotInterface {
     }
 
     public void sendChatMessage(ServerPlayerEntity player, String msg, String prefix) {
-        if (this.jda == null || !this.jda.getStatus().isInit()) {
+        if (!this.isReady()) {
             return;
         }
         WebhookMessageBuilder builder = new WebhookMessageBuilder();
@@ -143,7 +144,7 @@ public class DiscordBot extends ListenerAdapter implements DiscordBotInterface {
     }
 
     public void sendSysMessage(String msg, String prefix) {
-        if (this.jda == null || !this.jda.getStatus().isInit()) {
+        if (!this.isReady()) {
             return;
         }
         WebhookMessageBuilder builder = new WebhookMessageBuilder();
@@ -161,6 +162,14 @@ public class DiscordBot extends ListenerAdapter implements DiscordBotInterface {
         if (this.jda != null) {
             this.jda.shutdownNow();
         }
+    }
+
+    public boolean isReady() {
+        return this.jda != null && this.jda.getStatus().isInit();
+    }
+
+    public Guild getGuild(long id) {
+        return this.jda.getGuildById(id);
     }
 }
 

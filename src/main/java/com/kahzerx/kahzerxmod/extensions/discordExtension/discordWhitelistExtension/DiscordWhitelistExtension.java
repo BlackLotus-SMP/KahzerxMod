@@ -102,7 +102,6 @@ public class DiscordWhitelistExtension extends DiscordGenericExtension implement
 
     @Override
     public void onServerRun(MinecraftServer minecraftServer) {
-        this.getDiscordExtension().getBot().addExtensions(this);
         if (!this.getSettings().isEnabled()) {
             return;
         }
@@ -110,6 +109,11 @@ public class DiscordWhitelistExtension extends DiscordGenericExtension implement
             return;
         }
         isExtensionEnabled = true;
+    }
+
+    @Override
+    public void onServerStarted(MinecraftServer minecraftServer) {
+        this.getDiscordExtension().getBot().addExtensions(this);
     }
 
     public boolean isDiscordBanned(long discordID) {
@@ -391,10 +395,10 @@ public class DiscordWhitelistExtension extends DiscordGenericExtension implement
 
     @Override
     public boolean processCommands(MessageReceivedEvent event, String message, MinecraftServer server) {
-        if (!this.getSettings().isEnabled()) {
+        if (!this.extensionSettings().isEnabled()) {
             return false;
         }
-        if (!this.getDiscordExtension().getSettings().isEnabled()) {
+        if (!this.getDiscordExtension().extensionSettings().isEnabled()) {
             return false;
         }
         if (!DiscordUtils.isAllowed(event.getChannel().getIdLong(), this.extensionSettings().getWhitelistChats())) {
