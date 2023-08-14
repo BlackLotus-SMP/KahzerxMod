@@ -3,6 +3,7 @@ package com.kahzerx.kahzerxmod.extensions.fckPrivacyExtension;
 import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,8 +30,8 @@ public class FckPrivacyExtension extends GenericExtension implements Extensions 
     }
 
     @Override
-    public void onExtensionEnabled() { }
+    public void onExtensionEnabled(ServerCommandSource source) { }
 
     @Override
-    public void onExtensionDisabled() { }
+    public void onExtensionDisabled(ServerCommandSource source) { }
 }

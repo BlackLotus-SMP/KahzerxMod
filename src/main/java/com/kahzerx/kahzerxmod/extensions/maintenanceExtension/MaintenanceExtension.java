@@ -4,6 +4,7 @@ import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
@@ -29,7 +30,7 @@ public class MaintenanceExtension extends GenericExtension implements Extensions
     }
 
     @Override
-    public void onExtensionEnabled() {
+    public void onExtensionEnabled(ServerCommandSource source) {
         isExtensionEnabled = true;
         for (ServerPlayerEntity player : this.server.getPlayerManager().getPlayerList()) {
             if (!this.server.getPlayerManager().isOperator(player.getGameProfile())) {
@@ -39,7 +40,7 @@ public class MaintenanceExtension extends GenericExtension implements Extensions
     }
 
     @Override
-    public void onExtensionDisabled() {
+    public void onExtensionDisabled(ServerCommandSource source) {
         isExtensionEnabled = false;
     }
 }

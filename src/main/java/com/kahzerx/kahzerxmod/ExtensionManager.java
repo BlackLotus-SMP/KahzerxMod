@@ -1,8 +1,5 @@
 package com.kahzerx.kahzerxmod;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.internal.LinkedTreeMap;
 import com.kahzerx.kahzerxmod.config.KSettings;
 import com.kahzerx.kahzerxmod.extensions.backExtension.BackExtension;
 import com.kahzerx.kahzerxmod.extensions.badgeExtension.BadgeExtension;
@@ -51,6 +48,10 @@ import com.kahzerx.kahzerxmod.utils.FileUtils;
 import net.minecraft.util.WorldSavePath;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.util.*;
 
@@ -79,21 +80,20 @@ public class ExtensionManager {
 
     public void loadExtensions(String settings) {
         LOGGER.info("Loading settings from file world/KConfig.json");
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        KSettings ks = gson.fromJson(settings, KSettings.class);
         HashMap<String, String> fileSettings = new HashMap<>();
-
-        if (ks != null) {
-            for (Object es : ks.settings()) {
-                if (es == null) {
+        JSONParser parser = new JSONParser();
+        try {
+            JSONObject setting = (JSONObject) parser.parse(settings);
+            JSONArray settingsList = (JSONArray) setting.get("settings");
+            for (Object obj : settingsList) {
+                String ruleName = (String) ((JSONObject) obj).getOrDefault("name", null);
+                if (ruleName == null) {
                     continue;
                 }
-                Object name = ((LinkedTreeMap<?, ?>) es).get("name");
-                if (name == null) {
-                    continue;
-                }
-                fileSettings.put((String) name, gson.toJson(es));
+                fileSettings.put(ruleName, ((JSONObject) obj).toJSONString());
             }
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
 
         // TODO way of making so the extensions register themselves so we dont need massive class of extensions.add(...)

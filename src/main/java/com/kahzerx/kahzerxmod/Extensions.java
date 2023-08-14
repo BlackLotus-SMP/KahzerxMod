@@ -36,10 +36,10 @@ public interface Extensions extends Comparable<Extensions> {
     default void onClick(ServerPlayerEntity player) {}
     default void onPlayerSleep(ServerPlayerEntity player) {}
     default void onPlayerWakeUp(ServerPlayerEntity player) {}
-    default void onExtensionEnabled() {
+    default void onExtensionEnabled(ServerCommandSource source) {
         PlayerUtils.reloadCommands();
     }
-    default void onExtensionDisabled() {
+    default void onExtensionDisabled(ServerCommandSource source) {
         PlayerUtils.reloadCommands();
     }
     default void settingsCommand(LiteralArgumentBuilder<ServerCommandSource> builder) {}

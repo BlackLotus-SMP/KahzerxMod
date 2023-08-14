@@ -22,14 +22,14 @@ public class SlabExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onExtensionDisabled() {
-        Extensions.super.onExtensionDisabled();
+    public void onExtensionDisabled(ServerCommandSource source) {
+        Extensions.super.onExtensionDisabled(source);
         isExtensionEnabled = false;
     }
 
     @Override
-    public void onExtensionEnabled() {
-        Extensions.super.onExtensionEnabled();
+    public void onExtensionEnabled(ServerCommandSource source) {
+        Extensions.super.onExtensionEnabled(source);
         isExtensionEnabled = true;
     }
 

@@ -56,9 +56,11 @@ public class KahzerxServer {
                                     return 1;
                                 }
                                 ex.extensionSettings().setEnabled(true);
-                                ex.onExtensionEnabled();
+                                ex.onExtensionEnabled(context.getSource());
                                 extensionManager.saveSettings();
-                                context.getSource().sendFeedback(MarkEnum.TICK.appendMessage(ex.extensionSettings().getName() + " extension enabled"), false);  // TODO color enabled
+                                if (ex.extensionSettings().isEnabled()) {
+                                    context.getSource().sendFeedback(MarkEnum.TICK.appendMessage(ex.extensionSettings().getName() + " extension enabled"), false);  // TODO color enabled
+                                }
                                 return 1;
                             })).
                     then(literal("disable").
@@ -68,9 +70,11 @@ public class KahzerxServer {
                                     return 1;
                                 }
                                 ex.extensionSettings().setEnabled(false);
-                                ex.onExtensionDisabled();
+                                ex.onExtensionDisabled(context.getSource());
                                 extensionManager.saveSettings();
-                                context.getSource().sendFeedback(MarkEnum.TICK.appendMessage(ex.extensionSettings().getName() + " extension disabled"), false);
+                                if (!ex.extensionSettings().isEnabled()) {
+                                    context.getSource().sendFeedback(MarkEnum.TICK.appendMessage(ex.extensionSettings().getName() + " extension disabled"), false);
+                                }
                                 return 1;
                             })).
                     executes(context -> {

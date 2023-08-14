@@ -2,10 +2,10 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension;
 
 import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.Extensions;
-import com.kahzerx.kahzerxmod.KahzerxServer;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordBot;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordGenericExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordSendCommand;
+import com.kahzerx.kahzerxmod.extensions.discordExtension.EventResponse;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.commands.OnlineCommand;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordUtils;
 import com.kahzerx.kahzerxmod.klone.KlonePlayerEntity;
@@ -59,14 +59,14 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
         if (extensionSettings().getPrefix().equals("")) {
             extensionSettings().setCrossServerChat(false);
             this.em.saveSettings();
-            return;
         }
-        boolean started = this.getBot().start();
-        if (!started) {
+        EventResponse resp = this.getBot().start();
+        if (!resp.success()) {
             LOGGER.error("Unable to start discord extension!");
+            LOGGER.error(resp.message());
             this.extensionSettings().setEnabled(false);
             this.em.saveSettings();
-            this.onExtensionDisabled();
+            this.onExtensionDisabled(null);
         }
     }
 
@@ -148,14 +148,14 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
     }
 
     @Override
-    public void onExtensionEnabled() {
-        this.bot = new DiscordBot(KahzerxServer.minecraftServer, this);
-        boolean started = this.getBot().start();
-        if (!started) {
+    public void onExtensionEnabled(ServerCommandSource source) {
+        EventResponse resp = this.getBot().start();
+        if (!resp.success()) {
             LOGGER.error("Unable to start discord extension!");
+            source.sendFeedback(() -> MarkEnum.CROSS.appendMsg(resp.message()), false);
             this.extensionSettings().setEnabled(false);
             this.em.saveSettings();
-            this.onExtensionDisabled();
+            this.onExtensionDisabled(source);
             return;
         }
         this.getBot().sendSysMessage("**Server is ON**", this.extensionSettings().getPrefix());
@@ -165,7 +165,7 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
     // TODO update whitelist, admintools & sync if this gets disabled!
 
     @Override
-    public void onExtensionDisabled() {
+    public void onExtensionDisabled(ServerCommandSource source) {
         this.getBot().stop();
         PlayerUtils.reloadCommands();
     }
@@ -197,13 +197,13 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
                                     this.em.saveSettings();
                                     if (wasRunning) {
                                         context.getSource().sendFeedback(() -> MarkEnum.INFO.appendMsg("Restarting the discord bot..."), false);
-                                        boolean started = this.getBot().start();
-                                        if (!started) {
+                                        EventResponse resp = this.getBot().start();
+                                        if (!resp.success()) {
                                             LOGGER.error("Unable to start discord extension!");
-                                            context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendMsg("There has been an error trying to start the discord bot, check the console for more information"), false);
+                                            context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendMsg(resp.message()), false);
                                             this.extensionSettings().setEnabled(false);
                                             this.em.saveSettings();
-                                            this.onExtensionDisabled();
+                                            this.onExtensionDisabled(context.getSource());
                                             return 1;
                                         }
                                     }
@@ -214,16 +214,16 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
                                 suggests((c, b) -> suggestMatching(new String[]{"0"}, b)).
                                 executes(context -> {
                                     this.extensionSettings().setChatChannelID(LongArgumentType.getLong(context, "chatChannelID"));
+                                    this.em.saveSettings();
                                     if (this.extensionSettings().getChatChannelID() == 0) {
                                         this.getBot().stop();
                                         context.getSource().sendFeedback(() -> MarkEnum.INFO.appendMsg("Stopping the discord bot..."), false);
                                     }
                                     context.getSource().sendFeedback(() -> this.getLongSettingMessage(true, "channelID", this.extensionSettings().getChatChannelID(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName()), false);
-                                    this.em.saveSettings();
-                                    boolean webhooksUpdated = this.getBot().onUpdateChannelID();
-                                    if (!webhooksUpdated) {
-                                        context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendMsg("There has been an error trying to use this chat channel ID, check the console for more information"), false);
-                                        this.onExtensionDisabled();
+                                    EventResponse resp = this.getBot().onUpdateChannelID();
+                                    if (!resp.success()) {
+                                        context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendMsg(resp.message()), false);
+                                        this.onExtensionDisabled(context.getSource());
                                     }
                                     return 1;
                                 })).
@@ -256,31 +256,31 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
                                         prefix = "";
                                     }
                                     this.extensionSettings().setPrefix(prefix);
-                                    context.getSource().sendFeedback(() -> this.getStringSettingMessage(true, this.extensionSettings().getPrefix(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "prefix"), false);
+                                    context.getSource().sendFeedback(() -> this.getStringSettingMessage(true, "prefix", this.extensionSettings().getPrefix(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName()), false);
                                     this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
                             context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/prefix\n").styled(style -> style.withBold(true)).
                                     append(MarkEnum.INFO.appendMsg("Server prefix/name\n", Formatting.GRAY).styled(style -> style.withBold(false))).
-                                    append(this.getStringSettingMessage(false, this.extensionSettings().getPrefix(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "prefix")), false);
+                                    append(this.getStringSettingMessage(false, "prefix", this.extensionSettings().getPrefix(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName())), false);
                             return 1;
                         })).
                 then(literal("commandPrefix").
-                        then(argument("prefix", StringArgumentType.string()).
+                        then(argument("prefix", StringArgumentType.word()).  // TODO can't use special chars...
                                 suggests((c, b) -> suggestMatching(new String[]{"!", ";", "."}, b)).
                                 executes(context -> {
                                     String prefix = StringArgumentType.getString(context, "prefix");
                                     this.extensionSettings().setCommandPrefix(prefix);
-                                    this.getBot().updatePrefix(prefix);
-                                    context.getSource().sendFeedback(() -> this.getStringSettingMessage(true, this.extensionSettings().getPrefix(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "commandPrefix"), false);
+                                    this.getBot().updateCommandPrefix(prefix);
+                                    context.getSource().sendFeedback(() -> this.getStringSettingMessage(true, "commandPrefix", this.extensionSettings().getCommandPrefix(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName()), false);
                                     this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
                             context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/commandPrefix\n").styled(style -> style.withBold(true)).
                                     append(MarkEnum.INFO.appendMsg("Discord command prefix\n", Formatting.GRAY).styled(style -> style.withBold(false))).
-                                    append(this.getStringSettingMessage(false, this.extensionSettings().getPrefix(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "commandPrefix")), false);
+                                    append(this.getStringSettingMessage(false, "commandPrefix", this.extensionSettings().getCommandPrefix(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName())), false);
                             return 1;
                         })).
                 then(literal("crossServerChat").
@@ -296,7 +296,7 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
                                         return 1;
                                     }
                                     extensionSettings().setCrossServerChat(BoolArgumentType.getBool(context, "enabled"));
-                                    context.getSource().sendFeedback(() -> this.getBooleanSettingMessage(true, this.extensionSettings().isShouldFeedback(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "crossServerChat"), false);
+                                    context.getSource().sendFeedback(() -> this.getBooleanSettingMessage(true, this.extensionSettings().isCrossServerChat(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "crossServerChat"), false);
                                     this.em.saveSettings();
                                     return 1;
                                 })).
@@ -311,10 +311,10 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
                                 then(argument("chatID", LongArgumentType.longArg()).
                                         executes(context -> {
                                             long chat = LongArgumentType.getLong(context, "chatID");
-                                            if (extensionSettings().getAllowedChats().contains(chat)) {
+                                            if (this.extensionSettings().getAllowedChats().contains(chat)) {
                                                 context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendText(this.formatLongID("The chat ID ", chat, " was already on the list", true, false, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "allowedChats")), false);
                                             } else {
-                                                extensionSettings().addAllowedChatID(chat);
+                                                this.extensionSettings().addAllowedChatID(chat);
                                                 context.getSource().sendFeedback(() -> MarkEnum.TICK.appendText(this.formatLongID("The chat with ID ", chat, " has been", true, true, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "allowedChats")), false);
                                                 this.em.saveSettings();
                                             }
@@ -324,12 +324,12 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
                                 then(argument("chatID", LongArgumentType.longArg()).
                                         executes(context -> {
                                             long chat = LongArgumentType.getLong(context, "chatID");
-                                            if (extensionSettings().getAllowedChats().contains(chat)) {
+                                            if (this.extensionSettings().getAllowedChats().contains(chat)) {
                                                 this.extensionSettings().removeAllowedChatID(chat);
-                                                context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendText(this.formatLongID("The chat with ID ", chat, " has been", false, true, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "allowedChats")), false);
+                                                context.getSource().sendFeedback(() -> MarkEnum.TICK.appendText(this.formatLongID("The chat with ID ", chat, " has been", false, true, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "allowedChats")), false);
                                                 this.em.saveSettings();
                                             } else {
-                                                context.getSource().sendFeedback(() -> MarkEnum.TICK.appendText(this.formatLongID("The chat ID ", chat, " does not exist!", false, false, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "allowedChats")), false);
+                                                context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendText(this.formatLongID("The chat ID ", chat, " does not exist!", false, false, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "allowedChats")), false);
                                             }
                                             return 1;
                                         }))).

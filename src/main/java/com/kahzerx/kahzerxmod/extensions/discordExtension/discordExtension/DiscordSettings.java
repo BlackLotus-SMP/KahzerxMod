@@ -23,7 +23,7 @@ public class DiscordSettings extends ExtensionSettings {
         this.commandPrefix = file != null && file.getCommandPrefix() != null ? file.getCommandPrefix() : "!";
         this.chatChannelID = file != null ? file.getChatChannelID() : 0L;
         this.allowedChats = file != null && file.getAllowedChats() != null ? file.getAllowedChats() : new ArrayList<>();
-        this.shouldFeedback = file != null && file.isShouldFeedback();
+        this.shouldFeedback = file == null || file.isShouldFeedback();
     }
 
     public boolean isShouldFeedback() {

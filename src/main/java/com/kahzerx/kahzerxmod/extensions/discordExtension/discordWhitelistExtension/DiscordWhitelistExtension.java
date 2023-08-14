@@ -383,13 +383,13 @@ public class DiscordWhitelistExtension extends DiscordGenericExtension implement
     }
 
     @Override
-    public void onExtensionEnabled() {
+    public void onExtensionEnabled(ServerCommandSource source) {
         this.onCreateDatabase(this.conn);
         isExtensionEnabled = true;
     }
 
     @Override
-    public void onExtensionDisabled() {
+    public void onExtensionDisabled(ServerCommandSource source) {
         isExtensionEnabled = false;
     }
 
@@ -470,10 +470,10 @@ public class DiscordWhitelistExtension extends DiscordGenericExtension implement
                                         suggests((c, b) -> suggestMatching(new String[]{"1234"}, b)).
                                         executes(context -> {
                                             long chat = LongArgumentType.getLong(context, "chatID");
-                                            if (extensionSettings().getWhitelistChats().contains(chat)) {
+                                            if (this.extensionSettings().getWhitelistChats().contains(chat)) {
                                                 context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendText(this.formatLongID("The chat ID ", chat, " was already on the list", true, false, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "whitelistChats")), false);
                                             } else {
-                                                extensionSettings().addWhitelistChatID(chat);
+                                                this.extensionSettings().addWhitelistChatID(chat);
                                                 context.getSource().sendFeedback(() -> MarkEnum.TICK.appendText(this.formatLongID("The chat with ID ", chat, " has been", true, true, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "whitelistChats")), false);
                                                 this.em.saveSettings();
                                             }
@@ -484,12 +484,12 @@ public class DiscordWhitelistExtension extends DiscordGenericExtension implement
                                         suggests((c, b) -> suggestMatching(this.extensionSettings().getWhitelistChats().stream().map(Object::toString), b)).
                                         executes(context -> {
                                             long chat = LongArgumentType.getLong(context, "chatID");
-                                            if (extensionSettings().getWhitelistChats().contains(chat)) {
+                                            if (this.extensionSettings().getWhitelistChats().contains(chat)) {
                                                 this.extensionSettings().removeWhitelistChatID(chat);
-                                                context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendText(this.formatLongID("The chat with ID ", chat, " has been", false, true, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "whitelistChats")), false);
+                                                context.getSource().sendFeedback(() -> MarkEnum.TICK.appendText(this.formatLongID("The chat with ID ", chat, " has been", false, true, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "whitelistChats")), false);
                                                 this.em.saveSettings();
                                             } else {
-                                                context.getSource().sendFeedback(() -> MarkEnum.TICK.appendText(this.formatLongID("The chat ID ", chat, " does not exist!", false, false, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "whitelistChats")), false);
+                                                context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendText(this.formatLongID("The chat ID ", chat, " does not exist!", false, false, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "whitelistChats")), false);
                                             }
                                             return 1;
                                         }))).

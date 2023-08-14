@@ -72,10 +72,10 @@ public class DiscordWhitelistSyncExtension extends DiscordGenericExtension imple
     }
 
     @Override
-    public void onExtensionEnabled() { }
+    public void onExtensionEnabled(ServerCommandSource source) { }
 
     @Override
-    public void onExtensionDisabled() { }
+    public void onExtensionDisabled(ServerCommandSource source) { }
 
     @Override
     public void settingsCommand(LiteralArgumentBuilder<ServerCommandSource> builder) {

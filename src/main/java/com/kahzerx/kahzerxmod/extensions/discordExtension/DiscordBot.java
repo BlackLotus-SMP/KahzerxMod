@@ -8,6 +8,7 @@ import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -32,20 +33,29 @@ public class DiscordBot extends ListenerAdapter implements DiscordBotInterface {
         this.discordExtension = discordExtension;
     }
 
-    public boolean start() {
+    public EventResponse start() {
         try {
-            this.jda = JDABuilder.createDefault(discordExtension.extensionSettings().getToken()).addEventListeners(this).build();
-            this.jda.awaitReady();
-            this.updateWebHooks();
-            return true;
-        } catch (LoginException | InterruptedException e) {
+            this.initJDA();
+        } catch (InterruptedException | LoginException e) {
             this.jda = null;
             e.printStackTrace();
-            return false;
+            return new EventResponse(false, "Unable to start the discord bot, check the logs for more information, the token does not seem to be valid!");
+        }
+        try {
+            return this.updateWebHooks();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new EventResponse(false, "Unable to start the discord bot, check the logs for more information, the chat channel ID does not seem to be valid!");
         }
     }
 
-    public void updatePrefix(String prefix) {  // TODO update prefix on command
+    private void initJDA() throws InterruptedException, LoginException {
+        this.stop();
+        this.jda = JDABuilder.createDefault(discordExtension.extensionSettings().getToken()).addEventListeners(this).build();
+        this.jda.awaitReady();
+    }
+
+    public void updateCommandPrefix(String prefix) {  // TODO update prefix on command
         this.prefix = prefix;
         for (DiscordGenericExtension extension : this.discordExtensions) {
             for (GenericCommand command : extension.getCommands()) {
@@ -54,33 +64,36 @@ public class DiscordBot extends ListenerAdapter implements DiscordBotInterface {
         }
     }
 
-    public boolean onUpdateChannelID() {
+    public EventResponse onUpdateChannelID() {
         try {
-            this.updateWebHooks();
-            return true;
+            return this.updateWebHooks();
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return new EventResponse(false, "There has been an error trying to use this chat channel ID, check the console for more information");
         }
     }
 
-    private void updateWebHooks() {
-        if (!this.discordExtension.extensionSettings().isEnabled()) {
-            return;
+    private EventResponse updateWebHooks() throws LoginException, InterruptedException {
+        this.initJDA();
+        TextChannel channel = this.jda.getTextChannelById(this.discordExtension.extensionSettings().getChatChannelID());
+        if (channel == null) {
+            return new EventResponse(false, "The extension has an invalid Chat Channel ID!");
         }
-        List<Webhook> webhookList = this.jda.getTextChannelById(this.discordExtension.extensionSettings().getChatChannelID()).retrieveWebhooks().complete();
+        List<Webhook> webhookList = channel.retrieveWebhooks().complete();
         boolean webhookFlag = false;
         for (Webhook webdook : webhookList) {
             if (webdook.getName().equals("ChatBridge")) {
+//                channel.deleteWebhookById(webdook.getId());  // FIXME if another webhook with the same name already exists, the `WebhookClient.withUrl` logic crashes
                 webhookFlag = true;
                 this.whc = WebhookClient.withUrl(webdook.getUrl());
                 break;
             }
         }
         if (!webhookFlag) {
-            Webhook webook = jda.getTextChannelById(this.discordExtension.extensionSettings().getChatChannelID()).createWebhook("ChatBridge").complete();
+            Webhook webook = this.jda.getTextChannelById(this.discordExtension.extensionSettings().getChatChannelID()).createWebhook("ChatBridge").complete();
             this.whc = WebhookClient.withUrl(webook.getUrl());
         }
+        return new EventResponse(true, "");
     }
 
     public void addExtensions(DiscordGenericExtension... extensions) {

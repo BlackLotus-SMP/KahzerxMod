@@ -88,7 +88,7 @@ public abstract class DiscordGenericExtension extends GenericExtension {
                     withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to add!"))));
         } else {
             sett = Text.literal(key).styled(style -> style.
-                    withColor(Formatting.GRAY).
+                    withColor(Formatting.GREEN).
                     withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to edit!\nSet 0 to disable!"))));
         }
         return sett;

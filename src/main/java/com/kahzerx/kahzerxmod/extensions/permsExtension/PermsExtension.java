@@ -101,23 +101,23 @@ public class PermsExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onExtensionDisabled() {
+    public void onExtensionDisabled(ServerCommandSource source) {
         if (this.minecraftServer != null) {
             for (ServerPlayerEntity player : this.minecraftServer.getPlayerManager().getPlayerList()) {
                 this.onPlayerLeft(player);
             }
         }
-        Extensions.super.onExtensionDisabled();
+        Extensions.super.onExtensionDisabled(source);
     }
 
     @Override
-    public void onExtensionEnabled() {
+    public void onExtensionEnabled(ServerCommandSource source) {
         if (this.minecraftServer != null) {
             for (ServerPlayerEntity player : this.minecraftServer.getPlayerManager().getPlayerList()) {
                 this.onPlayerJoined(player);
             }
         }
-        Extensions.super.onExtensionEnabled();
+        Extensions.super.onExtensionEnabled(source);
     }
 
     @Override

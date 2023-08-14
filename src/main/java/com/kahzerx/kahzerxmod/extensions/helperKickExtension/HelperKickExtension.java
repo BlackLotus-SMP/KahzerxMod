@@ -6,6 +6,7 @@ import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.kahzerx.kahzerxmod.extensions.permsExtension.PermsExtension;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.command.ServerCommandSource;
 
 import java.util.HashMap;
 
@@ -33,14 +34,14 @@ public class HelperKickExtension extends GenericExtension implements Extensions 
     }
 
     @Override
-    public void onExtensionEnabled() {
-        Extensions.super.onExtensionEnabled();
+    public void onExtensionEnabled(ServerCommandSource source) {
+        Extensions.super.onExtensionEnabled(source);
         isExtensionEnabled = true;
     }
 
     @Override
-    public void onExtensionDisabled() {
-        Extensions.super.onExtensionDisabled();
+    public void onExtensionDisabled(ServerCommandSource source) {
+        Extensions.super.onExtensionDisabled(source);
         isExtensionEnabled = false;
     }
 }

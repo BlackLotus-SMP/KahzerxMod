@@ -71,10 +71,10 @@ public class DiscordAdminToolsExtension extends DiscordGenericExtension implemen
     }
 
     @Override
-    public void onExtensionEnabled() {}
+    public void onExtensionEnabled(ServerCommandSource source) {}
 
     @Override
-    public void onExtensionDisabled() {}
+    public void onExtensionDisabled(ServerCommandSource source) {}
 
     @Override
     public boolean processCommands(MessageReceivedEvent event, String message, MinecraftServer server) {
@@ -134,10 +134,10 @@ public class DiscordAdminToolsExtension extends DiscordGenericExtension implemen
                                         suggests((c, b) -> suggestMatching(new String[]{"1234"}, b)).
                                         executes(context -> {
                                             long chat = LongArgumentType.getLong(context, "chatID");
-                                            if (extensionSettings().getAdminChats().contains(chat)) {
+                                            if (this.extensionSettings().getAdminChats().contains(chat)) {
                                                 context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendText(this.formatLongID("The chat ID ", chat, " was already on the list", true, false, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "adminChats")), false);
                                             } else {
-                                                extensionSettings().addAdminChatID(chat);
+                                                this.extensionSettings().addAdminChatID(chat);
                                                 context.getSource().sendFeedback(() -> MarkEnum.TICK.appendText(this.formatLongID("The chat with ID ", chat, " has been", true, true, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "adminChats")), false);
                                                 this.em.saveSettings();
                                             }
@@ -148,12 +148,12 @@ public class DiscordAdminToolsExtension extends DiscordGenericExtension implemen
                                         suggests((c, b) -> suggestMatching(this.extensionSettings().getAdminChats().stream().map(Object::toString), b)).
                                         executes(context -> {
                                             long chat = LongArgumentType.getLong(context, "chatID");
-                                            if (extensionSettings().getAdminChats().contains(chat)) {
+                                            if (this.extensionSettings().getAdminChats().contains(chat)) {
                                                 this.extensionSettings().removeAdminChatID(chat);
-                                                context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendText(this.formatLongID("The chat with ID ", chat, " has been", false, true, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "adminChats")), false);
+                                                context.getSource().sendFeedback(() -> MarkEnum.TICK.appendText(this.formatLongID("The chat with ID ", chat, " has been", false, true, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "adminChats")), false);
                                                 this.em.saveSettings();
                                             } else {
-                                                context.getSource().sendFeedback(() -> MarkEnum.TICK.appendText(this.formatLongID("The chat ID ", chat, " does not exist!", false, false, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "adminChats")), false);
+                                                context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendText(this.formatLongID("The chat ID ", chat, " does not exist!", false, false, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "adminChats")), false);
                                             }
                                             return 1;
                                         }))).
