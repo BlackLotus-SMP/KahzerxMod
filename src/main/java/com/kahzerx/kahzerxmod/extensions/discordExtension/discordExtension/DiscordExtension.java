@@ -269,7 +269,7 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
                 then(literal("commandPrefix").
                         then(argument("prefix", StringArgumentType.word()).  // TODO can't use special chars...
                                 suggests((c, b) -> suggestMatching(new String[]{"!", ";", "."}, b)).
-                                executes(context -> {
+                                executes(context -> {  // TODO 0 is not "to disable"
                                     String prefix = StringArgumentType.getString(context, "prefix");
                                     this.extensionSettings().setCommandPrefix(prefix);
                                     this.getBot().updateCommandPrefix(prefix);
