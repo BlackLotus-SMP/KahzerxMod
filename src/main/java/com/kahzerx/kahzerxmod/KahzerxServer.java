@@ -23,6 +23,7 @@ import java.util.*;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class KahzerxServer {
+    // TODO cleanup based on interfaces, static func removal
     public static MinecraftServer minecraftServer;
     public static ServerDatabase db = new ServerDatabase();
     public static CommandDispatcher<ServerCommandSource> dispatcher;

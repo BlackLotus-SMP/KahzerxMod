@@ -143,11 +143,17 @@ public class ExtensionManager {
         this.registerExtension(new DiscordWhitelistExtension(fileSettings));
         this.registerExtension(new DiscordAdminToolsExtension(fileSettings));
         this.registerExtension(new DiscordWhitelistSyncExtension(fileSettings));
+        this.printExtensions();
         LOGGER.info("Settings loaded!");
     }
 
+    private void printExtensions() {
+        for (Extensions extension : this.extensions.values()) {
+            LOGGER.info(extension.extensionSettings());
+        }
+    }
+
     private void registerExtension(Extensions extension) {
-        LOGGER.info(extension.extensionSettings());
         this.extensions.put(extension.extensionSettings().getName(), extension);
     }
 
