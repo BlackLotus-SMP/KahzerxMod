@@ -42,7 +42,7 @@ public class DiscordBot extends ListenerAdapter implements DiscordBotInterface {
             return new EventResponse(false, "Unable to start the discord bot, check the logs for more information, the token does not seem to be valid!");
         }
         try {
-            return this.updateWebHooks();
+            return this.updateWebHooks(true);
         } catch (Exception e) {
             e.printStackTrace();
             return new EventResponse(false, "Unable to start the discord bot, check the logs for more information, the chat channel ID does not seem to be valid!");
@@ -66,15 +66,17 @@ public class DiscordBot extends ListenerAdapter implements DiscordBotInterface {
 
     public EventResponse onUpdateChannelID() {
         try {
-            return this.updateWebHooks();
+            return this.updateWebHooks(false);
         } catch (Exception e) {
             e.printStackTrace();
             return new EventResponse(false, "There has been an error trying to use this chat channel ID, check the console for more information");
         }
     }
 
-    private EventResponse updateWebHooks() throws LoginException, InterruptedException {
-        this.initJDA();
+    private EventResponse updateWebHooks(boolean justStartedBot) throws LoginException, InterruptedException {
+        if (!justStartedBot) {
+            this.initJDA();
+        }
         TextChannel channel = this.jda.getTextChannelById(this.discordExtension.extensionSettings().getChatChannelID());
         if (channel == null) {
             return new EventResponse(false, "The extension has an invalid Chat Channel ID!");
