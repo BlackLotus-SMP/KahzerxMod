@@ -31,12 +31,11 @@ import java.util.UUID;
 
 public class InfoCommand extends GenericCommand {
 
-    public InfoCommand(String prefix) {
-        super("info", DiscordPermission.WHITELIST_CHAT, prefix + "info <playerName> o " + prefix + "info");
+    public InfoCommand() {
+        super("info", DiscordPermission.WHITELIST_CHAT);
     }
 
     public void execute(MessageReceivedEvent event, MinecraftServer server, String serverPrefix, DiscordWhitelistExtension extension){
-        String destinationFile = "skin.png";
         boolean feedback = extension.getDiscordExtension().extensionSettings().isShouldFeedback();
         String msg = event.getMessage().getContentRaw();
         if (msg.split(" ").length == 2) {
@@ -70,16 +69,16 @@ public class InfoCommand extends GenericCommand {
                         event.getChannel().sendMessageEmbeds(embed.build()).queue();
                     }
                 }
-            }else {
+            } else {
                 EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**Not in whitelist.**"}, serverPrefix, true, Color.RED, true, feedback);
                 if (embed != null) {
                     event.getChannel().sendMessageEmbeds(embed.build()).queue();
                 }
-                return;
             }
-        }else {
+        } else {
             long dsId = event.getAuthor().getIdLong();
             ArrayList<String> whiteList = extension.getWhitelistedPlayers(dsId);
+            // TODO if there is no whitelisted players, display a message!
             for (String uuid: whiteList){
                 try {
                     File skinPng = saveImage(uuid, server, serverPrefix, event, feedback);
@@ -112,7 +111,7 @@ public class InfoCommand extends GenericCommand {
         Path worldPath = server.getSavePath(WorldSavePath.ROOT);
         File finalPath = new File(worldPath.toFile().getAbsolutePath() + String.format("skins/%s.png", uuid));
         File directoryPath = finalPath.getParentFile();
-        if (!directoryPath.exists()){
+        if (!directoryPath.exists()) {
             Files.createDirectories(directoryPath.toPath());
         }
         File[] skins = directoryPath.listFiles();
@@ -126,7 +125,7 @@ public class InfoCommand extends GenericCommand {
         boolean cuteFlag = false;
         for (File skin: skins) {
             String fileName = skin.getName();
-            if (fileName.equals(String.format("%s.png", uuid))){
+            if (fileName.equals(String.format("%s.png", uuid))) {
                 BasicFileAttributes attributes = Files.readAttributes(finalPath.toPath(), BasicFileAttributes.class);
                 boolean dateFlag = checkTime(attributes.creationTime());
                 if(dateFlag){
@@ -137,7 +136,7 @@ public class InfoCommand extends GenericCommand {
                 break;
             }
         }
-        if (!cuteFlag){
+        if (!cuteFlag) {
             InputStream input = url.openStream();
             OutputStream output = new FileOutputStream(finalPath);
 
@@ -147,31 +146,30 @@ public class InfoCommand extends GenericCommand {
             while ((length = input.read(b)) != -1) {
                 output.write(b, 0, length);
             }
-
             input.close();
             output.close();
         }
         return finalPath;
     }
-    public PlayerData collectData(File skinPng, String uuid, DiscordWhitelistExtension extension, Guild guild, MinecraftServer server){
-        Long dsId = extension.getDiscordID(uuid);
+    public PlayerData collectData(File skinPng, String uuid, DiscordWhitelistExtension extension, Guild guild, MinecraftServer server) {
+        long dsId = extension.getDiscordID(uuid);
         Member dsName = guild.retrieveMemberById(dsId).complete();
         String mcName = extension.getMinecraftNick(uuid);
         Team serverTeam = server.getScoreboard().getPlayerTeam(mcName);
         String playerRole = "**Has no role**";
-        if (serverTeam != null){
+        if (serverTeam != null) {
             String playerTeam = serverTeam.getName();
             playerRole = String.format("**%s**", playerTeam);
 
         }
         String status = "**ACTIVE**";
-        if (extension.isPlayerBanned(uuid)){
+        if (extension.isPlayerBanned(uuid)) {
             status = "**BANNED**";
         }
-        return new PlayerData(skinPng, mcName, dsName.getEffectiveName(),uuid, status, playerRole);
+        return new PlayerData(skinPng, mcName, dsName.getEffectiveName(), uuid, status, playerRole);
     }
 
-    class PlayerData{
+    static class PlayerData{
         public File skinPath;
         public String mcNick;
         public String dsNick;
@@ -188,7 +186,7 @@ public class InfoCommand extends GenericCommand {
         }
     }
 
-    public boolean checkTime(FileTime creacionSkin){
+    public boolean checkTime(FileTime creacionSkin) {
         LocalDateTime creacionDate = creacionSkin.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
         return LocalDateTime.now().isAfter(creacionDate.plusDays(1));
     }

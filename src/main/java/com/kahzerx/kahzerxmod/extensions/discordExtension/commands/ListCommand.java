@@ -14,21 +14,20 @@ import java.util.List;
 
 
 public class ListCommand extends GenericCommand {
-    public ListCommand(String prefix) {
-        super("list", DiscordPermission.WHITELIST_CHAT, prefix + "list");
+    public ListCommand() {
+        super("list", DiscordPermission.WHITELIST_CHAT, false);
     }
 
     @Override
     public void execute(MessageReceivedEvent event, MinecraftServer server, String serverPrefix, DiscordWhitelistExtension extension) {
         boolean feedback = extension.getDiscordExtension().extensionSettings().isShouldFeedback();
         String[] names = server.getPlayerManager().getWhitelistedNames();
+        Arrays.sort(names, String.CASE_INSENSITIVE_ORDER);
         EmbedBuilder embed;
         if (names.length == 0) {
             embed = DiscordChatUtils.generateEmbed(new String[]{"Whitelist is empty :("}, serverPrefix, true, Color.RED, true, feedback);
         } else {
             int maxNames = 60;
-            names = String.join(",", names).toLowerCase().split(",");
-            Arrays.sort(names);
             if (names.length > maxNames) {
                 List<String> playerList = new ArrayList<>();
                 for (String n : names) {

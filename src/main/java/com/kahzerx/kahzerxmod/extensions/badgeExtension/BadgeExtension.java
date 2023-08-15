@@ -64,8 +64,8 @@ public class BadgeExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onExtensionEnabled() {
-        Extensions.super.onExtensionEnabled();
+    public void onExtensionEnabled(ServerCommandSource source) {
+        Extensions.super.onExtensionEnabled(source);
         isExtensionEnabled = true;
         for (ServerPlayerEntity player : this.server.getPlayerManager().getPlayerList()) {
             this.onPlayerJoined(player);
@@ -73,16 +73,16 @@ public class BadgeExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onExtensionDisabled() {
-        Extensions.super.onExtensionDisabled();
+    public void onExtensionDisabled(ServerCommandSource source) {
+        Extensions.super.onExtensionDisabled(source);
         isExtensionEnabled = false;
         playerBadges.clear();
     }
 
     public void reload() {
         if (this.getSettings().isEnabled()) {
-            onExtensionDisabled();
-            onExtensionEnabled();
+            this.onExtensionDisabled(null);
+            this.onExtensionEnabled(null);
         }
     }
 

@@ -42,7 +42,6 @@
     "server.PlayerEventsMixins$PlayerPlace",
     "server.PlayerEventsMixins$PlayerSleeping",
     "server.ServerEventsMixin",
-    "shopExtension.ServerPlayerEntityMixin",
     "slabExtension.SlabBlockExtension",
     "solExtension.FireworkRocketEntityMixin",
     "villagersFollowEmeraldExtension.VillagerEntityMixin"

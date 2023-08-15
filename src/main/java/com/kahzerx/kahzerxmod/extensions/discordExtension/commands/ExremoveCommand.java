@@ -18,8 +18,8 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class ExremoveCommand extends GenericCommand {
-    public ExremoveCommand(String prefix) {
-        super("exremove", DiscordPermission.ADMIN_CHAT, prefix + "exremove <playerName>");
+    public ExremoveCommand() {
+        super("exremove", DiscordPermission.ADMIN_CHAT);
     }
 
     @Override

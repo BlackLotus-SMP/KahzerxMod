@@ -66,14 +66,14 @@ public class HomeExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onExtensionDisabled() {
-        Extensions.super.onExtensionDisabled();
+    public void onExtensionDisabled(ServerCommandSource source) {
+        Extensions.super.onExtensionDisabled(source);
         playerHomes.clear();
     }
 
     @Override
-    public void onExtensionEnabled() {
-        Extensions.super.onExtensionEnabled();
+    public void onExtensionEnabled(ServerCommandSource source) {
+        Extensions.super.onExtensionEnabled(source);
         for (ServerPlayerEntity player : this.server.getPlayerManager().getPlayerList()) {
             this.onPlayerJoined(player);
         }

@@ -1,6 +1,5 @@
 package com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistSyncExtension;
 
-import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordListener;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension.DiscordWhitelistExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
@@ -44,11 +43,18 @@ public class DiscordWhitelistSyncThread extends TimerTask {
 
     @Override
     public void run() {
-        if (DiscordListener.jda == null) {
+        if (!this.discordExtension.getBot().isReady()) {
             return;
         }
         if (!this.discordExtension.extensionSettings().isEnabled() || !this.discordWhitelistExtension.extensionSettings().isEnabled() || !this.discordWhitelistSyncExtension.extensionSettings().isEnabled()) {
             return;
+        }
+        if (this.discordWhitelistSyncExtension.extensionSettings().getGroupID() == 0L) {
+            LOGGER.error("YOU NEED TO SET THE SERVER GROUP ID FIRST!");
+            return;
+        }
+        if (this.discordWhitelistSyncExtension.extensionSettings().getNotifyChannelID() == 0L) {
+            LOGGER.warn("NOTIFY CHANNEL NOT FOUND! WON'T REPORT TO DISCORD");
         }
         try {
             LOGGER.info("STARTING WHITELIST SYNC.");
@@ -71,8 +77,9 @@ public class DiscordWhitelistSyncThread extends TimerTask {
         if (validRoles.isEmpty()) {
             return;
         }
-        Guild guild = DiscordListener.jda.getGuildById(discordWhitelistSyncExtension.extensionSettings().getGroupID());
+        Guild guild = this.discordExtension.getBot().getGuild(discordWhitelistSyncExtension.extensionSettings().getGroupID());
         if (guild == null) {
+            LOGGER.error("WRONG SERVER GROUP ID");
             return;
         }
         try {
@@ -151,8 +158,9 @@ public class DiscordWhitelistSyncThread extends TimerTask {
             EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{String.format("**F %s**", p.get().getName())}, "", true, Color.RED, true, discordWhitelistExtension.getDiscordExtension().extensionSettings().isShouldFeedback());
             if (embed != null) {
                 TextChannel channel = guild.getTextChannelById(discordWhitelistSyncExtension.extensionSettings().getNotifyChannelID());
-                assert channel != null;
-                channel.sendMessageEmbeds(embed.build()).queue();
+                if (channel != null) {
+                    channel.sendMessageEmbeds(embed.build()).queue();
+                }
             }
         }
     }

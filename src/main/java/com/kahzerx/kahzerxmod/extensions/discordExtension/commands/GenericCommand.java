@@ -16,12 +16,19 @@ import java.util.concurrent.TimeUnit;
 public class GenericCommand {
     private final String body;
     private final DiscordPermission permission;
-    private final String exampleCommand;
+    private String commandPrefix = "";
+    private final boolean needsPlayerParameter;
 
-    public GenericCommand(String body, DiscordPermission permission, String exampleCommand) {
+    public GenericCommand(String body, DiscordPermission permission) {
         this.body = body;
         this.permission = permission;
-        this.exampleCommand = exampleCommand;
+        this.needsPlayerParameter = true;
+    }
+
+    public GenericCommand(String body, DiscordPermission permission, boolean needsPlayerParameter) {
+        this.body = body;
+        this.permission = permission;
+        this.needsPlayerParameter = needsPlayerParameter;
     }
 
     public void execute(MessageReceivedEvent event, MinecraftServer server, String serverPrefix) {
@@ -40,6 +47,13 @@ public class GenericCommand {
         throw new UnsupportedOperationException("Not implemented");
     }
 
+    public String getCommandPrefix() {
+        return commandPrefix;
+    }
+
+    public void setCommandPrefix(String commandPrefix) {
+        this.commandPrefix = commandPrefix;
+    }
 
     public DiscordPermission getPermission() {
         return permission;
@@ -49,12 +63,12 @@ public class GenericCommand {
         return body;
     }
 
-    public String getExampleCommand() {
-        return exampleCommand;
+    private String getHelpSuggestion() {
+        return String.format("%s%s", this.getCommandPrefix(), this.getBody()) + (this.needsPlayerParameter ? " <playerName>" : "");
     }
 
     public void sendHelpCommand(String serverPrefix, MessageChannel channel, boolean should) {
-        EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{this.getExampleCommand()}, serverPrefix, true, Color.CYAN, true, should);
+        EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{this.getHelpSuggestion()}, serverPrefix, true, Color.CYAN, true, should);
         if (embed != null) {
             channel.sendMessageEmbeds(embed.build()).queue(m -> m.delete().queueAfter(2, TimeUnit.SECONDS));
         }

@@ -13,7 +13,7 @@ public class DiscordAdminToolsSettings extends ExtensionSettings {
         super(fileSettings, name, description);
         DiscordAdminToolsSettings file = (DiscordAdminToolsSettings) this.processFileSettings(fileSettings.getOrDefault(name, null), this.getClass());
         this.adminChats = file != null && file.getAdminChats() != null ? file.getAdminChats() : new ArrayList<>();
-        this.shouldFeedback = file != null && file.isShouldFeedback();;
+        this.shouldFeedback = file == null || file.isShouldFeedback();
     }
 
     public boolean isShouldFeedback() {

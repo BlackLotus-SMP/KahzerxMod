@@ -21,8 +21,8 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class RemoveCommand extends GenericCommand {
-    public RemoveCommand(String prefix) {
-        super("remove", DiscordPermission.WHITELIST_CHAT, prefix + "remove <playerName>");
+    public RemoveCommand() {
+        super("remove", DiscordPermission.WHITELIST_CHAT);
     }
 
     @Override

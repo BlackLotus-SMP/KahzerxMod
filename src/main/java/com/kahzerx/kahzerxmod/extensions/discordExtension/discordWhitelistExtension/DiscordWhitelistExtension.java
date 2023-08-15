@@ -3,9 +3,7 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExten
 import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.database.ServerQuery;
-import com.kahzerx.kahzerxmod.extensions.GenericExtension;
-import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordCommandsExtension;
-import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordListener;
+import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordGenericExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.commands.AddCommand;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.commands.InfoCommand;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.commands.ListCommand;
@@ -13,6 +11,7 @@ import com.kahzerx.kahzerxmod.extensions.discordExtension.commands.RemoveCommand
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordUtils;
+import com.kahzerx.kahzerxmod.utils.MarkEnum;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
@@ -23,7 +22,11 @@ import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.minecraft.server.*;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 import java.awt.*;
 import java.sql.*;
@@ -32,10 +35,11 @@ import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import static net.minecraft.command.CommandSource.suggestMatching;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
-public class DiscordWhitelistExtension extends GenericExtension implements Extensions, DiscordCommandsExtension {
+public class DiscordWhitelistExtension extends DiscordGenericExtension implements Extensions {
     private DiscordExtension discordExtension;
     private Connection conn;
 
@@ -43,13 +47,14 @@ public class DiscordWhitelistExtension extends GenericExtension implements Exten
 
     private ExtensionManager em = null;
 
-    private final AddCommand addCommand = new AddCommand(DiscordListener.commandPrefix);
-    private final RemoveCommand removeCommand = new RemoveCommand(DiscordListener.commandPrefix);
-    private final ListCommand listCommand = new ListCommand(DiscordListener.commandPrefix);
-    private final InfoCommand infoCommand = new InfoCommand(DiscordListener.commandPrefix);
+    private final AddCommand addCommand = new AddCommand();
+    private final RemoveCommand removeCommand = new RemoveCommand();
+    private final ListCommand listCommand = new ListCommand();
+    private final InfoCommand infoCommand = new InfoCommand();
 
     public DiscordWhitelistExtension(HashMap<String, String> fileSettings) {
-        super(new DiscordWhitelistSettings(fileSettings, "discordWhitelist", "Enables !list, !add and !remove commands along with nPlayers that specifies how many minecraft players a discord user can add; There is also an optional discordRole that will be given to the discord user on !add and deleted on !remove."));
+        super(new DiscordWhitelistSettings(fileSettings, "discordWhitelist", "Enables !list, !info, !add and !remove commands along with nPlayers that specifies how many minecraft players a discord user can add; There is also an optional discordRole that will be given to the discord user on !add and deleted on !remove."));
+        this.addCommands(this.addCommand, this.removeCommand, this.listCommand, this.infoCommand);
     }
 
     @Override
@@ -103,8 +108,12 @@ public class DiscordWhitelistExtension extends GenericExtension implements Exten
         if (!discordExtension.getSettings().isEnabled()) {
             return;
         }
-        DiscordListener.discordExtensions.add(this);
         isExtensionEnabled = true;
+    }
+
+    @Override
+    public void onServerStarted(MinecraftServer minecraftServer) {
+        this.getDiscordExtension().getBot().addExtensions(this);
     }
 
     public boolean isDiscordBanned(long discordID) {
@@ -374,33 +383,29 @@ public class DiscordWhitelistExtension extends GenericExtension implements Exten
     }
 
     @Override
-    public void onExtensionEnabled() {
-        if (!DiscordListener.discordExtensions.contains(this)) {
-            DiscordListener.discordExtensions.add(this);
-        }
+    public void onExtensionEnabled(ServerCommandSource source) {
         this.onCreateDatabase(this.conn);
         isExtensionEnabled = true;
     }
 
     @Override
-    public void onExtensionDisabled() {
-        DiscordListener.discordExtensions.remove(this);
+    public void onExtensionDisabled(ServerCommandSource source) {
         isExtensionEnabled = false;
     }
 
     @Override
     public boolean processCommands(MessageReceivedEvent event, String message, MinecraftServer server) {
-        if (!this.getSettings().isEnabled()) {
+        if (!this.extensionSettings().isEnabled()) {
             return false;
         }
-        if (!discordExtension.getSettings().isEnabled()) {
+        if (!this.getDiscordExtension().extensionSettings().isEnabled()) {
             return false;
         }
         if (!DiscordUtils.isAllowed(event.getChannel().getIdLong(), this.extensionSettings().getWhitelistChats())) {
-            if (message.startsWith(DiscordListener.commandPrefix + addCommand.getBody())
-                    || message.startsWith(DiscordListener.commandPrefix + removeCommand.getBody())
-                    || message.startsWith(DiscordListener.commandPrefix + listCommand.getBody())
-                    || message.startsWith(DiscordListener.commandPrefix + infoCommand.getBody())) {
+            if (message.startsWith(this.addCommand.getCommandPrefix() + this.addCommand.getBody())
+                    || message.startsWith(this.removeCommand.getCommandPrefix() + this.removeCommand.getBody())
+                    || message.startsWith(this.listCommand.getCommandPrefix() + this.listCommand.getBody())
+                    || message.startsWith(this.infoCommand.getCommandPrefix() + this.infoCommand.getBody())) {
                 EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**This is not the channel!!! >:(**"}, discordExtension.extensionSettings().getPrefix(), true, Color.RED, true, getDiscordExtension().extensionSettings().isShouldFeedback());
                 if (embed != null) {
                     event.getMessage().delete().queueAfter(2, TimeUnit.SECONDS);
@@ -410,87 +415,130 @@ public class DiscordWhitelistExtension extends GenericExtension implements Exten
                 return true;
             }
         }
-        if (message.startsWith(DiscordListener.commandPrefix + addCommand.getBody() + " ")) {
+        if (message.startsWith(this.addCommand.getCommandPrefix() + addCommand.getBody() + " ")) {
             addCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), this);
             return true;
-        } else if (message.startsWith(DiscordListener.commandPrefix + removeCommand.getBody() + " ")) {
+        } else if (message.startsWith(this.removeCommand.getCommandPrefix() + removeCommand.getBody() + " ")) {
             removeCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), this);
             return true;
-        } else if (message.equals(DiscordListener.commandPrefix + listCommand.getBody())) {
+        } else if (message.equals(this.listCommand.getCommandPrefix() + listCommand.getBody())) {
             listCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), this);
             return true;
-        } else if (message.startsWith(DiscordListener.commandPrefix + infoCommand.getBody())) {
+        } else if (message.startsWith(this.infoCommand.getCommandPrefix() + infoCommand.getBody())) {
             infoCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), this);
             return true;
         }
         return false;
     }
 
-    // TODO refactor
     @Override
     public void settingsCommand(LiteralArgumentBuilder<ServerCommandSource> builder) {
-        builder.
+        builder.  // TODO Interact with the description and add functionality maybe other than just if its enabled and the description
                 then(literal("discordRoleID").
                         then(argument("discordRole", LongArgumentType.longArg()).
+                                suggests((c, b) -> suggestMatching(new String[]{"0"}, b)).
                                 executes(context -> {
-                                    extensionSettings().setDiscordRoleID(LongArgumentType.getLong(context, "discordRoleID"));
-                                    context.getSource().sendFeedback(() -> Text.literal("[discordRole] > " + extensionSettings().getDiscordRole() + "."), false);
+                                    extensionSettings().setDiscordRoleID(LongArgumentType.getLong(context, "discordRole"));
+                                    context.getSource().sendFeedback(() -> this.getLongSettingMessage(true, "discordRoleID", this.extensionSettings().getDiscordRole(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName()), false);
                                     this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
-                            String help = "Role that gets added to every discord user that !add s.";
-                            context.getSource().sendFeedback(() -> Text.literal(help), false);
-                            context.getSource().sendFeedback(() -> Text.literal("[discordRole] > " + extensionSettings().getDiscordRole() + "."), false);
+                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/discordRoleID\n").styled(style -> style.withBold(true)).
+                                    append(MarkEnum.INFO.appendMsg("Role that gets added to every discord user that runs the !add command successfully\n", Formatting.GRAY).styled(style -> style.withBold(false))).
+                                    append(this.getLongSettingMessage(false, "discordRoleID", this.extensionSettings().getDiscordRole(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName())), false);
                             return 1;
                         })).
                 then(literal("nPlayers").
                         then(argument("nPlayers", IntegerArgumentType.integer()).
+                                suggests((c, b) -> suggestMatching(new String[]{"0"}, b)).
                                 executes(context -> {
                                     extensionSettings().setNPlayers(IntegerArgumentType.getInteger(context, "nPlayers"));
-                                    context.getSource().sendFeedback(() -> Text.literal("[players] > " + extensionSettings().getNPlayers() + "."), false);
+                                    context.getSource().sendFeedback(() -> this.getLongSettingMessage(true, "nPlayers", this.extensionSettings().getNPlayers(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName()), false);
                                     this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
-                            String help = "Amount of players a discord user can add to the whitelist.";
-                            context.getSource().sendFeedback(() -> Text.literal(help), false);
-                            context.getSource().sendFeedback(() -> Text.literal("[players] > " + extensionSettings().getNPlayers() + "."), false);
+                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/nPlayers\n").styled(style -> style.withBold(true)).
+                                    append(MarkEnum.INFO.appendMsg("Amount of players a discord user can add to the whitelist\n", Formatting.GRAY).styled(style -> style.withBold(false))).
+                                    append(this.getLongSettingMessage(false, "nPlayers", this.extensionSettings().getNPlayers(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName())), false);
                             return 1;
                         })).
                 then(literal("whitelistChats").
                         then(literal("add").
                                 then(argument("chatID", LongArgumentType.longArg()).
+                                        suggests((c, b) -> suggestMatching(new String[]{"1234"}, b)).
                                         executes(context -> {
-                                            if (extensionSettings().getWhitelistChats().contains(LongArgumentType.getLong(context, "chatID"))) {
-                                                context.getSource().sendFeedback(() -> Text.literal("ID already added."), false);
+                                            long chat = LongArgumentType.getLong(context, "chatID");
+                                            if (this.extensionSettings().getWhitelistChats().contains(chat)) {
+                                                context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendText(this.formatLongID("The chat ID ", chat, " was already on the list", true, false, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "whitelistChats")), false);
                                             } else {
-                                                extensionSettings().addWhitelistChatID(LongArgumentType.getLong(context, "chatID"));
-                                                context.getSource().sendFeedback(() -> Text.literal("ID added."), false);
+                                                this.extensionSettings().addWhitelistChatID(chat);
+                                                context.getSource().sendFeedback(() -> MarkEnum.TICK.appendText(this.formatLongID("The chat with ID ", chat, " has been", true, true, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "whitelistChats")), false);
                                                 this.em.saveSettings();
                                             }
                                             return 1;
                                         }))).
                         then(literal("remove").
                                 then(argument("chatID", LongArgumentType.longArg()).
+                                        suggests((c, b) -> suggestMatching(this.extensionSettings().getWhitelistChats().stream().map(Object::toString), b)).
                                         executes(context -> {
-                                            if (extensionSettings().getWhitelistChats().contains(LongArgumentType.getLong(context, "chatID"))) {
-                                                extensionSettings().removeWhitelistChatID(LongArgumentType.getLong(context, "chatID"));
-                                                context.getSource().sendFeedback(() -> Text.literal("ID removed."), false);
+                                            long chat = LongArgumentType.getLong(context, "chatID");
+                                            if (this.extensionSettings().getWhitelistChats().contains(chat)) {
+                                                this.extensionSettings().removeWhitelistChatID(chat);
+                                                context.getSource().sendFeedback(() -> MarkEnum.TICK.appendText(this.formatLongID("The chat with ID ", chat, " has been", false, true, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "whitelistChats")), false);
                                                 this.em.saveSettings();
                                             } else {
-                                                context.getSource().sendFeedback(() -> Text.literal("This ID doesn't exist."), false);
+                                                context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendText(this.formatLongID("The chat ID ", chat, " does not exist!", false, false, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "whitelistChats")), false);
                                             }
                                             return 1;
                                         }))).
                         then(literal("list").
                                 executes(context -> {
-                                    context.getSource().sendFeedback(() -> Text.literal(extensionSettings().getWhitelistChats().toString()), false);
+                                    MutableText chats = Text.literal("");
+                                    int chatCount = this.extensionSettings().getWhitelistChats().size();
+                                    if (chatCount == 0) {
+                                        chats.append(Text.literal("Not set!").styled(style -> style.
+                                                withColor(Formatting.RED).
+                                                withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to add!"))).
+                                                withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/%s %s whitelistChats add ", this.em.getSettingsBaseCommand(), this.extensionSettings().getName())))));
+                                    } else {
+                                        chats.
+                                                append(Text.literal("[+]").styled(style -> style.
+                                                        withColor(Formatting.GREEN).
+                                                        withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to add!"))).
+                                                        withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/%s %s whitelistChats add ", this.em.getSettingsBaseCommand(), this.extensionSettings().getName()))))).
+                                                append(Text.literal(" ")).
+                                                append(Text.literal("[-]\n").styled(style -> style.
+                                                        withColor(Formatting.RED).
+                                                        withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to remove!"))).
+                                                        withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/%s %s whitelistChats remove ", this.em.getSettingsBaseCommand(), this.extensionSettings().getName())))));
+                                        for (int i = 0; i < chatCount; i++) {
+                                            long chat = this.extensionSettings().getWhitelistChats().get(i);
+                                            chats.
+                                                    append(MarkEnum.DOT.appendText(Text.literal(String.format("%d", chat)).styled(style -> style.
+                                                            withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(String.format("Click to copy %d", chat)))).
+                                                            withBold(false).
+                                                            withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, String.format("%d", chat)))), Formatting.GRAY)).
+                                                    append(Text.literal(" ")).
+                                                    append(MarkEnum.CROSS.getFormattedIdentifier().styled(style -> style.
+                                                            withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(String.format("Click to delete %d", chat)))).
+                                                            withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/%s %s whitelistChats remove %d", this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), chat))))).
+                                                    append(i == chatCount-1 ? Text.literal("") : Text.literal("\n"));
+                                        }
+                                    }
+                                    context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/whitelistChats/list" + "\n").styled(style -> style.withBold(true)).
+                                            append(chats), false);
                                     return 1;
                                 })).
                         executes(context -> {
-                            String help = "ChatIDs where !add, !remove y !list work.";
-                            context.getSource().sendFeedback(() -> Text.literal(help), false);
+                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/whitelistChats\n").styled(style -> style.withBold(true)).
+                                    append(MarkEnum.INFO.appendMsg("Chats where !info, !add, !remove and !list work\n", Formatting.GRAY).styled(style -> style.withBold(false))).
+                                    append(Text.literal("[Chats]").styled(style -> style.
+                                            withColor(Formatting.DARK_GRAY).
+                                            withUnderline(true).
+                                            withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to display the already added whitelist chat IDs"))).
+                                            withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/%s %s whitelistChats list", this.em.getSettingsBaseCommand(), this.extensionSettings().getName()))))), false);
                             return 1;
                         }));
     }

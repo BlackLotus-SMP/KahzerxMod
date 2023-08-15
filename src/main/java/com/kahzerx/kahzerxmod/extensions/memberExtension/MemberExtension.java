@@ -5,6 +5,7 @@ import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -66,8 +67,8 @@ public class MemberExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onExtensionEnabled() { }
+    public void onExtensionEnabled(ServerCommandSource source) { }
 
     @Override
-    public void onExtensionDisabled() { }
+    public void onExtensionDisabled(ServerCommandSource source) { }
 }

@@ -2,25 +2,30 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistSyncE
 
 import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.Extensions;
-import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
-import com.kahzerx.kahzerxmod.extensions.GenericExtension;
+import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordGenericExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension.DiscordWhitelistExtension;
+import com.kahzerx.kahzerxmod.utils.MarkEnum;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Timer;
 
+import static net.minecraft.command.CommandSource.suggestMatching;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
-public class DiscordWhitelistSyncExtension extends GenericExtension implements Extensions {
+public class DiscordWhitelistSyncExtension extends DiscordGenericExtension implements Extensions {
     private DiscordExtension discordExtension;
     private DiscordWhitelistExtension discordWhitelistExtension;
 
@@ -67,90 +72,139 @@ public class DiscordWhitelistSyncExtension extends GenericExtension implements E
     }
 
     @Override
-    public void onExtensionEnabled() { }
+    public void onExtensionEnabled(ServerCommandSource source) { }
 
     @Override
-    public void onExtensionDisabled() { }
+    public void onExtensionDisabled(ServerCommandSource source) { }
 
     @Override
     public void settingsCommand(LiteralArgumentBuilder<ServerCommandSource> builder) {
-        builder.
+        builder.  // TODO Interact with the description and add functionality maybe other than just if its enabled and the description
                 then(literal("notifyChatID").
                         then(argument("chatID", LongArgumentType.longArg()).
+                                suggests((c, b) -> suggestMatching(new String[]{"0"}, b)).
                                 executes(context -> {
-                                    extensionSettings().setNotifyChannelID(LongArgumentType.getLong(context, "chatID"));
-                                    context.getSource().sendFeedback(() -> Text.literal("[notifyChatID] > " + extensionSettings().getNotifyChannelID() + "."), false);
+                                    this.extensionSettings().setNotifyChannelID(LongArgumentType.getLong(context, "chatID"));
+                                    context.getSource().sendFeedback(() -> this.getLongSettingMessage(true, "notifyChatID", this.extensionSettings().getNotifyChannelID(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName()), false);
                                     this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
-                            String help = "Channel where you get notified when someone gets removed from the whitelist.";
-                            context.getSource().sendFeedback(() -> Text.literal(help), false);
-                            context.getSource().sendFeedback(() -> Text.literal("[notifyChatID] > " + extensionSettings().getNotifyChannelID() + "."), false);
+                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/notifyChatID\n").styled(style -> style.withBold(true)).
+                                    append(MarkEnum.INFO.appendMsg("Channel where you get notified when someone gets removed from the whitelist\n", Formatting.GRAY).styled(style -> style.withBold(false))).
+                                    append(this.getLongSettingMessage(false, "notifyChatID", this.extensionSettings().getNotifyChannelID(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName())), false);
                             return 1;
                         })).
                 then(literal("groupID").
                         then(argument("groupID", LongArgumentType.longArg()).
+                                suggests((c, b) -> suggestMatching(new String[]{"0"}, b)).
                                 executes(context -> {
                                     extensionSettings().setGroupID(LongArgumentType.getLong(context, "groupID"));
-                                    context.getSource().sendFeedback(() -> Text.literal("[groupID] > " + extensionSettings().getGroupID() + "."), false);
+                                    context.getSource().sendFeedback(() -> this.getLongSettingMessage(true, "groupID", this.extensionSettings().getGroupID(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName()), false);
                                     this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
-                            String help = "ServerID, to know where to check members.";
-                            context.getSource().sendFeedback(() -> Text.literal(help), false);
-                            context.getSource().sendFeedback(() -> Text.literal("[groupID] > " + extensionSettings().getGroupID() + "."), false);
+                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/groupID\n").styled(style -> style.withBold(true)).
+                                    append(MarkEnum.INFO.appendMsg("ServerID, to know where to check members\n", Formatting.GRAY).styled(style -> style.withBold(false))).
+                                    append(this.getLongSettingMessage(false, "groupID", this.extensionSettings().getGroupID(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName())), false);
                             return 1;
                         })).
                 then(literal("aggressive").
                         then(argument("aggressive", BoolArgumentType.bool()).
                                 executes(context -> {
                                     extensionSettings().setAggressive(BoolArgumentType.getBool(context, "aggressive"));
-                                    context.getSource().sendFeedback(() -> Text.literal("[aggressive] > " + extensionSettings().isAggressive() + "."), false);
+                                    context.getSource().sendFeedback(() -> this.getBooleanSettingMessage(true, this.extensionSettings().isAggressive(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "aggressive"), false);
                                     this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
-                            String help = "Full whitelist/database sync.";
-                            context.getSource().sendFeedback(() -> Text.literal(help), false);
-                            context.getSource().sendFeedback(() -> Text.literal("[aggressive] > " + extensionSettings().isAggressive() + "."), false);
+                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/aggressive\n").styled(style -> style.withBold(true)).
+                                    append(MarkEnum.INFO.appendMsg("Full whitelist/database sync\n", Formatting.GRAY).styled(style -> style.withBold(false))).
+                                    append(this.getBooleanSettingMessage(false, this.extensionSettings().isAggressive(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "aggressive")), false);
                             return 1;
                         })).
                 then(literal("validRoles").
                         then(literal("add").
                                 then(argument("roleID", LongArgumentType.longArg()).
+                                        suggests((c, b) -> suggestMatching(new String[]{"1234"}, b)).
                                         executes(context -> {
-                                            if (extensionSettings().getValidRoles().contains(LongArgumentType.getLong(context, "roleID"))) {
-                                                context.getSource().sendFeedback(() -> Text.literal("ID already added."), false);
+                                            long role = LongArgumentType.getLong(context, "roleID");
+                                            if (extensionSettings().getValidRoles().contains(role)) {
+                                                context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendText(this.formatLongID("The role ID ", role, " was already on the list", true, false, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "validRoles")), false);
                                             } else {
-                                                extensionSettings().addValidRoleID(LongArgumentType.getLong(context, "roleID"));
-                                                context.getSource().sendFeedback(() -> Text.literal("ID added."), false);
+                                                extensionSettings().addValidRoleID(role);
+                                                context.getSource().sendFeedback(() -> MarkEnum.TICK.appendText(this.formatLongID("The role with ID ", role, " has been", true, true, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "validRoles")), false);
                                                 this.em.saveSettings();
                                             }
                                             return 1;
                                         }))).
                         then(literal("remove").
                                 then(argument("roleID", LongArgumentType.longArg()).
+                                        suggests((c, b) -> suggestMatching(this.extensionSettings().getValidRoles().stream().map(Object::toString), b)).
                                         executes(context -> {
-                                            if (extensionSettings().getValidRoles().contains(LongArgumentType.getLong(context, "roleID"))) {
-                                                extensionSettings().removeValidRoleID(LongArgumentType.getLong(context, "roleID"));
-                                                context.getSource().sendFeedback(() -> Text.literal("ID removed."), false);
+                                            long role = LongArgumentType.getLong(context, "roleID");
+                                            if (extensionSettings().getValidRoles().contains(role)) {
+                                                extensionSettings().removeValidRoleID(role);
+                                                context.getSource().sendFeedback(() -> MarkEnum.TICK.appendText(this.formatLongID("The role with ID ", role, " has been", false, true, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "validRoles")), false);
                                                 this.em.saveSettings();
                                             } else {
-                                                context.getSource().sendFeedback(() -> Text.literal("This ID doesn't exist."), false);
+                                                context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendText(this.formatLongID("The role ID ", role," does not exist!", false, false, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "validRoles")), false);
                                             }
                                             return 1;
                                         }))).
                         then(literal("list").
                                 executes(context -> {
-                                    context.getSource().sendFeedback(() -> Text.literal(extensionSettings().getValidRoles().toString()), false);
+                                    MutableText roles = Text.literal("");
+                                    int roleCount = this.extensionSettings().getValidRoles().size();
+                                    if (roleCount == 0) {
+                                        roles.append(Text.literal("Not set!").styled(style -> style.
+                                                withColor(Formatting.RED).
+                                                withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to add!"))).
+                                                withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/%s %s validRoles add ", this.em.getSettingsBaseCommand(), this.extensionSettings().getName())))));
+                                    } else {
+                                        roles.
+                                                append(Text.literal("[+]").styled(style -> style.
+                                                        withColor(Formatting.GREEN).
+                                                        withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to add!"))).
+                                                        withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/%s %s validRoles add ", this.em.getSettingsBaseCommand(), this.extensionSettings().getName()))))).
+                                                append(Text.literal(" ")).
+                                                append(Text.literal("[-]\n").styled(style -> style.
+                                                        withColor(Formatting.RED).
+                                                        withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to remove!"))).
+                                                        withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/%s %s validRoles remove ", this.em.getSettingsBaseCommand(), this.extensionSettings().getName())))));
+                                        for (int i = 0; i < roleCount; i++) {
+                                            long role = this.extensionSettings().getValidRoles().get(i);
+                                            roles.
+                                                    append(MarkEnum.DOT.appendText(Text.literal(String.format("%d", role)).styled(style -> style.
+                                                            withBold(false).
+                                                            withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(String.format("Click to copy %d", role)))).
+                                                            withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, String.format("%d", role)))), Formatting.GRAY)).
+                                                    append(Text.literal(" ")).
+                                                    append(MarkEnum.CROSS.getFormattedIdentifier().styled(style -> style.
+                                                            withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(String.format("Click to delete %d", role)))).
+                                                            withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/%s %s validRoles remove %d", this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), role))))).
+                                                    append(i == roleCount-1 ? Text.literal("") : Text.literal("\n"));
+                                        }
+                                    }
+                                    context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/validRoles/list" + "\n").styled(style -> style.withBold(true)).
+                                            append(roles), false);
                                     return 1;
                                 })).
                         executes(context -> {
-                            String help = "Role list that a member needs to have (at least one) so dont get kicked from the whitelist (ex: sub role).";
-                            context.getSource().sendFeedback(() -> Text.literal(help), false);
+                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/validRoles\n").styled(style -> style.withBold(true)).
+                                    append(MarkEnum.INFO.appendMsg("Role list that a member needs to have (at least one) so dont get kicked from the whitelist (ex: sub role)\n", Formatting.GRAY).styled(style -> style.withBold(false))).
+                                    append(Text.literal("[Roles]").styled(style -> style.
+                                            withColor(Formatting.DARK_GRAY).
+                                            withUnderline(true).
+                                            withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to display the already added valid role IDs"))).
+                                            withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/%s %s validRoles list", this.em.getSettingsBaseCommand(), this.extensionSettings().getName()))))), false);
                             return 1;
                         }));
+    }
+
+    @Override
+    protected boolean processCommands(MessageReceivedEvent event, String message, MinecraftServer server) {
+        return false;
     }
 }

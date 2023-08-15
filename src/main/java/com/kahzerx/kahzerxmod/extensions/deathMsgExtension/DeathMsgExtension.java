@@ -5,6 +5,7 @@ import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.kahzerx.kahzerxmod.utils.DimUtils;
 import com.kahzerx.kahzerxmod.utils.MarkEnum;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.HashMap;
@@ -27,8 +28,8 @@ public class DeathMsgExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onExtensionEnabled() { }
+    public void onExtensionEnabled(ServerCommandSource source) { }
 
     @Override
-    public void onExtensionDisabled() { }
+    public void onExtensionDisabled(ServerCommandSource source) { }
 }
