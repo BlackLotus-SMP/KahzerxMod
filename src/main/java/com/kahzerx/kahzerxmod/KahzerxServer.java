@@ -29,7 +29,8 @@ public class KahzerxServer {
     public static CommandDispatcher<ServerCommandSource> dispatcher;
     public static CommandRegistryAccess commandRegistryAccess;
     private static final String SETTINGS_BASE_COMMAND = "KSettings";
-    private static final ExtensionManager extensionManager = new ExtensionManager(SETTINGS_BASE_COMMAND);
+    private static final int DEFAULT_SETTINGS_COMMAND_LEVEL = 2;
+    private static final ExtensionManager extensionManager = new ExtensionManager(SETTINGS_BASE_COMMAND, DEFAULT_SETTINGS_COMMAND_LEVEL);
 
     public static void onRunServer(MinecraftServer minecraftServer) {
         KahzerxServer.minecraftServer = minecraftServer;
@@ -45,7 +46,7 @@ public class KahzerxServer {
         // TODO command of reload, from file, check diffs and apply
         // TODO refactor so you know which extension depends on which extension for dep tree on disable
         LiteralArgumentBuilder<ServerCommandSource> settingsCommand = literal(SETTINGS_BASE_COMMAND).
-                requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(2));  // TODO this has to be customizable for CMPs
+                requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(extensionManager.getDefaultSettingCommandLevel()));
         for (Extensions ex : extensionManager.getExtensions().values()) {
             LiteralArgumentBuilder<ServerCommandSource> extensionSubCommand = literal(ex.extensionSettings().getName());
             extensionSubCommand.

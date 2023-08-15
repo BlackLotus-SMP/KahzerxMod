@@ -59,9 +59,19 @@ public class ExtensionManager {
     private static final Logger LOGGER = LogManager.getLogger();
     private final SortedMap<String, Extensions> extensions = new TreeMap<>();
     private final String SETTINGS_BASE_COMMAND;
+    private int defaultSettingCommandLevel;
 
-    public ExtensionManager(String settingsBaseCommand) {
+    public ExtensionManager(String settingsBaseCommand, int defaultSettingCommandLevel) {
         this.SETTINGS_BASE_COMMAND = settingsBaseCommand;
+        this.defaultSettingCommandLevel = defaultSettingCommandLevel;
+    }
+
+    public int getDefaultSettingCommandLevel() {
+        return defaultSettingCommandLevel;
+    }
+
+    public void setDefaultSettingCommandLevel(int defaultSettingCommandLevel) {
+        this.defaultSettingCommandLevel = defaultSettingCommandLevel;
     }
 
     public SortedMap<String, Extensions> getExtensions() {
@@ -74,7 +84,7 @@ public class ExtensionManager {
         for (Extensions ex : this.extensions.values()) {
             settingsArray.add(ex.extensionSettings());
         }
-        KSettings settings = new KSettings(settingsArray);
+        KSettings settings = new KSettings(settingsArray, this.getDefaultSettingCommandLevel());
         FileUtils.createConfig(KahzerxServer.minecraftServer.getSavePath(WorldSavePath.ROOT).toString(), settings);
     }
 
@@ -84,6 +94,10 @@ public class ExtensionManager {
         JSONParser parser = new JSONParser();
         try {
             JSONObject setting = (JSONObject) parser.parse(settings);
+            long settingCommandLevel = (long) setting.getOrDefault("commandLevel", -1);
+            if (settingCommandLevel != -1) {
+                this.setDefaultSettingCommandLevel((int) settingCommandLevel);
+            }
             JSONArray settingsList = (JSONArray) setting.get("settings");
             for (Object obj : settingsList) {
                 String ruleName = (String) ((JSONObject) obj).getOrDefault("name", null);
