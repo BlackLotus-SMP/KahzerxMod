@@ -43,7 +43,7 @@ public class DiscordWhitelistSyncThread extends TimerTask {
 
     @Override
     public void run() {
-        if (this.discordExtension.getBot().isReady()) {  // TODO check if it works
+        if (!this.discordExtension.getBot().isReady()) {
             return;
         }
         if (!this.discordExtension.extensionSettings().isEnabled() || !this.discordWhitelistExtension.extensionSettings().isEnabled() || !this.discordWhitelistSyncExtension.extensionSettings().isEnabled()) {

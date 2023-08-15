@@ -36,7 +36,6 @@ public class InfoCommand extends GenericCommand {
     }
 
     public void execute(MessageReceivedEvent event, MinecraftServer server, String serverPrefix, DiscordWhitelistExtension extension){
-        String destinationFile = "skin.png";
         boolean feedback = extension.getDiscordExtension().extensionSettings().isShouldFeedback();
         String msg = event.getMessage().getContentRaw();
         if (msg.split(" ").length == 2) {
@@ -70,16 +69,16 @@ public class InfoCommand extends GenericCommand {
                         event.getChannel().sendMessageEmbeds(embed.build()).queue();
                     }
                 }
-            }else {
+            } else {
                 EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**Not in whitelist.**"}, serverPrefix, true, Color.RED, true, feedback);
                 if (embed != null) {
                     event.getChannel().sendMessageEmbeds(embed.build()).queue();
                 }
-                return;
             }
-        }else {
+        } else {
             long dsId = event.getAuthor().getIdLong();
             ArrayList<String> whiteList = extension.getWhitelistedPlayers(dsId);
+            // TODO if there is no whitelisted players, display a message!
             for (String uuid: whiteList){
                 try {
                     File skinPng = saveImage(uuid, server, serverPrefix, event, feedback);

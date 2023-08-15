@@ -533,7 +533,7 @@ public class DiscordWhitelistExtension extends DiscordGenericExtension implement
                                 })).
                         executes(context -> {
                             context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/whitelistChats\n").styled(style -> style.withBold(true)).
-                                    append(MarkEnum.INFO.appendMsg("Chats where !info, !add, !remove y !list work\n", Formatting.GRAY).styled(style -> style.withBold(false))).
+                                    append(MarkEnum.INFO.appendMsg("Chats where !info, !add, !remove and !list work\n", Formatting.GRAY).styled(style -> style.withBold(false))).
                                     append(Text.literal("[Chats]").styled(style -> style.
                                             withColor(Formatting.DARK_GRAY).
                                             withUnderline(true).
