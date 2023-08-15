@@ -143,6 +143,7 @@ public class ExtensionManager {
         this.registerExtension(new DiscordWhitelistExtension(fileSettings));
         this.registerExtension(new DiscordAdminToolsExtension(fileSettings));
         this.registerExtension(new DiscordWhitelistSyncExtension(fileSettings));
+        // TODO bungee support
         this.printExtensions();
         LOGGER.info("Settings loaded!");
     }
