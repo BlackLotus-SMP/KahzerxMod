@@ -1,5 +1,6 @@
 package com.kahzerx.kahzerxmod.extensions.discordExtension.commands;
 
+import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordPermission;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension.DiscordWhitelistExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
@@ -8,6 +9,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.minecraft.server.MinecraftServer;
@@ -23,6 +25,11 @@ import java.util.concurrent.TimeUnit;
 public class RemoveCommand extends GenericCommand {
     public RemoveCommand() {
         super("remove", "remove from whitelist a previously added player with /add", DiscordPermission.WHITELIST_CHAT);
+    }
+
+    @Override
+    public void executeSlash(SlashCommandEvent event, MinecraftServer server, ExtensionManager extensionManager) {
+
     }
 
     @Override

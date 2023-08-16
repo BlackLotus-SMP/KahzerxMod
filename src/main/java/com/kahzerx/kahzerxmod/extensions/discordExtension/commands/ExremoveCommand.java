@@ -1,11 +1,13 @@
 package com.kahzerx.kahzerxmod.extensions.discordExtension.commands;
 
+import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordPermission;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordAdminToolsExtension.DiscordAdminToolsExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension.DiscordWhitelistExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
 import com.mojang.authlib.GameProfile;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.Whitelist;
@@ -20,6 +22,11 @@ import java.util.concurrent.TimeUnit;
 public class ExremoveCommand extends GenericCommand {
     public ExremoveCommand() {
         super("exremove", "remove a mc player previously added by the /exadd command", DiscordPermission.ADMIN_CHAT);
+    }
+
+    @Override
+    public void executeSlash(SlashCommandEvent event, MinecraftServer server, ExtensionManager extensionManager) {
+
     }
 
     @Override

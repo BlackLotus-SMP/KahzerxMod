@@ -1,9 +1,11 @@
 package com.kahzerx.kahzerxmod.extensions.discordExtension.commands;
 
+import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordPermission;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension.DiscordWhitelistExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.minecraft.server.MinecraftServer;
 
@@ -16,6 +18,11 @@ import java.util.List;
 public class ListCommand extends GenericCommand {
     public ListCommand() {
         super("list", "print full whitelist", DiscordPermission.WHITELIST_CHAT, false);
+    }
+
+    @Override
+    public void executeSlash(SlashCommandEvent event, MinecraftServer server, ExtensionManager extensionManager) {
+
     }
 
     @Override

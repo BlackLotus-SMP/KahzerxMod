@@ -17,6 +17,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.minecraft.server.*;
@@ -69,6 +70,10 @@ public class DiscordWhitelistExtension extends DiscordGenericExtension implement
 
     public DiscordExtension getDiscordExtension() {
         return discordExtension;
+    }
+
+    public ExtensionManager getEm() {
+        return em;
     }
 
     @Override
@@ -193,10 +198,10 @@ public class DiscordWhitelistExtension extends DiscordGenericExtension implement
             }
             rs.close();
             ps.close();
-            return canAdd;
+            return !canAdd;
         } catch (SQLException e) {
             e.printStackTrace();
-            return canAdd;
+            return true;
         }
     }
 
@@ -426,6 +431,19 @@ public class DiscordWhitelistExtension extends DiscordGenericExtension implement
             return true;
         } else if (message.startsWith(this.infoCommand.getCommandPrefix() + infoCommand.getCommand())) {
             infoCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), this);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    protected boolean processSlashCommands(SlashCommandEvent event, MinecraftServer server) {
+        CommandFound commandFound = this.findValidSlashCommand(event, this.extensionSettings().getWhitelistChats());
+        if (!commandFound.found()) {
+            return false;
+        }
+        if (commandFound.command() != null) {
+            commandFound.command().executeSlash(event, server, this.getEm());
             return true;
         }
         return false;

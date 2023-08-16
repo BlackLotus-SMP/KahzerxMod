@@ -9,6 +9,7 @@ import com.kahzerx.kahzerxmod.utils.MarkEnum;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
@@ -205,6 +206,11 @@ public class DiscordWhitelistSyncExtension extends DiscordGenericExtension imple
 
     @Override
     protected boolean processCommands(MessageReceivedEvent event, String message, MinecraftServer server) {
+        return false;
+    }
+
+    @Override
+    protected boolean processSlashCommands(SlashCommandEvent event, MinecraftServer server) {
         return false;
     }
 }

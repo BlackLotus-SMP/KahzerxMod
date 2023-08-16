@@ -1,5 +1,6 @@
 package com.kahzerx.kahzerxmod.extensions.discordExtension.commands;
 
+import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordPermission;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension.DiscordWhitelistExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
@@ -7,6 +8,7 @@ import com.mojang.authlib.GameProfile;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.minecraft.client.realms.FileUpload;
@@ -30,9 +32,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class InfoCommand extends GenericCommand {
-
     public InfoCommand() {
         super("info", "show information about whitelisted players", DiscordPermission.WHITELIST_CHAT);
+    }
+
+    @Override
+    public void executeSlash(SlashCommandEvent event, MinecraftServer server, ExtensionManager extensionManager) {
+
     }
 
     public void execute(MessageReceivedEvent event, MinecraftServer server, String serverPrefix, DiscordWhitelistExtension extension){

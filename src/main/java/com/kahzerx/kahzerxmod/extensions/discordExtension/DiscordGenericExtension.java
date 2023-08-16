@@ -4,6 +4,7 @@ import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.commands.GenericCommand;
 import com.kahzerx.kahzerxmod.utils.MarkEnum;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.ClickEvent;
@@ -14,6 +15,7 @@ import net.minecraft.util.Formatting;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public abstract class DiscordGenericExtension extends GenericExtension {
     private final ArrayList<GenericCommand> commands = new ArrayList<>();
@@ -22,6 +24,29 @@ public abstract class DiscordGenericExtension extends GenericExtension {
     }
 
     protected abstract boolean processCommands(MessageReceivedEvent event, String message, MinecraftServer server);
+    protected abstract boolean processSlashCommands(SlashCommandEvent event, MinecraftServer server);
+
+    protected CommandFound findValidSlashCommand(SlashCommandEvent event, List<Long> allowedChats) {
+        for (GenericCommand command : this.getCommands()) {
+            if (!command.getCommand().equals(event.getName())) {
+                continue;
+            }
+            if (!this.getSettings().isEnabled()) {
+                event.reply("This extension is not enabled!").setEphemeral(true).queue();
+                return new CommandFound(null, true);
+            }
+            if (allowedChats.size() == 0) {
+                event.reply("There are no chats available for this command!").setEphemeral(true).queue();
+                return new CommandFound(null, true);
+            }
+            if (!allowedChats.contains(event.getChannel().getIdLong())) {
+                event.reply("This is not the right channel for this command!").setEphemeral(true).queue();
+                return new CommandFound(null, true);
+            }
+            return new CommandFound(command, true);
+        }
+        return new CommandFound(null, false);
+    }
 
     protected void addCommands(GenericCommand... c) {
         this.commands.addAll(Arrays.asList(c));
@@ -106,4 +131,6 @@ public abstract class DiscordGenericExtension extends GenericExtension {
                 withColor(enabled ? Formatting.GREEN : Formatting.RED).
                 withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to modify!"))));
     }
+
+    protected record CommandFound(GenericCommand command, boolean found) { }
 }

@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.minecraft.server.MinecraftServer;
@@ -123,16 +124,19 @@ public class DiscordBot extends ListenerAdapter implements DiscordBotInterface {
                 if (command.isNeedsPlayerParameter()) {
                     cd.addOption(OptionType.STRING, "player", "player name");
                 }
-                this.jda.upsertCommand(cd).queue();
+                this.jda.upsertCommand(cd).queue();  // TODO validate if the command is enabled or not to upsert or delete!
+                // TODO event that triggers on extension enable or disable to delete or upsert commands
             }
         }
     }
 
     @Override
     public void onSlashCommand(@NotNull SlashCommandEvent event) {
-        System.out.println(event);
-        System.out.println(event.getName());
-        event.reply("a").setEphemeral(false).queue();
+        for (DiscordGenericExtension extension : this.discordExtensions) {
+            if (extension.processSlashCommands(event, this.server)) {
+                return;
+            }
+        }
     }
 
     @Override
@@ -150,7 +154,7 @@ public class DiscordBot extends ListenerAdapter implements DiscordBotInterface {
         }
 
         String message = event.getMessage().getContentRaw();
-        for (DiscordGenericExtension extension : this.discordExtensions) {  // TODO slash commands?
+        for (DiscordGenericExtension extension : this.discordExtensions) {
             if (extension.processCommands(event, message, server)) {
                 return;
             }

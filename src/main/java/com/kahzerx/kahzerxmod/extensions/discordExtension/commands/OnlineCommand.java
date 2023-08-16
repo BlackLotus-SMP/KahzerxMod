@@ -1,9 +1,11 @@
 package com.kahzerx.kahzerxmod.extensions.discordExtension.commands;
 
+import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordPermission;
 import com.kahzerx.kahzerxmod.klone.KlonePlayerEntity;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordUtils;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -16,6 +18,11 @@ import static com.kahzerx.kahzerxmod.extensions.fbiExtension.FBIExtension.getHid
 public class OnlineCommand extends GenericCommand {
     public OnlineCommand() {
         super("online", "list online players", DiscordPermission.ALLOWED_CHAT, false);
+    }
+
+    @Override
+    public void executeSlash(SlashCommandEvent event, MinecraftServer server, ExtensionManager extensionManager) {
+
     }
 
     @Override

@@ -16,6 +16,7 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
@@ -87,8 +88,25 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
         return false;
     }
 
+    @Override
+    protected boolean processSlashCommands(SlashCommandEvent event, MinecraftServer server) {
+        CommandFound commandFound = this.findValidSlashCommand(event, this.extensionSettings().getAllowedChats());
+        if (!commandFound.found()) {
+            return false;
+        }
+        if (commandFound.command() != null) {
+            commandFound.command().executeSlash(event, server, this.getEm());
+            return true;
+        }
+        return false;
+    }
+
     public DiscordBot getBot() {
         return bot;
+    }
+
+    public ExtensionManager getEm() {
+        return em;
     }
 
     @Override
