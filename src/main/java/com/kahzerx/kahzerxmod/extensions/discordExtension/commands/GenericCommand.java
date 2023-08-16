@@ -7,6 +7,7 @@ import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtens
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -39,10 +40,6 @@ public abstract class GenericCommand {
     }
 
     public abstract void executeSlash(SlashCommandEvent event, MinecraftServer server, ExtensionManager extensionManager);
-
-    public void execute(MessageReceivedEvent event, MinecraftServer server, String serverPrefix) {
-        throw new UnsupportedOperationException("Not implemented");
-    }
 
     public void execute(MessageReceivedEvent event, MinecraftServer server, String serverPrefix, DiscordWhitelistExtension extension) {
         throw new UnsupportedOperationException("Not implemented");
@@ -92,17 +89,30 @@ public abstract class GenericCommand {
         return null;
     }
 
-    protected void replyMessage(SlashCommandEvent event, boolean feedback, String message, String prefix) {
-        this.replyMessage(event, feedback, message, prefix, true);
+    protected void replyMessage(SlashCommandEvent event, boolean feedback, String message, String prefix, boolean success) {
+        this.replyMessage(event, feedback, message, prefix, true, success);
     }
 
-    protected void replyMessage(SlashCommandEvent event, boolean feedback, String message, String prefix, boolean ephemeral) {
-        ReplyAction action = event.reply(String.format("%s%s", prefix, message));
+    protected void replyMessage(SlashCommandEvent event, boolean feedback, String message, String prefix, boolean ephemeral, boolean success) {
+        MessageEmbed embed = this.generateSimpleEmbed(prefix, message, success ? Color.GREEN : Color.RED);
+        ReplyAction action = event.replyEmbeds(embed);
         if (feedback) {
             action.setEphemeral(ephemeral).queue();
         } else {
-            action.setEphemeral(false).queue(m -> m.deleteOriginal().queueAfter(2, TimeUnit.SECONDS));
+            action.setEphemeral(false).queue(m -> m.deleteOriginal().queueAfter(2, TimeUnit.SECONDS));  // TODO will this work with 2 servers and the same token?
         }
+    }
+
+    private MessageEmbed generateSimpleEmbed(String prefix, String message, Color color) {
+        EmbedBuilder emb = new EmbedBuilder();
+        emb.setColor(color);
+        if (prefix.equals("")) {
+            emb.setTitle("server");
+        } else {
+            emb.setTitle(prefix);
+        }
+        emb.setDescription(message);
+        return emb.build();
     }
 
     public void sendHelpCommand(String serverPrefix, MessageChannel channel, boolean should) {

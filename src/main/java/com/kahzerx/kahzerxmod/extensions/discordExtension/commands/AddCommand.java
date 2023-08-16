@@ -35,36 +35,33 @@ public class AddCommand extends GenericCommand {
         DiscordWhitelistExtension discordWhitelistExtension = extensionManager.getDiscordWhitelistExtension();
         boolean feedback = discordExtension.extensionSettings().isShouldFeedback();
         String prefix = discordExtension.extensionSettings().getPrefix();
-        if (!prefix.equals("")) {
-            prefix = String.format("[%s] ", prefix);
-        }
         long userID = event.getUser().getIdLong();
         if (discordWhitelistExtension.isDiscordBanned(userID)) {
-            this.replyMessage(event, feedback, "You can't add players because you are banned!", prefix);
+            this.replyMessage(event, feedback, "You can't add players because you are banned!", prefix, false);
             return;
         }
         String playerName = this.getPlayer(event);
         if (playerName == null) {
-            this.replyMessage(event, feedback, String.format("You need to add the player name!\n%s", this.getHelpSuggestion()), prefix);
+            this.replyMessage(event, feedback, String.format("You need to add the player name!\n%s", this.getHelpSuggestion()), prefix, false);
             return;
         }
         Optional<GameProfile> profile = server.getUserCache().findByName(playerName);
         if (profile.isEmpty()) {
-            this.replyMessage(event, feedback, String.format("The player %s is not premium", playerName), prefix);
+            this.replyMessage(event, feedback, String.format("The player %s is not premium", playerName), prefix, false);
             return;
         }
         if (discordWhitelistExtension.userReachedMaxPlayers(userID)) {
-            this.replyMessage(event, feedback, String.format("You can't add more than %d players to the whitelist", discordWhitelistExtension.extensionSettings().getNPlayers()), prefix);
+            this.replyMessage(event, feedback, String.format("You can't add more than %d players to the whitelist", discordWhitelistExtension.extensionSettings().getNPlayers()), prefix, false);
             return;
         }
         GameProfile playerProfile = profile.get();
         if (discordWhitelistExtension.isPlayerBanned(playerProfile.getId().toString())) {
-            this.replyMessage(event, feedback, String.format("The player %s is banned", playerProfile.getName()), prefix);
+            this.replyMessage(event, feedback, String.format("The player %s is banned", playerProfile.getName()), prefix, false);
             return;
         }
         Whitelist whitelist = server.getPlayerManager().getWhitelist();
         if (whitelist.isAllowed(playerProfile)) {
-            this.replyMessage(event, feedback, String.format("The player %s is already whitelisted", playerProfile.getName()), prefix);
+            this.replyMessage(event, feedback, String.format("The player %s is already whitelisted", playerProfile.getName()), prefix, false);
             return;
         }
         WhitelistEntry whitelistEntry = new WhitelistEntry(playerProfile);
@@ -72,7 +69,7 @@ public class AddCommand extends GenericCommand {
         whitelist.add(whitelistEntry);
         Guild guild = event.getGuild();
         if (guild == null) {
-            this.replyMessage(event, feedback, "Error trying to find guild! contact an administrator", prefix);
+            this.replyMessage(event, feedback, "Error trying to find guild! contact an administrator", prefix, false);
             return;
         }
         Role role = guild.getRoleById(discordWhitelistExtension.extensionSettings().getDiscordRole());
@@ -84,7 +81,7 @@ public class AddCommand extends GenericCommand {
                 exception.printStackTrace();
             }
         }
-        this.replyMessage(event, feedback, String.format("%s has been added to the whitelist!", playerProfile.getName()), prefix, false);
+        this.replyMessage(event, feedback, String.format("%s has been added to the whitelist!", playerProfile.getName()), prefix, false, true);
     }
 
     @Override
