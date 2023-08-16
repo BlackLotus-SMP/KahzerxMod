@@ -10,8 +10,11 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.Webhook;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.NotNull;
@@ -107,6 +110,29 @@ public class DiscordBot extends ListenerAdapter implements DiscordBotInterface {
                 command.setCommandPrefix(prefix);
             }
         }
+        this.addSlashCommands();
+    }
+
+    public void addSlashCommands() {
+        if (!this.isReady()) {
+            return;
+        }
+        for (DiscordGenericExtension e : this.discordExtensions) {
+            for (GenericCommand command : e.getCommands()) {
+                CommandData cd = new CommandData(command.getCommand(), command.getDescription());
+                if (command.isNeedsPlayerParameter()) {
+                    cd.addOption(OptionType.STRING, "player", "player name");
+                }
+                this.jda.upsertCommand(cd).queue();
+            }
+        }
+    }
+
+    @Override
+    public void onSlashCommand(@NotNull SlashCommandEvent event) {
+        System.out.println(event);
+        System.out.println(event.getName());
+        event.reply("a").setEphemeral(false).queue();
     }
 
     @Override

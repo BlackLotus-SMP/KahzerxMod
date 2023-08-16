@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 public class PardonCommand extends GenericCommand {
     public PardonCommand() {
-        super("pardon", DiscordPermission.ADMIN_CHAT);
+        super("pardon", "pardon a previously banned player with /ban", DiscordPermission.ADMIN_CHAT);
     }
 
     @Override

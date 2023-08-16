@@ -32,7 +32,7 @@ import java.util.UUID;
 public class InfoCommand extends GenericCommand {
 
     public InfoCommand() {
-        super("info", DiscordPermission.WHITELIST_CHAT);
+        super("info", "show information about whitelisted players", DiscordPermission.WHITELIST_CHAT);
     }
 
     public void execute(MessageReceivedEvent event, MinecraftServer server, String serverPrefix, DiscordWhitelistExtension extension){

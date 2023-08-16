@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 public class AddCommand extends GenericCommand {
     public AddCommand() {
-        super("add", DiscordPermission.WHITELIST_CHAT);
+        super("add", "add minecraft player to the whitelist", DiscordPermission.WHITELIST_CHAT);
     }
 
     @Override

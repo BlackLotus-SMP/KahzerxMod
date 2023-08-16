@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ExremoveCommand extends GenericCommand {
     public ExremoveCommand() {
-        super("exremove", DiscordPermission.ADMIN_CHAT);
+        super("exremove", "remove a mc player previously added by the /exadd command", DiscordPermission.ADMIN_CHAT);
     }
 
     @Override

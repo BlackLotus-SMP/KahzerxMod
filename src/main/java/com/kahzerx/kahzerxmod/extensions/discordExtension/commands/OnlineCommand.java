@@ -15,7 +15,7 @@ import static com.kahzerx.kahzerxmod.extensions.fbiExtension.FBIExtension.getHid
 
 public class OnlineCommand extends GenericCommand {
     public OnlineCommand() {
-        super("online", DiscordPermission.ALLOWED_CHAT, false);
+        super("online", "list online players", DiscordPermission.ALLOWED_CHAT, false);
     }
 
     @Override

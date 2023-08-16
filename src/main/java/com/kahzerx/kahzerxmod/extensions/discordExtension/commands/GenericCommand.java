@@ -14,19 +14,22 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class GenericCommand {
-    private final String body;
+    private final String command;
+    private final String description;
     private final DiscordPermission permission;
     private String commandPrefix = "";
     private final boolean needsPlayerParameter;
 
-    public GenericCommand(String body, DiscordPermission permission) {
-        this.body = body;
+    public GenericCommand(String command, String description, DiscordPermission permission) {
+        this.command = command;
+        this.description = description;
         this.permission = permission;
         this.needsPlayerParameter = true;
     }
 
-    public GenericCommand(String body, DiscordPermission permission, boolean needsPlayerParameter) {
-        this.body = body;
+    public GenericCommand(String command, String description, DiscordPermission permission, boolean needsPlayerParameter) {
+        this.command = command;
+        this.description = description;
         this.permission = permission;
         this.needsPlayerParameter = needsPlayerParameter;
     }
@@ -59,12 +62,20 @@ public class GenericCommand {
         return permission;
     }
 
-    public String getBody() {
-        return body;
+    public String getCommand() {
+        return command;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public boolean isNeedsPlayerParameter() {
+        return needsPlayerParameter;
     }
 
     private String getHelpSuggestion() {
-        return String.format("%s%s", this.getCommandPrefix(), this.getBody()) + (this.needsPlayerParameter ? " <playerName>" : "");
+        return String.format("%s%s", this.getCommandPrefix(), this.getCommand()) + (this.needsPlayerParameter ? " <playerName>" : "");
     }
 
     public void sendHelpCommand(String serverPrefix, MessageChannel channel, boolean should) {

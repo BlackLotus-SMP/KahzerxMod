@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ExaddCommand extends GenericCommand {
     public ExaddCommand() {
-        super("exadd", DiscordPermission.ADMIN_CHAT);
+        super("exadd", "add a mc player that is not on the discord server, stands for exception add", DiscordPermission.ADMIN_CHAT);
     }
 
     @Override

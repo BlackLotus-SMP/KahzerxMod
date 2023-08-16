@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 public class BanCommand extends GenericCommand {
     public BanCommand() {
-        super("ban", DiscordPermission.ADMIN_CHAT);
+        super("ban", "ban a whitelisted player from the mc server and makes the discord user not able to add anymore", DiscordPermission.ADMIN_CHAT);
     }
 
     @Override
