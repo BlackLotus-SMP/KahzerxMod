@@ -3,12 +3,17 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension.commands;
 import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordPermission;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordAdminToolsExtension.DiscordAdminToolsExtension;
+import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension.DiscordWhitelistExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
 import com.mojang.authlib.GameProfile;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.minecraft.server.MinecraftServer;
 
 import java.awt.*;
@@ -24,7 +29,52 @@ public class BanCommand extends GenericCommand {
 
     @Override
     public void executeSlash(SlashCommandEvent event, MinecraftServer server, ExtensionManager extensionManager) {
-
+        DiscordExtension discordExtension = extensionManager.getDiscordExtension();
+        DiscordWhitelistExtension discordWhitelistExtension = extensionManager.getDiscordWhitelistExtension();
+        DiscordAdminToolsExtension discordAdminToolsExtension = extensionManager.getDiscordAdminToolsExtension();
+        boolean feedback = discordAdminToolsExtension.extensionSettings().isShouldFeedback();
+        String prefix = discordExtension.extensionSettings().getPrefix();
+        String playerName = this.getPlayer(event);
+        if (playerName == null) {
+            this.replyMessage(event, feedback, String.format("You need to add the player name!\n%s", this.getHelpSuggestion()), prefix, false);
+            return;
+        }
+        Optional<GameProfile> profile = server.getUserCache().findByName(playerName);
+        if (profile.isEmpty()) {
+            this.replyMessage(event, feedback, String.format("The player %s is not premium", playerName), prefix, false);
+            return;
+        }
+        GameProfile playerProfile = profile.get();
+        if (!discordWhitelistExtension.alreadyAddedBySomeone(playerProfile.getId().toString())) {
+            this.replyMessage(event, feedback, String.format("The player %s is not whitelisted", playerName), prefix, false);
+            return;
+        }
+        if (discordWhitelistExtension.canRemove(69420L, playerProfile.getId().toString())) {
+            this.replyMessage(event, feedback, String.format("The player %s was added with the /exadd command, you need to use /exremove", playerName), prefix, false);
+            return;
+        }
+        long discordID = discordWhitelistExtension.getDiscordID(playerProfile.getId().toString());
+        if (discordWhitelistExtension.isPlayerBanned(playerProfile.getId().toString())) {
+            onBanAction(discordWhitelistExtension, discordID, server);
+            this.replyMessage(event, feedback, String.format("The player %s is already banned", playerName), prefix, false);
+            return;
+        }
+        discordWhitelistExtension.banDiscord(discordID);
+        onBanAction(discordWhitelistExtension, discordID, server);
+        this.replyMessage(event, feedback, String.format("The player %s has been banned", playerName), prefix, false, true);
+        Guild guild = event.getGuild();
+        if (guild == null) {
+            return;
+        }
+        Role role = guild.getRoleById(discordWhitelistExtension.extensionSettings().getDiscordRole());
+        Member member = event.getMember();
+        if (role != null && member != null) {
+            try {
+                guild.removeRoleFromMember(member, role).queue();
+            } catch (HierarchyException exception) {
+                exception.printStackTrace();
+            }
+        }
     }
 
     @Override
