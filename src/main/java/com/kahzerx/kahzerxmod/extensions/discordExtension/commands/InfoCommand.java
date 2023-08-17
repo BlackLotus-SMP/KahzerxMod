@@ -1,5 +1,6 @@
 package com.kahzerx.kahzerxmod.extensions.discordExtension.commands;
 
+import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordPermission;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension.DiscordWhitelistExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
@@ -30,7 +31,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class InfoCommand extends GenericCommand {
-
     public InfoCommand() {
         super("info", "show information about whitelisted players", DiscordPermission.WHITELIST_CHAT);
     }
@@ -103,6 +103,11 @@ public class InfoCommand extends GenericCommand {
             }
 
         }
+
+    }
+
+    @Override
+    public void executeCommand(MessageReceivedEvent event, MinecraftServer server, ExtensionManager extensionManager) {
 
     }
 

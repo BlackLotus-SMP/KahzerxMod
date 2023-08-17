@@ -1,5 +1,6 @@
 package com.kahzerx.kahzerxmod.extensions.discordExtension.commands;
 
+import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordPermission;
 import com.kahzerx.kahzerxmod.klone.KlonePlayerEntity;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
@@ -33,5 +34,10 @@ public class OnlineCommand extends GenericCommand {
             msg.append(player.getName().getString().replace("_", "\\_")).append(isBot ? " [Bot]" : "").append("\n");
         }
         event.getChannel().sendMessageEmbeds(Objects.requireNonNull(DiscordChatUtils.generateEmbed(msg, n, serverPrefix)).build()).queue();
+    }
+
+    @Override
+    public void executeCommand(MessageReceivedEvent event, MinecraftServer server, ExtensionManager extensionManager) {
+
     }
 }

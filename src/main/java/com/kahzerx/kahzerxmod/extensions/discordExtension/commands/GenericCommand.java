@@ -1,5 +1,6 @@
 package com.kahzerx.kahzerxmod.extensions.discordExtension.commands;
 
+import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordPermission;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordAdminToolsExtension.DiscordAdminToolsExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension.DiscordWhitelistExtension;
@@ -13,7 +14,7 @@ import java.awt.*;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class GenericCommand {
+public abstract class GenericCommand {
     private final String command;
     private final String description;
     private final DiscordPermission permission;
@@ -50,6 +51,8 @@ public class GenericCommand {
         throw new UnsupportedOperationException("Not implemented");
     }
 
+    public abstract void executeCommand(MessageReceivedEvent event, MinecraftServer server, ExtensionManager extensionManager);
+
     public String getCommandPrefix() {
         return commandPrefix;
     }
@@ -74,7 +77,7 @@ public class GenericCommand {
         return needsPlayerParameter;
     }
 
-    private String getHelpSuggestion() {
+    protected String getHelpSuggestion() {
         return String.format("%s%s", this.getCommandPrefix(), this.getCommand()) + (this.needsPlayerParameter ? " <playerName>" : "");
     }
 
