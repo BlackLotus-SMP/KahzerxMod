@@ -57,7 +57,7 @@ public class AddCommand extends GenericCommand {
             }
             return;
         }
-        if (!extension.userReachedMaxPlayers(id)) {
+        if (extension.userReachedMaxPlayers(id)) {
             EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**You can't add more players, max " + extension.extensionSettings().getNPlayers() + "**"}, serverPrefix, true, Color.RED, true, feedback);
             if (embed != null) {
                 event.getChannel().sendMessageEmbeds(embed.build()).queue();
