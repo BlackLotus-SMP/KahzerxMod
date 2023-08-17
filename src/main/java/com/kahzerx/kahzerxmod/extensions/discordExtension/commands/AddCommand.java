@@ -2,6 +2,7 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension.commands;
 
 import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordPermission;
+import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension.DiscordWhitelistExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
 import com.mojang.authlib.GameProfile;
@@ -28,14 +29,17 @@ public class AddCommand extends GenericCommand {
     }
 
     @Override
-    public void execute(MessageReceivedEvent event, MinecraftServer server, String serverPrefix, DiscordWhitelistExtension extension) {
-        boolean feedback = extension.getDiscordExtension().extensionSettings().isShouldFeedback();
+    public void executeCommand(MessageReceivedEvent event, MinecraftServer server, ExtensionManager extensionManager) {
+        DiscordWhitelistExtension discordWhitelistExtension = extensionManager.getDiscordWhitelistExtension();
+        DiscordExtension discordExtension = extensionManager.getDiscordExtension();
+        String serverPrefix = discordExtension.extensionSettings().getPrefix();
+        boolean feedback = discordExtension.extensionSettings().isShouldFeedback();
         List<String> bannedResponses = new ArrayList<>();
         bannedResponses.add("https://www.youtube.com/watch?v=eOhM3pYUkXE");
         bannedResponses.add("https://www.youtube.com/watch?v=O-U-8vpYMlo");
         bannedResponses.add("https://www.youtube.com/watch?v=44_VHjUlGdY");
         long id = event.getAuthor().getIdLong();
-        if (extension.isDiscordBanned(id)) {
+        if (discordWhitelistExtension.isDiscordBanned(id)) {
             EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{bannedResponses.get(new Random().nextInt(bannedResponses.size()))}, serverPrefix, true, Color.RED, true, feedback);
             if (embed != null) {
                 event.getChannel().sendMessageEmbeds(embed.build()).queue();
@@ -57,8 +61,8 @@ public class AddCommand extends GenericCommand {
             }
             return;
         }
-        if (extension.userReachedMaxPlayers(id)) {
-            EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**You can't add more players, max " + extension.extensionSettings().getNPlayers() + "**"}, serverPrefix, true, Color.RED, true, feedback);
+        if (discordWhitelistExtension.userReachedMaxPlayers(id)) {
+            EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**You can't add more players, max " + discordWhitelistExtension.extensionSettings().getNPlayers() + "**"}, serverPrefix, true, Color.RED, true, feedback);
             if (embed != null) {
                 event.getChannel().sendMessageEmbeds(embed.build()).queue();
             }
@@ -73,18 +77,18 @@ public class AddCommand extends GenericCommand {
             return;
         }
         WhitelistEntry whitelistEntry = new WhitelistEntry(profile.get());
-        if (extension.isPlayerBanned(profile.get().getId().toString())) {
+        if (discordWhitelistExtension.isPlayerBanned(profile.get().getId().toString())) {
             EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**Looks like that player is banned**"}, serverPrefix, true, Color.RED, true, feedback);
             if (embed != null) {
                 event.getChannel().sendMessageEmbeds(embed.build()).queue();
             }
             return;
         }
-        extension.addPlayer(id, profile.get().getId().toString(), profile.get().getName());
+        discordWhitelistExtension.addPlayer(id, profile.get().getId().toString(), profile.get().getName());
         whitelist.add(whitelistEntry);
 
         Guild guild = event.getGuild();
-        Role role = guild.getRoleById(extension.extensionSettings().getDiscordRole());
+        Role role = guild.getRoleById(discordWhitelistExtension.extensionSettings().getDiscordRole());
         Member member = event.getMember();
         if (role != null && member != null) {
             try {
@@ -98,10 +102,5 @@ public class AddCommand extends GenericCommand {
         if (embed != null) {
             event.getChannel().sendMessageEmbeds(embed.build()).queue();
         }
-    }
-
-    @Override
-    public void executeCommand(MessageReceivedEvent event, MinecraftServer server, ExtensionManager extensionManager) {
-
     }
 }
