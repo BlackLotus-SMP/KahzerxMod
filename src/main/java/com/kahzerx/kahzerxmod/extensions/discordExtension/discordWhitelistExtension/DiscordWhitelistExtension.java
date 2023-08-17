@@ -71,6 +71,10 @@ public class DiscordWhitelistExtension extends DiscordGenericExtension implement
         return discordExtension;
     }
 
+    public ExtensionManager getEm() {
+        return em;
+    }
+
     @Override
     public void onCreateDatabase(Connection conn) {
         this.conn = conn;

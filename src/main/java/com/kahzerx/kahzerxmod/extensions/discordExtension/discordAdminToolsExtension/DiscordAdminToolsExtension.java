@@ -65,6 +65,10 @@ public class DiscordAdminToolsExtension extends DiscordGenericExtension implemen
         return discordExtension;
     }
 
+    public ExtensionManager getEm() {
+        return em;
+    }
+
     @Override
     public DiscordAdminToolsSettings extensionSettings() {
         return (DiscordAdminToolsSettings) this.getSettings();

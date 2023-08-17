@@ -28,7 +28,7 @@ public class DiscordBot extends ListenerAdapter implements DiscordBotInterface {
     private WebhookClient whc;
     private final List<DiscordGenericExtension> discordExtensions = new ArrayList<>();
 
-    public DiscordBot(MinecraftServer server, DiscordExtension discordExtension) {  // TODO slash commands?
+    public DiscordBot(MinecraftServer server, DiscordExtension discordExtension) {
         this.server = server;
         this.discordExtension = discordExtension;
     }

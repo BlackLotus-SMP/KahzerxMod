@@ -91,6 +91,10 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
         return bot;
     }
 
+    public ExtensionManager getEm() {
+        return em;
+    }
+
     @Override
     public void onServerStarted(MinecraftServer minecraftServer) {
         this.getBot().addExtensions(this);
