@@ -55,7 +55,7 @@ public class DiscordBot extends ListenerAdapter implements DiscordBotInterface {
         this.jda.awaitReady();
     }
 
-    public void updateCommandPrefix(String prefix) {  // TODO update prefix on command
+    public void updateCommandPrefix(String prefix) {
         this.prefix = prefix;
         for (DiscordGenericExtension extension : this.discordExtensions) {
             for (GenericCommand command : extension.getCommands()) {
