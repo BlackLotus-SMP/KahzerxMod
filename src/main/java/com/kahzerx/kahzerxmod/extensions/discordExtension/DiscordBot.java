@@ -124,9 +124,11 @@ public class DiscordBot extends ListenerAdapter implements DiscordBotInterface {
         }
 
         String message = event.getMessage().getContentRaw();
-        for (DiscordGenericExtension extension : this.discordExtensions) {  // TODO slash commands?
-            if (extension.processCommands(event, message, server)) {
-                return;
+        if (message.startsWith(this.prefix)) {
+            for (DiscordGenericExtension extension : this.discordExtensions) {
+                if (extension.processCommands(event, message.substring(1), server)) {
+                    return;
+                }
             }
         }
 
