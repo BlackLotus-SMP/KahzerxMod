@@ -64,6 +64,10 @@ public class AddCommand extends GenericCommand {
             this.replyMessage(event, feedback, String.format("The player %s is already whitelisted", playerProfile.getName()), prefix, false);
             return;
         }
+        if (discordWhitelistExtension.alreadyAddedBySomeone(profile.get().getId().toString())) {
+            this.replyMessage(event, feedback, String.format("The player %s is already whitelisted by someone else", playerProfile.getName()), prefix, false);
+            return;
+        }
         WhitelistEntry whitelistEntry = new WhitelistEntry(playerProfile);
         discordWhitelistExtension.addPlayer(userID, playerProfile.getId().toString(), playerProfile.getName());
         whitelist.add(whitelistEntry);

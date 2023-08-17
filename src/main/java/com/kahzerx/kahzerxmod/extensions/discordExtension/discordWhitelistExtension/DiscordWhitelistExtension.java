@@ -377,7 +377,7 @@ public class DiscordWhitelistExtension extends DiscordGenericExtension implement
             whitelist.remove(whitelistEntry);
             ServerPlayerEntity serverPlayerEntity = server.getPlayerManager().getPlayer(profile.getId());
             if (serverPlayerEntity != null) {
-                serverPlayerEntity.networkHandler.disconnect(Text.literal("Byee~"));
+                serverPlayerEntity.networkHandler.disconnect(Text.literal("Byee~"));  // TODO Send message "You have been removed from the whitelist and will get kicked in 1 hour since you no longer have a valid discord role"
             }
         }
     }
