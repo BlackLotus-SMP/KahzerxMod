@@ -72,16 +72,12 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
 
     @Override
     protected boolean processCommands(MessageReceivedEvent event, String message, MinecraftServer server) {
-        if (!this.extensionSettings().isEnabled()) {
+        CommandFound commandFound = this.findValidCommand(event, message, this.extensionSettings().getAllowedChats(), this.extensionSettings().isShouldFeedback(), this.extensionSettings().getPrefix());
+        if (!commandFound.found()) {
             return false;
         }
-        if (!DiscordUtils.isAllowed(event.getChannel().getIdLong(), this.extensionSettings().getAllowedChats())) {
-            if (message.startsWith(this.onlineCommand.getCommandPrefix() + this.onlineCommand.getCommand())) {
-                return true;
-            }
-        }
-        if (message.equals(this.onlineCommand.getCommandPrefix() + this.onlineCommand.getCommand())) {
-            this.onlineCommand.execute(event, server, this.extensionSettings().getPrefix(), this.extensionSettings().getAllowedChats());
+        if (commandFound.command() != null) {
+            commandFound.command().executeCommand(event, server, this.getEm());
             return true;
         }
         return false;
