@@ -68,17 +68,15 @@ public class AddCommand extends GenericCommand {
         discordWhitelistExtension.addPlayer(userID, playerProfile.getId().toString(), playerProfile.getName());
         whitelist.add(whitelistEntry);
         Guild guild = event.getGuild();
-        if (guild == null) {
-            this.replyMessage(event, feedback, "Error trying to find guild! contact an administrator", prefix, false);
-            return;
-        }
-        Role role = guild.getRoleById(discordWhitelistExtension.extensionSettings().getDiscordRole());
-        Member member = event.getMember();
-        if (role != null && member != null) {
-            try {
-                guild.addRoleToMember(member, role).queue();
-            } catch (HierarchyException exception) {
-                exception.printStackTrace();
+        if (guild != null) {
+            Role role = guild.getRoleById(discordWhitelistExtension.extensionSettings().getDiscordRole());
+            Member member = event.getMember();
+            if (role != null && member != null) {
+                try {
+                    guild.addRoleToMember(member, role).queue();
+                } catch (HierarchyException exception) {
+                    exception.printStackTrace();
+                }
             }
         }
         this.replyMessage(event, feedback, String.format("%s has been added to the whitelist!", playerProfile.getName()), prefix, false, true);

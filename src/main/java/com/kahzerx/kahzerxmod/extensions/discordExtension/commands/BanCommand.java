@@ -61,20 +61,19 @@ public class BanCommand extends GenericCommand {
         }
         discordWhitelistExtension.banDiscord(discordID);
         onBanAction(discordWhitelistExtension, discordID, server);
-        this.replyMessage(event, feedback, String.format("The player %s has been banned", playerName), prefix, false, true);
         Guild guild = event.getGuild();
-        if (guild == null) {
-            return;
-        }
-        Role role = guild.getRoleById(discordWhitelistExtension.extensionSettings().getDiscordRole());
-        Member member = event.getMember();
-        if (role != null && member != null) {
-            try {
-                guild.removeRoleFromMember(member, role).queue();
-            } catch (HierarchyException exception) {
-                exception.printStackTrace();
+        if (guild != null) {
+            Role role = guild.getRoleById(discordWhitelistExtension.extensionSettings().getDiscordRole());
+            Member member = event.getMember();
+            if (role != null && member != null) {
+                try {
+                    guild.removeRoleFromMember(member, role).queue();
+                } catch (HierarchyException exception) {
+                    exception.printStackTrace();
+                }
             }
         }
+        this.replyMessage(event, feedback, String.format("%s has been banned", playerName), prefix, false, true);  // TODO print all the account the discord user had too!
     }
 
     @Override
