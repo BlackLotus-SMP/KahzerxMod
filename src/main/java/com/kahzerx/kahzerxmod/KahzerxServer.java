@@ -29,7 +29,8 @@ public class KahzerxServer {
     public static CommandDispatcher<ServerCommandSource> dispatcher;
     public static CommandRegistryAccess commandRegistryAccess;
     private static final String SETTINGS_BASE_COMMAND = "KSettings";
-    private static final ExtensionManager extensionManager = new ExtensionManager(SETTINGS_BASE_COMMAND);
+    private static final int DEFAULT_SETTINGS_COMMAND_LEVEL = 2;
+    private static final ExtensionManager extensionManager = new ExtensionManager(SETTINGS_BASE_COMMAND, DEFAULT_SETTINGS_COMMAND_LEVEL);
 
     public static void onRunServer(MinecraftServer minecraftServer) {
         KahzerxServer.minecraftServer = minecraftServer;
@@ -45,7 +46,7 @@ public class KahzerxServer {
         // TODO command of reload, from file, check diffs and apply
         // TODO refactor so you know which extension depends on which extension for dep tree on disable
         LiteralArgumentBuilder<ServerCommandSource> settingsCommand = literal(SETTINGS_BASE_COMMAND).
-                requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(2));  // TODO this has to be customizable for CMPs
+                requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(extensionManager.getDefaultSettingCommandLevel()));
         for (Extensions ex : extensionManager.getExtensions().values()) {
             LiteralArgumentBuilder<ServerCommandSource> extensionSubCommand = literal(ex.extensionSettings().getName());
             extensionSubCommand.
@@ -59,7 +60,12 @@ public class KahzerxServer {
                                 ex.onExtensionEnabled(context.getSource());
                                 extensionManager.saveSettings();
                                 if (ex.extensionSettings().isEnabled()) {
-                                    context.getSource().sendFeedback(MarkEnum.TICK.appendMessage(ex.extensionSettings().getName() + " extension enabled"), false);  // TODO color enabled
+                                    context.getSource().sendFeedback(() -> MarkEnum.TICK.
+                                            appendMsg(ex.extensionSettings().getName() + " extension ").
+                                            append(Text.literal("enabled").styled(style -> style.
+                                                    withColor(Formatting.GREEN).
+                                                    withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to disable"))).
+                                                    withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/%s %s disable", SETTINGS_BASE_COMMAND, ex.extensionSettings().getName()))))), false);
                                 }
                                 return 1;
                             })).
@@ -73,16 +79,24 @@ public class KahzerxServer {
                                 ex.onExtensionDisabled(context.getSource());
                                 extensionManager.saveSettings();
                                 if (!ex.extensionSettings().isEnabled()) {
-                                    context.getSource().sendFeedback(MarkEnum.TICK.appendMessage(ex.extensionSettings().getName() + " extension disabled"), false);
+                                    context.getSource().sendFeedback(() -> MarkEnum.TICK.appendMsg(ex.extensionSettings().getName() + " extension ").
+                                            append(Text.literal("disabled").styled(style -> style.
+                                                    withColor(Formatting.RED).
+                                                    withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to enable"))).
+                                                    withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/%s %s enable", SETTINGS_BASE_COMMAND, ex.extensionSettings().getName()))))), false);
                                 }
                                 return 1;
                             })).
                     executes(context -> {
-                        // TODO click on status to enable or disable maybe?
                         context.getSource().sendFeedback(() -> Text.literal("\n" + ex.extensionSettings().getName() + "\n").styled(style -> style.withBold(true)).
                                         append(MarkEnum.INFO.appendMsg(ex.extensionSettings().getDescription() + "\n", Formatting.GRAY).styled(style -> style.withBold(false))).
                                         append(Text.literal("Enabled: ").styled(style -> style.withBold(false).withColor(Formatting.WHITE))).
-                                        append(Text.literal(String.format("%b", ex.extensionSettings().isEnabled())).styled(style -> style.withBold(false).withColor(ex.extensionSettings().isEnabled() ? Formatting.GREEN : Formatting.RED))), false);
+                                        append(Text.literal(String.format("%b", ex.extensionSettings().isEnabled())).styled(style -> style.
+                                                withBold(false).
+                                                withColor(ex.extensionSettings().isEnabled() ? Formatting.GREEN : Formatting.RED).
+                                                withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(String.format("Click to %s", ex.extensionSettings().isEnabled() ? "disable" : "enable")))).
+                                                withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/%s %s %s", SETTINGS_BASE_COMMAND, ex.extensionSettings().getName(), ex.extensionSettings().isEnabled() ? "disable" : "enable")))
+                                        )), false);
                         return 1;
                     });
             ex.settingsCommand(extensionSubCommand);  // Otros ajustes por si fueran necesarios para las extensiones más complejas.
@@ -102,7 +116,7 @@ public class KahzerxServer {
                                 withBold(false).
                                 withColor(ex.extensionSettings().isEnabled() ? Formatting.GREEN : Formatting.GRAY).
                                 withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(String.format("Enable %s", ex.extensionSettings().getName())))).
-                                withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/KSettings %s enable", ex.extensionSettings().getName())))));
+                                withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/%s %s enable", SETTINGS_BASE_COMMAND, ex.extensionSettings().getName())))));
                 exData.append(Text.literal(" ").styled(
                         style -> style.
                                 withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(""))).
@@ -112,7 +126,7 @@ public class KahzerxServer {
                                 withBold(false).
                                 withColor(!ex.extensionSettings().isEnabled() ? Formatting.RED : Formatting.GRAY).
                                 withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(String.format("Disable %s", ex.extensionSettings().getName())))).
-                                withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/KSettings %s disable", ex.extensionSettings().getName())))));
+                                withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/%s %s disable", SETTINGS_BASE_COMMAND, ex.extensionSettings().getName())))));
                 extensionNames.add(exData);
             }
             context.getSource().sendFeedback(() -> Text.literal("\nSettings").styled(style -> style.withBold(true).withUnderline(true).withColor(Formatting.GOLD)), false);
@@ -139,7 +153,6 @@ public class KahzerxServer {
     public static void onRegisterCommands(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess commandRegistryAccess) {
         KahzerxServer.dispatcher = dispatcher;
         KahzerxServer.commandRegistryAccess = commandRegistryAccess;
-
     }
 
     public static void onStopServer() {
