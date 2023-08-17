@@ -2,6 +2,7 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension.commands;
 
 import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordPermission;
+import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension.DiscordWhitelistExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
 import com.mojang.authlib.GameProfile;
@@ -10,8 +11,6 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.requests.RestAction;
-import net.minecraft.client.realms.FileUpload;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.WorldSavePath;
@@ -23,10 +22,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
@@ -38,7 +35,48 @@ public class InfoCommand extends GenericCommand {
 
     @Override
     public void executeSlash(SlashCommandEvent event, MinecraftServer server, ExtensionManager extensionManager) {
-
+        DiscordExtension discordExtension = extensionManager.getDiscordExtension();
+        DiscordWhitelistExtension discordWhitelistExtension = extensionManager.getDiscordWhitelistExtension();
+        boolean feedback = discordExtension.extensionSettings().isShouldFeedback();
+        String prefix = discordExtension.extensionSettings().getPrefix();
+        String playerName = this.getPlayer(event);
+        ArrayList<String> players = new ArrayList<>();
+        if (playerName == null) {
+            long userID = event.getUser().getIdLong();
+            players.addAll(discordWhitelistExtension.getWhitelistedPlayers(userID));
+        } else {
+            Optional<GameProfile> profile = server.getUserCache().findByName(playerName);
+            if (profile.isEmpty()) {
+                this.replyMessage(event, feedback, String.format("The player %s is not premium", playerName), prefix, false);
+                return;
+            }
+            if (!discordWhitelistExtension.alreadyAddedBySomeone(profile.get().getId())) {
+                this.replyMessage(event, feedback, String.format("The player %s is not whitelisted", playerName), prefix, false);
+                return;
+            }
+            players.add(profile.get().getId().toString());
+        }
+        for (String uuid : players) {  // TODO what if there is players is empty
+            try {
+                File skinPng = saveImage(uuid, server);
+                if (skinPng == null) {
+                    continue;
+                }
+                PlayerData embeDitto = collectData(skinPng, uuid, discordWhitelistExtension, event.getGuild(), server);
+                EmbedBuilder embedFinal = new EmbedBuilder();
+                embedFinal.setTitle(embeDitto.mcNick);
+                embedFinal.setColor(new Color(0xABDED7));
+                embedFinal.setDescription(String.format("Added by: %s", embeDitto.dsNick));
+                embedFinal.setThumbnail("attachment://skin.png");
+                embedFinal.addField("Uuid: ", embeDitto.playerUuid, false);
+                embedFinal.addField("Server Role: ", embeDitto.serverRole, true);
+                embedFinal.addField("Server Status: ", embeDitto.status, true);
+                event.replyEmbeds(embedFinal.build()).addFile(embeDitto.skinPath, "skin.png").queue();
+            } catch (IOException e) {
+                e.printStackTrace();
+                this.replyMessage(event, feedback, "There has been an error", prefix, false);
+            }
+        }
     }
 
     public void execute(MessageReceivedEvent event, MinecraftServer server, String serverPrefix, DiscordWhitelistExtension extension){
@@ -57,7 +95,10 @@ public class InfoCommand extends GenericCommand {
             UUID playerUuid = profile.get().getId();
             if (extension.alreadyAddedBySomeone(playerUuid)) {
                 try {
-                    File skinPng = saveImage(playerUuid.toString(), server, serverPrefix, event, feedback);
+                    File skinPng = saveImage(playerUuid.toString(), server);
+                    if (skinPng == null) {
+                        return;
+                    }
                     PlayerData embeDitto = collectData(skinPng, playerUuid.toString(), extension, event.getGuild(), server);
                     EmbedBuilder embedFinal = new EmbedBuilder();
                     embedFinal.setTitle(embeDitto.mcNick);
@@ -85,9 +126,12 @@ public class InfoCommand extends GenericCommand {
             long dsId = event.getAuthor().getIdLong();
             ArrayList<String> whiteList = extension.getWhitelistedPlayers(dsId);
             // TODO if there is no whitelisted players, display a message!
-            for (String uuid: whiteList){
+            for (String uuid: whiteList) {
                 try {
-                    File skinPng = saveImage(uuid, server, serverPrefix, event, feedback);
+                    File skinPng = saveImage(uuid, server);
+                    if (skinPng == null) {
+                        continue;
+                    }
                     PlayerData embeDitto = collectData(skinPng, uuid, extension, event.getGuild(), server);
                     EmbedBuilder embedFinal = new EmbedBuilder();
                     embedFinal.setTitle(embeDitto.mcNick);
@@ -112,7 +156,7 @@ public class InfoCommand extends GenericCommand {
 
     }
 
-    public File saveImage(String uuid, MinecraftServer server, String serverPrefix, MessageReceivedEvent event, Boolean feedback) throws IOException {
+    public File saveImage(String uuid, MinecraftServer server) throws IOException {
         URL url = new URL(String.format("https://crafatar.com/renders/body/%s?overlay", uuid));
         Path worldPath = server.getSavePath(WorldSavePath.ROOT);
         File finalPath = new File(worldPath.toFile().getAbsolutePath() + String.format("skins/%s.png", uuid));
@@ -122,10 +166,6 @@ public class InfoCommand extends GenericCommand {
         }
         File[] skins = directoryPath.listFiles();
         if (skins == null) {
-            EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**Could not list the files :c**"}, serverPrefix, true, Color.RED, true, feedback);
-            if (embed != null) {
-                event.getChannel().sendMessageEmbeds(embed.build()).queue();
-            }
             return null;
         }
         boolean cuteFlag = false;
@@ -134,9 +174,9 @@ public class InfoCommand extends GenericCommand {
             if (fileName.equals(String.format("%s.png", uuid))) {
                 BasicFileAttributes attributes = Files.readAttributes(finalPath.toPath(), BasicFileAttributes.class);
                 boolean dateFlag = checkTime(attributes.creationTime());
-                if(dateFlag){
+                if (dateFlag) {
                     boolean delete = skin.delete();
-                }else {
+                } else {
                     cuteFlag = true;
                 }
                 break;
@@ -157,6 +197,7 @@ public class InfoCommand extends GenericCommand {
         }
         return finalPath;
     }
+
     public PlayerData collectData(File skinPng, String uuid, DiscordWhitelistExtension extension, Guild guild, MinecraftServer server) {
         long dsId = extension.getDiscordID(uuid);
         Member dsName = guild.retrieveMemberById(dsId).complete();
@@ -175,7 +216,7 @@ public class InfoCommand extends GenericCommand {
         return new PlayerData(skinPng, mcName, dsName.getEffectiveName(), uuid, status, playerRole);
     }
 
-    static class PlayerData{
+    static class PlayerData {
         public File skinPath;
         public String mcNick;
         public String dsNick;
@@ -196,7 +237,6 @@ public class InfoCommand extends GenericCommand {
         LocalDateTime creacionDate = creacionSkin.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
         return LocalDateTime.now().isAfter(creacionDate.plusDays(1));
     }
-
 }
 
 

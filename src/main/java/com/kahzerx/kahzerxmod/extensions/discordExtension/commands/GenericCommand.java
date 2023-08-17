@@ -95,6 +95,10 @@ public abstract class GenericCommand {
 
     protected void replyMessage(SlashCommandEvent event, boolean feedback, String message, String prefix, boolean ephemeral, boolean success) {
         MessageEmbed embed = this.generateSimpleEmbed(prefix, message, success ? Color.GREEN : Color.RED);
+        this.replyEmbed(event, feedback, ephemeral, embed);
+    }
+
+    protected void replyEmbed(SlashCommandEvent event, boolean feedback, boolean ephemeral, MessageEmbed embed) {
         ReplyAction action = event.replyEmbeds(embed);
         if (feedback) {
             action.setEphemeral(ephemeral).queue();
