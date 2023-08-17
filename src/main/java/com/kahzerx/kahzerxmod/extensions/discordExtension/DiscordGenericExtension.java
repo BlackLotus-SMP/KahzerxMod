@@ -31,7 +31,7 @@ public abstract class DiscordGenericExtension extends GenericExtension {
 
     protected CommandFound findValidCommand(MessageReceivedEvent event, String message, List<Long> allowedChats, boolean shouldFeedback, String serverPrefix) {
         for (GenericCommand command : this.getCommands()) {
-            if (!command.getCommand().startsWith(message)) {
+            if (!message.startsWith(command.getCommand())) {
                 continue;
             }
             if (!this.getSettings().isEnabled()) {
