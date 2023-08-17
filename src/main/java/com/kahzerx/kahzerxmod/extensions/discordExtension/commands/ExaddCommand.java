@@ -27,7 +27,8 @@ public class ExaddCommand extends GenericCommand {
     public void executeSlash(SlashCommandEvent event, MinecraftServer server, ExtensionManager extensionManager) {
         DiscordExtension discordExtension = extensionManager.getDiscordExtension();
         DiscordWhitelistExtension discordWhitelistExtension = extensionManager.getDiscordWhitelistExtension();
-        boolean feedback = discordExtension.extensionSettings().isShouldFeedback();
+        DiscordAdminToolsExtension discordAdminToolsExtension = extensionManager.getDiscordAdminToolsExtension();
+        boolean feedback = discordAdminToolsExtension.extensionSettings().isShouldFeedback();
         String prefix = discordExtension.extensionSettings().getPrefix();
         String playerName = this.getPlayer(event);
         if (playerName == null) {

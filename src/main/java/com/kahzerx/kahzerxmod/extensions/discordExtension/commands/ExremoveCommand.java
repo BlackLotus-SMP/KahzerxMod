@@ -3,6 +3,7 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension.commands;
 import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordPermission;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordAdminToolsExtension.DiscordAdminToolsExtension;
+import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension.DiscordWhitelistExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
 import com.mojang.authlib.GameProfile;
@@ -26,7 +27,39 @@ public class ExremoveCommand extends GenericCommand {
 
     @Override
     public void executeSlash(SlashCommandEvent event, MinecraftServer server, ExtensionManager extensionManager) {
-
+        DiscordExtension discordExtension = extensionManager.getDiscordExtension();
+        DiscordWhitelistExtension discordWhitelistExtension = extensionManager.getDiscordWhitelistExtension();
+        DiscordAdminToolsExtension discordAdminToolsExtension = extensionManager.getDiscordAdminToolsExtension();
+        boolean feedback = discordAdminToolsExtension.extensionSettings().isShouldFeedback();
+        String prefix = discordExtension.extensionSettings().getPrefix();
+        String playerName = this.getPlayer(event);
+        if (playerName == null) {
+            this.replyMessage(event, feedback, String.format("You need to add the player name!\n%s", this.getHelpSuggestion()), prefix, false);
+            return;
+        }
+        Optional<GameProfile> profile = server.getUserCache().findByName(playerName);
+        if (profile.isEmpty()) {
+            this.replyMessage(event, feedback, String.format("The player %s is not premium", playerName), prefix, false);
+            return;
+        }
+        GameProfile playerProfile = profile.get();
+        if (discordWhitelistExtension.canRemove(69420L, playerProfile.getId().toString())) {
+            this.replyMessage(event, feedback, String.format("The player %s has not been whitelisted using the /exadd command", playerName), prefix, false);
+            return;
+        }
+        Whitelist whitelist = server.getPlayerManager().getWhitelist();
+        if (!whitelist.isAllowed(playerProfile)) {
+            this.replyMessage(event, feedback, String.format("The player %s is not whitelisted", playerProfile.getName()), prefix, false);
+            return;
+        }
+        WhitelistEntry whitelistEntry = new WhitelistEntry(playerProfile);
+        discordWhitelistExtension.deletePlayer(69420L, playerProfile.getId().toString());
+        whitelist.remove(whitelistEntry);
+        ServerPlayerEntity player = server.getPlayerManager().getPlayer(profile.get().getId());
+        if (player != null) {
+            player.networkHandler.disconnect(Text.literal("You have been removed from the whitelist"));
+        }
+        this.replyMessage(event, feedback, String.format("%s has been removed from the whitelist!", playerProfile.getName()), prefix, false, true);
     }
 
     @Override
