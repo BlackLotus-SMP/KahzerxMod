@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 public class RemoveCommand extends GenericCommand {
     public RemoveCommand() {
-        super("remove", DiscordPermission.WHITELIST_CHAT);
+        super("remove", "remove from whitelist a previously added player with /add", DiscordPermission.WHITELIST_CHAT);
     }
 
     @Override

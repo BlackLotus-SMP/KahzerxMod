@@ -76,11 +76,11 @@ public class DiscordExtension extends DiscordGenericExtension implements Extensi
             return false;
         }
         if (!DiscordUtils.isAllowed(event.getChannel().getIdLong(), this.extensionSettings().getAllowedChats())) {
-            if (message.startsWith(this.onlineCommand.getCommandPrefix() + this.onlineCommand.getBody())) {
+            if (message.startsWith(this.onlineCommand.getCommandPrefix() + this.onlineCommand.getCommand())) {
                 return true;
             }
         }
-        if (message.equals(this.onlineCommand.getCommandPrefix() + this.onlineCommand.getBody())) {
+        if (message.equals(this.onlineCommand.getCommandPrefix() + this.onlineCommand.getCommand())) {
             this.onlineCommand.execute(event, server, this.extensionSettings().getPrefix(), this.extensionSettings().getAllowedChats());
             return true;
         }

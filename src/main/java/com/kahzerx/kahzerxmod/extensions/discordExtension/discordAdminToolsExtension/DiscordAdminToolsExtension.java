@@ -88,23 +88,23 @@ public class DiscordAdminToolsExtension extends DiscordGenericExtension implemen
             return false;
         }
         if (!DiscordUtils.isAllowed(event.getChannel().getIdLong(), this.extensionSettings().getAdminChats())) {
-            if (message.startsWith(this.banCommand.getCommandPrefix() + this.banCommand.getBody())
-                    || message.startsWith(this.pardonCommand.getCommandPrefix() + this.pardonCommand.getBody())
-                    || message.startsWith(this.exaddCommand.getCommandPrefix() + this.exaddCommand.getBody())
-                    || message.startsWith(this.exremoveCommand.getCommandPrefix() + this.exremoveCommand.getBody())) {
+            if (message.startsWith(this.banCommand.getCommandPrefix() + this.banCommand.getCommand())
+                    || message.startsWith(this.pardonCommand.getCommandPrefix() + this.pardonCommand.getCommand())
+                    || message.startsWith(this.exaddCommand.getCommandPrefix() + this.exaddCommand.getCommand())
+                    || message.startsWith(this.exremoveCommand.getCommandPrefix() + this.exremoveCommand.getCommand())) {
                 return true;
             }
         }
-        if (message.startsWith(this.banCommand.getCommandPrefix() + this.banCommand.getBody() + " ")) {
+        if (message.startsWith(this.banCommand.getCommandPrefix() + this.banCommand.getCommand() + " ")) {
             this.banCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), discordWhitelistExtension, this);
             return true;
-        } else if (message.startsWith(this.pardonCommand.getCommandPrefix() + this.pardonCommand.getBody() + " ")) {
+        } else if (message.startsWith(this.pardonCommand.getCommandPrefix() + this.pardonCommand.getCommand() + " ")) {
             this.pardonCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), discordWhitelistExtension, this);
             return true;
-        } else if (message.startsWith(this.exaddCommand.getCommandPrefix() + this.exaddCommand.getBody() + " ")) {
+        } else if (message.startsWith(this.exaddCommand.getCommandPrefix() + this.exaddCommand.getCommand() + " ")) {
             this.exaddCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), discordWhitelistExtension, this);
             return true;
-        } else if (message.startsWith(this.exremoveCommand.getCommandPrefix() + this.exremoveCommand.getBody() + " ")) {
+        } else if (message.startsWith(this.exremoveCommand.getCommandPrefix() + this.exremoveCommand.getCommand() + " ")) {
             this.exremoveCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), discordWhitelistExtension, this);
             return true;
         }

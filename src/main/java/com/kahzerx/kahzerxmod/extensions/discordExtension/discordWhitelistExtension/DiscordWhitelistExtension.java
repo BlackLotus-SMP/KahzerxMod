@@ -402,10 +402,10 @@ public class DiscordWhitelistExtension extends DiscordGenericExtension implement
             return false;
         }
         if (!DiscordUtils.isAllowed(event.getChannel().getIdLong(), this.extensionSettings().getWhitelistChats())) {
-            if (message.startsWith(this.addCommand.getCommandPrefix() + this.addCommand.getBody())
-                    || message.startsWith(this.removeCommand.getCommandPrefix() + this.removeCommand.getBody())
-                    || message.startsWith(this.listCommand.getCommandPrefix() + this.listCommand.getBody())
-                    || message.startsWith(this.infoCommand.getCommandPrefix() + this.infoCommand.getBody())) {
+            if (message.startsWith(this.addCommand.getCommandPrefix() + this.addCommand.getCommand())
+                    || message.startsWith(this.removeCommand.getCommandPrefix() + this.removeCommand.getCommand())
+                    || message.startsWith(this.listCommand.getCommandPrefix() + this.listCommand.getCommand())
+                    || message.startsWith(this.infoCommand.getCommandPrefix() + this.infoCommand.getCommand())) {
                 EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**This is not the channel!!! >:(**"}, discordExtension.extensionSettings().getPrefix(), true, Color.RED, true, getDiscordExtension().extensionSettings().isShouldFeedback());
                 if (embed != null) {
                     event.getMessage().delete().queueAfter(2, TimeUnit.SECONDS);
@@ -415,16 +415,16 @@ public class DiscordWhitelistExtension extends DiscordGenericExtension implement
                 return true;
             }
         }
-        if (message.startsWith(this.addCommand.getCommandPrefix() + addCommand.getBody() + " ")) {
+        if (message.startsWith(this.addCommand.getCommandPrefix() + addCommand.getCommand() + " ")) {
             addCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), this);
             return true;
-        } else if (message.startsWith(this.removeCommand.getCommandPrefix() + removeCommand.getBody() + " ")) {
+        } else if (message.startsWith(this.removeCommand.getCommandPrefix() + removeCommand.getCommand() + " ")) {
             removeCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), this);
             return true;
-        } else if (message.equals(this.listCommand.getCommandPrefix() + listCommand.getBody())) {
+        } else if (message.equals(this.listCommand.getCommandPrefix() + listCommand.getCommand())) {
             listCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), this);
             return true;
-        } else if (message.startsWith(this.infoCommand.getCommandPrefix() + infoCommand.getBody())) {
+        } else if (message.startsWith(this.infoCommand.getCommandPrefix() + infoCommand.getCommand())) {
             infoCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), this);
             return true;
         }
