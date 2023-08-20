@@ -35,18 +35,6 @@ public abstract class GenericCommand {
         this.needsPlayerParameter = needsPlayerParameter;
     }
 
-    public void execute(MessageReceivedEvent event, MinecraftServer server, String serverPrefix, DiscordWhitelistExtension extension) {
-        throw new UnsupportedOperationException("Not implemented");
-    }
-
-    public void execute(MessageReceivedEvent event, MinecraftServer server, String serverPrefix, List<Long> validChannels) {
-        throw new UnsupportedOperationException("Not implemented");
-    }
-
-    public void execute(MessageReceivedEvent event, MinecraftServer server, String serverPrefix, DiscordWhitelistExtension extension, DiscordAdminToolsExtension adminExtension) {
-        throw new UnsupportedOperationException("Not implemented");
-    }
-
     public abstract void executeCommand(MessageReceivedEvent event, MinecraftServer server, ExtensionManager extensionManager);
 
     public String getCommandPrefix() {
