@@ -3,6 +3,7 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension.commands;
 import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordPermission;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordAdminToolsExtension.DiscordAdminToolsExtension;
+import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension.DiscordWhitelistExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
 import com.mojang.authlib.GameProfile;
@@ -24,8 +25,12 @@ public class ExremoveCommand extends GenericCommand {
     }
 
     @Override
-    public void execute(MessageReceivedEvent event, MinecraftServer server, String serverPrefix, DiscordWhitelistExtension extension, DiscordAdminToolsExtension adminExtension) {
-        boolean feedback = adminExtension.extensionSettings().isShouldFeedback();
+    public void executeCommand(MessageReceivedEvent event, MinecraftServer server, ExtensionManager extensionManager) {
+        DiscordWhitelistExtension discordWhitelistExtension = extensionManager.getDiscordWhitelistExtension();
+        DiscordExtension discordExtension = extensionManager.getDiscordExtension();
+        DiscordAdminToolsExtension discordAdminToolsExtension = extensionManager.getDiscordAdminToolsExtension();
+        String serverPrefix = discordExtension.extensionSettings().getPrefix();
+        boolean feedback = discordAdminToolsExtension.extensionSettings().isShouldFeedback();
         String[] req = event.getMessage().getContentRaw().split(" ");
         String playerName = req[1];
         if (req.length != 2) {
@@ -41,7 +46,7 @@ public class ExremoveCommand extends GenericCommand {
             }
             return;
         }
-        if (!extension.canRemove(69420L, profile.get().getId().toString())) {
+        if (!discordWhitelistExtension.canRemove(69420L, profile.get().getId().toString())) {
             EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**You can't remove " + profile.get().getName() + ".**"}, serverPrefix, true, Color.RED, true, feedback);
             if (embed != null) {
                 event.getChannel().sendMessageEmbeds(embed.build()).queue();
@@ -57,7 +62,7 @@ public class ExremoveCommand extends GenericCommand {
             return;
         }
         WhitelistEntry whitelistEntry = new WhitelistEntry(profile.get());
-        extension.deletePlayer(69420L, profile.get().getId().toString());
+        discordWhitelistExtension.deletePlayer(69420L, profile.get().getId().toString());
         whitelist.remove(whitelistEntry);
         ServerPlayerEntity player = server.getPlayerManager().getPlayer(profile.get().getId());
         if (player != null) {
@@ -67,10 +72,5 @@ public class ExremoveCommand extends GenericCommand {
         if (embed != null) {
             event.getChannel().sendMessageEmbeds(embed.build()).queue();
         }
-    }
-
-    @Override
-    public void executeCommand(MessageReceivedEvent event, MinecraftServer server, ExtensionManager extensionManager) {
-
     }
 }
