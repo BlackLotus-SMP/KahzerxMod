@@ -2,7 +2,7 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension.commands;
 
 import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordPermission;
-import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension.DiscordWhitelistExtension;
+import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -20,8 +20,10 @@ public class ListCommand extends GenericCommand {
     }
 
     @Override
-    public void execute(MessageReceivedEvent event, MinecraftServer server, String serverPrefix, DiscordWhitelistExtension extension) {
-        boolean feedback = extension.getDiscordExtension().extensionSettings().isShouldFeedback();
+    public void executeCommand(MessageReceivedEvent event, MinecraftServer server, ExtensionManager extensionManager) {
+        DiscordExtension discordExtension = extensionManager.getDiscordExtension();
+        String serverPrefix = discordExtension.extensionSettings().getPrefix();
+        boolean feedback = discordExtension.extensionSettings().isShouldFeedback();
         String[] names = server.getPlayerManager().getWhitelistedNames();
         Arrays.sort(names, String.CASE_INSENSITIVE_ORDER);
         EmbedBuilder embed;
@@ -51,10 +53,5 @@ public class ListCommand extends GenericCommand {
         if (embed != null) {
             event.getChannel().sendMessageEmbeds(embed.build()).queue();
         }
-    }
-
-    @Override
-    public void executeCommand(MessageReceivedEvent event, MinecraftServer server, ExtensionManager extensionManager) {
-
     }
 }
