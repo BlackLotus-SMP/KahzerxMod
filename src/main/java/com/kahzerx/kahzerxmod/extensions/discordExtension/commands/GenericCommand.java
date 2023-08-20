@@ -2,8 +2,6 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension.commands;
 
 import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordPermission;
-import com.kahzerx.kahzerxmod.extensions.discordExtension.discordAdminToolsExtension.DiscordAdminToolsExtension;
-import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension.DiscordWhitelistExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -11,7 +9,6 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.minecraft.server.MinecraftServer;
 
 import java.awt.*;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public abstract class GenericCommand {
