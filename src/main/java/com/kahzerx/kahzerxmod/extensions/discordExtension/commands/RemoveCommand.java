@@ -2,6 +2,7 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension.commands;
 
 import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordPermission;
+import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension.DiscordWhitelistExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
 import com.mojang.authlib.GameProfile;
@@ -27,10 +28,13 @@ public class RemoveCommand extends GenericCommand {
     }
 
     @Override
-    public void execute(MessageReceivedEvent event, MinecraftServer server, String serverPrefix, DiscordWhitelistExtension extension) {
-        boolean feedback = extension.getDiscordExtension().extensionSettings().isShouldFeedback();
+    public void executeCommand(MessageReceivedEvent event, MinecraftServer server, ExtensionManager extensionManager) {
+        DiscordWhitelistExtension discordWhitelistExtension = extensionManager.getDiscordWhitelistExtension();
+        DiscordExtension discordExtension = extensionManager.getDiscordExtension();
+        String serverPrefix = discordExtension.extensionSettings().getPrefix();
+        boolean feedback = discordExtension.extensionSettings().isShouldFeedback();
         long id = event.getAuthor().getIdLong();
-        if (extension.isDiscordBanned(id)) {
+        if (discordWhitelistExtension.isDiscordBanned(id)) {
             EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**Looks like you are banned...**"}, serverPrefix, true, Color.RED, true, feedback);
             assert embed != null;
             event.getChannel().sendMessageEmbeds(embed.build()).queue();
@@ -59,7 +63,7 @@ public class RemoveCommand extends GenericCommand {
             }
             return;
         }
-        if (!extension.canRemove(id, profile.get().getId().toString())) {
+        if (!discordWhitelistExtension.canRemove(id, profile.get().getId().toString())) {
             EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**You can't remove " + profile.get().getName() + ".**"}, serverPrefix, true, Color.RED, true, feedback);
             if (embed != null) {
                 event.getChannel().sendMessageEmbeds(embed.build()).queue();
@@ -67,16 +71,16 @@ public class RemoveCommand extends GenericCommand {
             return;
         }
         WhitelistEntry whitelistEntry = new WhitelistEntry(profile.get());
-        extension.deletePlayer(id, profile.get().getId().toString());
+        discordWhitelistExtension.deletePlayer(id, profile.get().getId().toString());
         whitelist.remove(whitelistEntry);
         ServerPlayerEntity player = server.getPlayerManager().getPlayer(profile.get().getId());
         if (player != null) {
             player.networkHandler.disconnect(Text.literal("Byee~"));
         }
 
-        if (extension.getWhitelistedPlayers(id).isEmpty()) {
+        if (discordWhitelistExtension.getWhitelistedPlayers(id).isEmpty()) {
             Guild guild = event.getGuild();
-            Role role = guild.getRoleById(extension.extensionSettings().getDiscordRole());
+            Role role = guild.getRoleById(discordWhitelistExtension.extensionSettings().getDiscordRole());
             Member member = event.getMember();
             if (role != null && member != null) {
                 try {
@@ -91,10 +95,5 @@ public class RemoveCommand extends GenericCommand {
         if (embed != null) {
             event.getChannel().sendMessageEmbeds(embed.build()).queue();
         }
-    }
-
-    @Override
-    public void executeCommand(MessageReceivedEvent event, MinecraftServer server, ExtensionManager extensionManager) {
-
     }
 }
