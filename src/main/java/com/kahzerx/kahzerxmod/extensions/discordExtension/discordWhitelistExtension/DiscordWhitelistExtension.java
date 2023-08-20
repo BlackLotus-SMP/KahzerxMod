@@ -71,6 +71,10 @@ public class DiscordWhitelistExtension extends DiscordGenericExtension implement
         return discordExtension;
     }
 
+    public ExtensionManager getEm() {
+        return em;
+    }
+
     @Override
     public void onCreateDatabase(Connection conn) {
         this.conn = conn;
@@ -193,10 +197,10 @@ public class DiscordWhitelistExtension extends DiscordGenericExtension implement
             }
             rs.close();
             ps.close();
-            return canAdd;
+            return !canAdd;
         } catch (SQLException e) {
             e.printStackTrace();
-            return canAdd;
+            return true;
         }
     }
 
@@ -395,37 +399,12 @@ public class DiscordWhitelistExtension extends DiscordGenericExtension implement
 
     @Override
     public boolean processCommands(MessageReceivedEvent event, String message, MinecraftServer server) {
-        if (!this.extensionSettings().isEnabled()) {
+        CommandFound commandFound = this.findValidCommand(event, message, this.extensionSettings().getWhitelistChats(), this.getDiscordExtension().extensionSettings().isShouldFeedback(), this.getDiscordExtension().extensionSettings().getPrefix());
+        if (!commandFound.found()) {
             return false;
         }
-        if (!this.getDiscordExtension().extensionSettings().isEnabled()) {
-            return false;
-        }
-        if (!DiscordUtils.isAllowed(event.getChannel().getIdLong(), this.extensionSettings().getWhitelistChats())) {
-            if (message.startsWith(this.addCommand.getCommandPrefix() + this.addCommand.getBody())
-                    || message.startsWith(this.removeCommand.getCommandPrefix() + this.removeCommand.getBody())
-                    || message.startsWith(this.listCommand.getCommandPrefix() + this.listCommand.getBody())
-                    || message.startsWith(this.infoCommand.getCommandPrefix() + this.infoCommand.getBody())) {
-                EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**This is not the channel!!! >:(**"}, discordExtension.extensionSettings().getPrefix(), true, Color.RED, true, getDiscordExtension().extensionSettings().isShouldFeedback());
-                if (embed != null) {
-                    event.getMessage().delete().queueAfter(2, TimeUnit.SECONDS);
-                    MessageAction embedSent = event.getChannel().sendMessageEmbeds(embed.build());
-                    embedSent.queue(m -> m.delete().queueAfter(2, TimeUnit.SECONDS));
-                }
-                return true;
-            }
-        }
-        if (message.startsWith(this.addCommand.getCommandPrefix() + addCommand.getBody() + " ")) {
-            addCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), this);
-            return true;
-        } else if (message.startsWith(this.removeCommand.getCommandPrefix() + removeCommand.getBody() + " ")) {
-            removeCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), this);
-            return true;
-        } else if (message.equals(this.listCommand.getCommandPrefix() + listCommand.getBody())) {
-            listCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), this);
-            return true;
-        } else if (message.startsWith(this.infoCommand.getCommandPrefix() + infoCommand.getBody())) {
-            infoCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), this);
+        if (commandFound.command() != null) {
+            commandFound.command().executeCommand(event, server, this.getEm());
             return true;
         }
         return false;

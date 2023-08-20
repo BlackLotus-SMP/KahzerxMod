@@ -3,8 +3,11 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.commands.GenericCommand;
+import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
 import com.kahzerx.kahzerxmod.utils.MarkEnum;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -12,8 +15,11 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public abstract class DiscordGenericExtension extends GenericExtension {
     private final ArrayList<GenericCommand> commands = new ArrayList<>();
@@ -22,6 +28,39 @@ public abstract class DiscordGenericExtension extends GenericExtension {
     }
 
     protected abstract boolean processCommands(MessageReceivedEvent event, String message, MinecraftServer server);
+
+    protected CommandFound findValidCommand(MessageReceivedEvent event, String message, List<Long> allowedChats, boolean shouldFeedback, String serverPrefix) {
+        for (GenericCommand command : this.getCommands()) {
+            if (!message.startsWith(command.getCommand())) {
+                continue;
+            }
+            if (!this.getSettings().isEnabled()) {
+                EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"The extension is not enabled"}, serverPrefix, true, Color.RED, true, shouldFeedback);
+                this.sendEmbed(event, embed);
+                return new CommandFound(null, true);
+            }
+            if (allowedChats.size() == 0) {
+                EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"There are no chats available for this command"}, serverPrefix, true, Color.RED, true, shouldFeedback);
+                this.sendEmbed(event, embed);
+                return new CommandFound(null, true);
+            }
+            if (!allowedChats.contains(event.getChannel().getIdLong())) {
+                EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"This is not the right channel for this command"}, serverPrefix, true, Color.RED, true, shouldFeedback);
+                this.sendEmbed(event, embed);
+                return new CommandFound(null, true);
+            }
+            return new CommandFound(command, true);
+        }
+        return new CommandFound(null, false);
+    }
+
+    private void sendEmbed(MessageReceivedEvent event, EmbedBuilder embed) {
+        if (embed != null) {
+            event.getMessage().delete().queueAfter(2, TimeUnit.SECONDS);
+            MessageAction embedSent = event.getChannel().sendMessageEmbeds(embed.build());
+            embedSent.queue(m -> m.delete().queueAfter(3, TimeUnit.SECONDS));
+        }
+    }
 
     protected void addCommands(GenericCommand... c) {
         this.commands.addAll(Arrays.asList(c));
@@ -106,4 +145,6 @@ public abstract class DiscordGenericExtension extends GenericExtension {
                 withColor(enabled ? Formatting.GREEN : Formatting.RED).
                 withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to modify!"))));
     }
+
+    protected record CommandFound(GenericCommand command, boolean found) { }
 }

@@ -1,7 +1,9 @@
 package com.kahzerx.kahzerxmod.extensions.discordExtension.commands;
 
+import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordPermission;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordAdminToolsExtension.DiscordAdminToolsExtension;
+import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension.DiscordWhitelistExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
 import com.mojang.authlib.GameProfile;
@@ -17,12 +19,16 @@ import java.util.concurrent.TimeUnit;
 
 public class ExaddCommand extends GenericCommand {
     public ExaddCommand() {
-        super("exadd", DiscordPermission.ADMIN_CHAT);
+        super("exadd", "add a player that is not on the discord server, stands for exception add", DiscordPermission.ADMIN_CHAT);
     }
 
     @Override
-    public void execute(MessageReceivedEvent event, MinecraftServer server, String serverPrefix, DiscordWhitelistExtension extension, DiscordAdminToolsExtension adminExtension) {
-        boolean feedback = adminExtension.extensionSettings().isShouldFeedback();
+    public void executeCommand(MessageReceivedEvent event, MinecraftServer server, ExtensionManager extensionManager) {
+        DiscordWhitelistExtension discordWhitelistExtension = extensionManager.getDiscordWhitelistExtension();
+        DiscordExtension discordExtension = extensionManager.getDiscordExtension();
+        DiscordAdminToolsExtension discordAdminToolsExtension = extensionManager.getDiscordAdminToolsExtension();
+        String serverPrefix = discordExtension.extensionSettings().getPrefix();
+        boolean feedback = discordAdminToolsExtension.extensionSettings().isShouldFeedback();
         String[] req = event.getMessage().getContentRaw().split(" ");
         String playerName = req[1];
         if (req.length != 2) {
@@ -47,21 +53,21 @@ public class ExaddCommand extends GenericCommand {
             return;
         }
         WhitelistEntry whitelistEntry = new WhitelistEntry(profile.get());
-        if (extension.isPlayerBanned(profile.get().getId().toString())) {
+        if (discordWhitelistExtension.isPlayerBanned(profile.get().getId().toString())) {
             EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**Looks like that player is banned.**"}, serverPrefix, true, Color.RED, true, feedback);
             if (embed != null) {
                 event.getChannel().sendMessageEmbeds(embed.build()).queue();
             }
             return;
         }
-        if (extension.alreadyAddedBySomeone(profile.get().getId().toString())) {
+        if (discordWhitelistExtension.alreadyAddedBySomeone(profile.get().getId().toString())) {
             EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**Already whitelisted by someone else.**"}, serverPrefix, true, Color.RED, true, feedback);
             if (embed != null) {
                 event.getChannel().sendMessageEmbeds(embed.build()).queue();
             }
             return;
         }
-        extension.addPlayer(69420L, profile.get().getId().toString(), profile.get().getName());
+        discordWhitelistExtension.addPlayer(69420L, profile.get().getId().toString(), profile.get().getName());
         whitelist.add(whitelistEntry);
         EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**" + profile.get().getName() + " added :D**"}, serverPrefix, true, Color.GREEN, true, feedback);
         if (embed != null) {

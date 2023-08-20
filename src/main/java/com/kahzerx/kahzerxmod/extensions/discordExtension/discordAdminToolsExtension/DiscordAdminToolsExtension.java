@@ -65,6 +65,10 @@ public class DiscordAdminToolsExtension extends DiscordGenericExtension implemen
         return discordExtension;
     }
 
+    public ExtensionManager getEm() {
+        return em;
+    }
+
     @Override
     public DiscordAdminToolsSettings extensionSettings() {
         return (DiscordAdminToolsSettings) this.getSettings();
@@ -78,34 +82,12 @@ public class DiscordAdminToolsExtension extends DiscordGenericExtension implemen
 
     @Override
     public boolean processCommands(MessageReceivedEvent event, String message, MinecraftServer server) {
-        if (!this.getSettings().isEnabled()) {
+        CommandFound commandFound = this.findValidCommand(event, message, this.extensionSettings().getAdminChats(), this.extensionSettings().isShouldFeedback(), this.getDiscordExtension().extensionSettings().getPrefix());
+        if (!commandFound.found()) {
             return false;
         }
-        if (!this.getDiscordExtension().getSettings().isEnabled()) {
-            return false;
-        }
-        if (!this.discordWhitelistExtension.getSettings().isEnabled()) {
-            return false;
-        }
-        if (!DiscordUtils.isAllowed(event.getChannel().getIdLong(), this.extensionSettings().getAdminChats())) {
-            if (message.startsWith(this.banCommand.getCommandPrefix() + this.banCommand.getBody())
-                    || message.startsWith(this.pardonCommand.getCommandPrefix() + this.pardonCommand.getBody())
-                    || message.startsWith(this.exaddCommand.getCommandPrefix() + this.exaddCommand.getBody())
-                    || message.startsWith(this.exremoveCommand.getCommandPrefix() + this.exremoveCommand.getBody())) {
-                return true;
-            }
-        }
-        if (message.startsWith(this.banCommand.getCommandPrefix() + this.banCommand.getBody() + " ")) {
-            this.banCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), discordWhitelistExtension, this);
-            return true;
-        } else if (message.startsWith(this.pardonCommand.getCommandPrefix() + this.pardonCommand.getBody() + " ")) {
-            this.pardonCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), discordWhitelistExtension, this);
-            return true;
-        } else if (message.startsWith(this.exaddCommand.getCommandPrefix() + this.exaddCommand.getBody() + " ")) {
-            this.exaddCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), discordWhitelistExtension, this);
-            return true;
-        } else if (message.startsWith(this.exremoveCommand.getCommandPrefix() + this.exremoveCommand.getBody() + " ")) {
-            this.exremoveCommand.execute(event, server, discordExtension.extensionSettings().getPrefix(), discordWhitelistExtension, this);
+        if (commandFound.command() != null) {
+            commandFound.command().executeCommand(event, server, this.getEm());
             return true;
         }
         return false;

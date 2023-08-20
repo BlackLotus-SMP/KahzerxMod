@@ -1,6 +1,8 @@
 package com.kahzerx.kahzerxmod.extensions.discordExtension.commands;
 
+import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordPermission;
+import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension.DiscordWhitelistExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
 import com.mojang.authlib.GameProfile;
@@ -8,8 +10,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.requests.RestAction;
-import net.minecraft.client.realms.FileUpload;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.WorldSavePath;
@@ -21,22 +21,23 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
 
 public class InfoCommand extends GenericCommand {
-
     public InfoCommand() {
-        super("info", DiscordPermission.WHITELIST_CHAT);
+        super("info", "show information about whitelisted players", DiscordPermission.WHITELIST_CHAT);
     }
 
-    public void execute(MessageReceivedEvent event, MinecraftServer server, String serverPrefix, DiscordWhitelistExtension extension){
-        boolean feedback = extension.getDiscordExtension().extensionSettings().isShouldFeedback();
+    @Override
+    public void executeCommand(MessageReceivedEvent event, MinecraftServer server, ExtensionManager extensionManager) {
+        DiscordWhitelistExtension discordWhitelistExtension = extensionManager.getDiscordWhitelistExtension();
+        DiscordExtension discordExtension = extensionManager.getDiscordExtension();
+        String serverPrefix = discordExtension.extensionSettings().getPrefix();
+        boolean feedback = discordExtension.extensionSettings().isShouldFeedback();
         String msg = event.getMessage().getContentRaw();
         if (msg.split(" ").length == 2) {
             String playerName = msg.split(" ")[1];
@@ -49,10 +50,10 @@ public class InfoCommand extends GenericCommand {
                 return;
             }
             UUID playerUuid = profile.get().getId();
-            if (extension.alreadyAddedBySomeone(playerUuid)) {
+            if (discordWhitelistExtension.alreadyAddedBySomeone(playerUuid)) {
                 try {
                     File skinPng = saveImage(playerUuid.toString(), server, serverPrefix, event, feedback);
-                    PlayerData embeDitto = collectData(skinPng, playerUuid.toString(), extension, event.getGuild(), server);
+                    PlayerData embeDitto = collectData(skinPng, playerUuid.toString(), discordWhitelistExtension, event.getGuild(), server);
                     EmbedBuilder embedFinal = new EmbedBuilder();
                     embedFinal.setTitle(embeDitto.mcNick);
                     embedFinal.setColor(new Color(0xABDED7));
@@ -77,12 +78,12 @@ public class InfoCommand extends GenericCommand {
             }
         } else {
             long dsId = event.getAuthor().getIdLong();
-            ArrayList<String> whiteList = extension.getWhitelistedPlayers(dsId);
+            ArrayList<String> whiteList = discordWhitelistExtension.getWhitelistedPlayers(dsId);
             // TODO if there is no whitelisted players, display a message!
             for (String uuid: whiteList){
                 try {
                     File skinPng = saveImage(uuid, server, serverPrefix, event, feedback);
-                    PlayerData embeDitto = collectData(skinPng, uuid, extension, event.getGuild(), server);
+                    PlayerData embeDitto = collectData(skinPng, uuid, discordWhitelistExtension, event.getGuild(), server);
                     EmbedBuilder embedFinal = new EmbedBuilder();
                     embedFinal.setTitle(embeDitto.mcNick);
                     embedFinal.setColor(new Color(0xABDED7));

@@ -78,6 +78,18 @@ public class ExtensionManager {
         return this.extensions;
     }
 
+    public DiscordExtension getDiscordExtension() {
+        return (DiscordExtension) this.extensions.get("discord");
+    }
+
+    public DiscordWhitelistExtension getDiscordWhitelistExtension() {
+        return (DiscordWhitelistExtension) this.extensions.get("discordWhitelist");
+    }
+
+    public DiscordAdminToolsExtension getDiscordAdminToolsExtension() {
+        return (DiscordAdminToolsExtension) this.extensions.get("discordAdminTools");
+    }
+
     // TODO force func call on setters?
     public void saveSettings() {
         List<Object> settingsArray = new ArrayList<>();

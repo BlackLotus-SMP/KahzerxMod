@@ -28,7 +28,7 @@ public class DiscordBot extends ListenerAdapter implements DiscordBotInterface {
     private WebhookClient whc;
     private final List<DiscordGenericExtension> discordExtensions = new ArrayList<>();
 
-    public DiscordBot(MinecraftServer server, DiscordExtension discordExtension) {  // TODO slash commands?
+    public DiscordBot(MinecraftServer server, DiscordExtension discordExtension) {
         this.server = server;
         this.discordExtension = discordExtension;
     }
@@ -55,7 +55,7 @@ public class DiscordBot extends ListenerAdapter implements DiscordBotInterface {
         this.jda.awaitReady();
     }
 
-    public void updateCommandPrefix(String prefix) {  // TODO update prefix on command
+    public void updateCommandPrefix(String prefix) {
         this.prefix = prefix;
         for (DiscordGenericExtension extension : this.discordExtensions) {
             for (GenericCommand command : extension.getCommands()) {
@@ -124,9 +124,11 @@ public class DiscordBot extends ListenerAdapter implements DiscordBotInterface {
         }
 
         String message = event.getMessage().getContentRaw();
-        for (DiscordGenericExtension extension : this.discordExtensions) {  // TODO slash commands?
-            if (extension.processCommands(event, message, server)) {
-                return;
+        if (message.startsWith(this.prefix)) {
+            for (DiscordGenericExtension extension : this.discordExtensions) {
+                if (extension.processCommands(event, message.substring(1), server)) {
+                    return;
+                }
             }
         }
 

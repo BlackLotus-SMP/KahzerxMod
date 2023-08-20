@@ -1,6 +1,8 @@
 package com.kahzerx.kahzerxmod.extensions.discordExtension.commands;
 
+import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordPermission;
+import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordExtension;
 import com.kahzerx.kahzerxmod.klone.KlonePlayerEntity;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordUtils;
@@ -15,14 +17,14 @@ import static com.kahzerx.kahzerxmod.extensions.fbiExtension.FBIExtension.getHid
 
 public class OnlineCommand extends GenericCommand {
     public OnlineCommand() {
-        super("online", DiscordPermission.ALLOWED_CHAT, false);
+        super("online", "list online players", DiscordPermission.ALLOWED_CHAT, false);
     }
 
     @Override
-    public void execute(MessageReceivedEvent event, MinecraftServer server, String serverPrefix, List<Long> allowedChats) {
-        if (!DiscordUtils.isAllowed(event.getChannel().getIdLong(), allowedChats)) {
-            return;
-        }
+    public void executeCommand(MessageReceivedEvent event, MinecraftServer server, ExtensionManager extensionManager) {
+        DiscordExtension discordExtension = extensionManager.getDiscordExtension();
+        String serverPrefix = discordExtension.extensionSettings().getPrefix();
+        boolean feedback = discordExtension.extensionSettings().isShouldFeedback();
         StringBuilder msg = new StringBuilder();
         int n = server.getPlayerManager().getPlayerList().size();
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
@@ -32,6 +34,8 @@ public class OnlineCommand extends GenericCommand {
             boolean isBot = player.getClass() == KlonePlayerEntity.class;
             msg.append(player.getName().getString().replace("_", "\\_")).append(isBot ? " [Bot]" : "").append("\n");
         }
-        event.getChannel().sendMessageEmbeds(Objects.requireNonNull(DiscordChatUtils.generateEmbed(msg, n, serverPrefix)).build()).queue();
+        if (feedback) {
+            event.getChannel().sendMessageEmbeds(Objects.requireNonNull(DiscordChatUtils.generateEmbed(msg, n, serverPrefix)).build()).queue();
+        }
     }
 }
