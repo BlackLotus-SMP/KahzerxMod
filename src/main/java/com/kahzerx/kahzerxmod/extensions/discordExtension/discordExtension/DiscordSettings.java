@@ -92,7 +92,7 @@ public class DiscordSettings extends ExtensionSettings {
                 "name='" + this.getName() + '\'' +
                 ", enabled=" + this.isEnabled() +
                 ", description='" + this.isEnabled() + '\'' +
-                ", token='" + token + '\'' +
+                ", token='" + (token.length() >= 8 ? token.substring(0, 8) + "..." : "") + '\'' +
                 ", crossServerChat=" + crossServerChat +
                 ", prefix='" + prefix + '\'' +
                 ", commandPrefix='" + commandPrefix + '\'' +
