@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(SeedCommand.class)
 public class seedCommandMixin {
+    // TODO inject in the hasPermission method
     @Inject(method = "register", at = @At(value = "HEAD"), cancellable = true)
     private static void onRegisterCommand(CommandDispatcher<ServerCommandSource> dispatcher, boolean dedicated, CallbackInfo ci) {
         ci.cancel();

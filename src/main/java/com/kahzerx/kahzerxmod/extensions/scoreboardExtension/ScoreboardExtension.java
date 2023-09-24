@@ -13,10 +13,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.scoreboard.ScoreboardCriterion;
-import net.minecraft.scoreboard.ScoreboardObjective;
-import net.minecraft.scoreboard.ScoreboardPlayerScore;
+import net.minecraft.scoreboard.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -89,19 +86,19 @@ public class ScoreboardExtension extends GenericExtension implements Extensions 
 
     private void hideSidebar(MinecraftServer server) {
         Scoreboard scoreboard = server.getScoreboard();
-        if (scoreboard.getObjectiveForSlot(1) != null) {
-            scoreboard.setObjectiveSlot(1, null);
+        if (scoreboard.getObjectiveForSlot(ScoreboardDisplaySlot.SIDEBAR) != null) {
+            scoreboard.setObjectiveSlot(ScoreboardDisplaySlot.SIDEBAR, null);
         }
     }
 
     public int hideSidebar(ServerCommandSource source) {
         Scoreboard scoreboard = source.getServer().getScoreboard();
         Entity entity = source.getEntity();
-        if (scoreboard.getObjectiveForSlot(1) == null) {
+        if (scoreboard.getObjectiveForSlot(ScoreboardDisplaySlot.SIDEBAR) == null) {
             source.sendFeedback(MarkEnum.CROSS.appendMessage("There is no scoreboard"), false);
             return 1;
         } else {
-            scoreboard.setObjectiveSlot(1, null);
+            scoreboard.setObjectiveSlot(ScoreboardDisplaySlot.SIDEBAR, null);
             assert entity != null;
             source.getServer().getPlayerManager().broadcast(MarkEnum.TICK.appendMsg(entity.getEntityName() + " removed the scoreboard."), false);
         }
@@ -137,11 +134,11 @@ public class ScoreboardExtension extends GenericExtension implements Extensions 
 
     public Text display(Scoreboard scoreboard, ScoreboardObjective scoreboardObjective, int tick, Entity entity, boolean persistent) {
         Text text;
-        if (scoreboard.getObjectiveForSlot(1) == scoreboardObjective) {
+        if (scoreboard.getObjectiveForSlot(ScoreboardDisplaySlot.SIDEBAR) == scoreboardObjective) {
             text = MarkEnum.CROSS.appendMsg("Already showing");
         } else {
             assert entity != null;
-            scoreboard.setObjectiveSlot(1, scoreboardObjective);
+            scoreboard.setObjectiveSlot(ScoreboardDisplaySlot.SIDEBAR, scoreboardObjective);
             if (persistent) {
                 tickSet = -100;
             } else {
@@ -189,7 +186,7 @@ public class ScoreboardExtension extends GenericExtension implements Extensions 
 
                 return;
             }
-            scoreboard.setObjectiveSlot(1, newScoreboardObjective);
+            scoreboard.setObjectiveSlot(ScoreboardDisplaySlot.SIDEBAR, newScoreboardObjective);
             if (persistent) {
                 tickSet = -100;
             } else {
@@ -236,7 +233,7 @@ public class ScoreboardExtension extends GenericExtension implements Extensions 
 
                 return;
             }
-            scoreboard.setObjectiveSlot(1, newScoreboardObjective);
+            scoreboard.setObjectiveSlot(ScoreboardDisplaySlot.SIDEBAR, newScoreboardObjective);
             if (persistent) {
                 tickSet = -100;
             } else {

@@ -2,6 +2,8 @@ package com.kahzerx.kahzerxmod.mixin.server;
 
 import com.kahzerx.kahzerxmod.KahzerxServer;
 import net.minecraft.advancement.Advancement;
+import net.minecraft.advancement.AdvancementDisplay;
+import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.advancement.PlayerAdvancementTracker;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -11,6 +13,7 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.server.PlayerManager;
+import net.minecraft.server.network.ConnectedClientData;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.network.ServerPlayerInteractionManager;
 import net.minecraft.server.world.ServerWorld;
@@ -38,12 +41,12 @@ public class PlayerEventsMixins {
         }
 
         @Inject(method = "onPlayerConnect", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;loadPlayerData(Lnet/minecraft/server/network/ServerPlayerEntity;)Lnet/minecraft/nbt/NbtCompound;", shift = At.Shift.AFTER))
-        private void onPlayerJoined(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
+        private void onPlayerJoined(ClientConnection connection, ServerPlayerEntity player, ConnectedClientData clientData, CallbackInfo ci) {
             KahzerxServer.onPlayerJoined(player);
         }
 
         @Inject(method = "onPlayerConnect", at = @At("TAIL"))
-        private void onPlayerConnected(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
+        private void onPlayerConnected(ClientConnection connection, ServerPlayerEntity player, ConnectedClientData clientData, CallbackInfo ci) {
             KahzerxServer.onPlayerConnected(player);
         }
     }
@@ -88,9 +91,9 @@ public class PlayerEventsMixins {
     public static class PlayerAdvancement {
         @Shadow private ServerPlayerEntity owner;
 
-        @Inject(method = "grantCriterion", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcast(Lnet/minecraft/text/Text;Z)V"))
-        private void onAdvancement(Advancement advancement, String criterionName, CallbackInfoReturnable<Boolean> cir) {
-            Text text = Text.translatable("chat.type.advancement." + Objects.requireNonNull(advancement.getDisplay()).getFrame().getId(), owner.getDisplayName(), advancement.toHoverableText());
+        @Inject(method = "method_53637", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcast(Lnet/minecraft/text/Text;Z)V"))
+        private void onAdvancement(AdvancementEntry advancementEntry, AdvancementDisplay display, CallbackInfo ci) {
+            Text text = Text.translatable("chat.type.advancement." + display.getFrame().getId(), owner.getDisplayName(), Advancement.getNameFromIdentity(advancementEntry));
             KahzerxServer.onAdvancement(text.getString().replace("_", "\\_"));
         }
     }

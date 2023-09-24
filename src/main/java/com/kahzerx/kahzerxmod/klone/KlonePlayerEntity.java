@@ -7,12 +7,14 @@ import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.PacketCallbacks;
+import net.minecraft.network.packet.c2s.common.SyncedClientOptions;
 import net.minecraft.network.packet.s2c.play.DeathMessageS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntityPositionS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntitySetHeadYawS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerTask;
+import net.minecraft.server.network.ConnectedClientData;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.HoverEvent;
@@ -26,8 +28,10 @@ import java.util.Objects;
 public class KlonePlayerEntity extends ServerPlayerEntity {
     private final LocalDateTime timeout;
     private final KloneExtension kloneExtension;
-    public KlonePlayerEntity(MinecraftServer server, ServerWorld world, GameProfile profile, KloneExtension kloneExtension) {
-        super(server, world, profile);
+
+    // TODO doesn't seem to work anymore?
+    public KlonePlayerEntity(MinecraftServer server, ServerWorld world, GameProfile profile, SyncedClientOptions clientOptions, KloneExtension kloneExtension) {
+        super(server, world, profile, clientOptions);
         this.timeout = LocalDateTime.now().plusDays(1);  // TODO this has to be customizable
         this.kloneExtension = kloneExtension;
     }
@@ -45,11 +49,11 @@ public class KlonePlayerEntity extends ServerPlayerEntity {
 //        server.getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.REMOVE_PLAYER, player));
         player.networkHandler.disconnect(Text.literal("A clone has been created.\nThe clone will leave once you rejoin.\nHappy AFK!"));
 
-        KlonePlayerEntity klonedPlayer = new KlonePlayerEntity(server, world, profile, kloneExtension);
+        KlonePlayerEntity klonedPlayer = new KlonePlayerEntity(server, world, profile, player.getClientOptions(), kloneExtension);
 //        KlonePlayerEntity klonedPlayer = new KlonePlayerEntity(server, world, profile);
 
         klonedPlayer.refreshPositionAndAngles(player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch());
-        server.getPlayerManager().onPlayerConnect(new KloneNetworkManager(NetworkSide.SERVERBOUND), klonedPlayer);
+        server.getPlayerManager().onPlayerConnect(new KloneNetworkManager(NetworkSide.SERVERBOUND), klonedPlayer, new ConnectedClientData(profile, 0, klonedPlayer.getClientOptions()));
         klonedPlayer.teleport(world, player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch());
         klonedPlayer.setHealth(player.getHealth());
         klonedPlayer.unsetRemoved();
@@ -109,7 +113,7 @@ public class KlonePlayerEntity extends ServerPlayerEntity {
         this.hungerManager = new HungerManager();
         Text text = this.getDamageTracker().getDeathMessage();
         if (this.getWorld().getGameRules().getBoolean(GameRules.SHOW_DEATH_MESSAGES)) {
-            this.networkHandler.sendPacket(new DeathMessageS2CPacket(this.getId(), text), PacketCallbacks.of(() -> {
+            this.networkHandler.send(new DeathMessageS2CPacket(this.getId(), text), PacketCallbacks.of(() -> {
                 String string = text.asTruncatedString(256);
                 Text text2 = Text.translatable("death.attack.message_too_long", Text.literal(string).formatted(Formatting.YELLOW));
                 Text text3 = Text.translatable("death.attack.even_more_magic", this.getDisplayName()).styled((style) -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, text2)));
