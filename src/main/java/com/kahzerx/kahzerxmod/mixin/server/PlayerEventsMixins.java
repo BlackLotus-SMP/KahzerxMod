@@ -57,7 +57,7 @@ public class PlayerEventsMixins {
 
         @Shadow protected ServerWorld world;
 
-        @Inject(method = "tryBreakBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onBreak(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/entity/player/PlayerEntity;)V", shift = At.Shift.BEFORE))
+        @Inject(method = "tryBreakBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onBroken(Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V", shift = At.Shift.BEFORE))
         private void onBroken(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
             KahzerxServer.onPlayerBreakBlock(player, world, pos);
         }
@@ -93,7 +93,7 @@ public class PlayerEventsMixins {
 
         @Inject(method = "method_53637", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcast(Lnet/minecraft/text/Text;Z)V"))
         private void onAdvancement(AdvancementEntry advancementEntry, AdvancementDisplay display, CallbackInfo ci) {
-            Text text = Text.translatable("chat.type.advancement." + display.getFrame().getId(), owner.getDisplayName(), Advancement.getNameFromIdentity(advancementEntry));
+            Text text = Text.translatable("chat.type.advancement." + display.getFrame().getChatAnnouncementText(advancementEntry, owner), owner.getDisplayName(), Advancement.getNameFromIdentity(advancementEntry));
             KahzerxServer.onAdvancement(text.getString().replace("_", "\\_"));
         }
     }

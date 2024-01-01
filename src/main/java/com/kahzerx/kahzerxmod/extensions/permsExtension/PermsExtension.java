@@ -90,13 +90,13 @@ public class PermsExtension extends GenericExtension implements Extensions {
         if (server == null) {
             return;
         }
-        Team actual = server.getScoreboard().getPlayerTeam(player.getName().getString());
+        Team actual = server.getScoreboard().getScoreHolderTeam(player.getName().getString());
         Team shouldTeam = server.getScoreboard().getTeam(playerPerms.get(playerUUID).getName());
         if (actual == null || shouldTeam == null) {
             return;
         }
         if (!actual.isEqual(shouldTeam)) {
-            server.getScoreboard().addPlayerToTeam(player.getName().getString(), shouldTeam);
+            server.getScoreboard().addScoreHolderToTeam(player.getName().getString(), shouldTeam);
         }
     }
 
@@ -199,7 +199,7 @@ public class PermsExtension extends GenericExtension implements Extensions {
 
         Collection<String> teamNames = source.getServer().getScoreboard().getTeamNames();
         if (teamNames.contains(PermsLevels.getValue(level).getName())) {
-            source.getServer().getScoreboard().addPlayerToTeam(player, source.getServer().getScoreboard().getTeam(PermsLevels.getValue(level).getName()));
+            source.getServer().getScoreboard().addScoreHolderToTeam(player, source.getServer().getScoreboard().getTeam(PermsLevels.getValue(level).getName()));
         }
 
         return 1;

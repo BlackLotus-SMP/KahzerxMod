@@ -139,7 +139,7 @@ public class ExtensionManager {
         this.registerExtension(new SeedExtension(fileSettings));
         this.registerExtension(new FckPrivacyExtension(fileSettings));
         this.registerExtension(new SpoofExtension(fileSettings));
-        this.registerExtension(new ScoreboardExtension(fileSettings));
+//        this.registerExtension(new ScoreboardExtension(fileSettings));
         this.registerExtension(new SpawnExtension(fileSettings));
         this.registerExtension(new WhereExtension(fileSettings));
         this.registerExtension(new BocaExtension(fileSettings));

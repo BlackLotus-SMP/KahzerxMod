@@ -52,12 +52,12 @@ public class MemberExtension extends GenericExtension implements Extensions {
             team.setShowFriendlyInvisibles(false);
         }
         if (teamNames.contains("TEST_MEMBER")) {
-            Team playerTeam = server.getScoreboard().getPlayerTeam(player.getName().getString());
+            Team playerTeam = server.getScoreboard().getScoreHolderTeam(player.getName().getString());
             if (playerTeam != null) {
                 return;
             }
             Team team = server.getScoreboard().getTeam("TEST_MEMBER");
-            server.getScoreboard().addPlayerToTeam(player.getName().getString(), team);
+            server.getScoreboard().addScoreHolderToTeam(player.getName().getString(), team);
         }
     }
 
