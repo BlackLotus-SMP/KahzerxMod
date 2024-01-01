@@ -26,7 +26,7 @@ public class PlayerManagerMixin {
         if (BadgeExtension.isExtensionEnabled && sender != null) {
             MutableText t = Text.literal("");
             List<BadgeInstance> badges = BadgeExtension.playerBadges.get(sender.getUuid().toString());
-            if (badges.size() != 0) {
+            if (!badges.isEmpty()) {
                 t = Text.literal(" ");
                 MutableText hover = Text.literal("");
                 hover.append(Text.literal("Badges:").styled(style -> style.withColor(Formatting.WHITE)));
@@ -49,7 +49,7 @@ public class PlayerManagerMixin {
             MutableText display = MutableText.of(sender.getDisplayName().getContent());
             display.setStyle(sender.getDisplayName().getStyle());
             MutableText m = Text.literal("");
-            if (sender.getDisplayName().getSiblings().size() != 0) {
+            if (!sender.getDisplayName().getSiblings().isEmpty()) {
                 display.append(sender.getDisplayName().getSiblings().get(0));
                 display.append(sender.getDisplayName().getSiblings().get(1));
                 m.append(sender.getDisplayName().getSiblings().get(2).copy());

@@ -14,12 +14,14 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.scoreboard.*;
+import net.minecraft.scoreboard.number.StyledNumberFormat;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.stat.ServerStatHandler;
 import net.minecraft.stat.Stat;
 import net.minecraft.stat.Stats;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -100,7 +102,7 @@ public class ScoreboardExtension extends GenericExtension implements Extensions 
         } else {
             scoreboard.setObjectiveSlot(ScoreboardDisplaySlot.SIDEBAR, null);
             assert entity != null;
-            source.getServer().getPlayerManager().broadcast(MarkEnum.TICK.appendMsg(entity.getEntityName() + " removed the scoreboard."), false);
+            source.getServer().getPlayerManager().broadcast(MarkEnum.TICK.appendMsg(entity.getName().getString() + " removed the scoreboard."), false);
         }
         return 1;
     }
@@ -144,7 +146,7 @@ public class ScoreboardExtension extends GenericExtension implements Extensions 
             } else {
                 tickSet = tick + (20 * 20);
             }
-            text = MarkEnum.TICK.appendText(Text.literal(Formatting.WHITE + entity.getEntityName() + " has selected " + Formatting.GOLD + "[" + scoreboardObjective.getDisplayName().getString() + "]"));
+            text = MarkEnum.TICK.appendText(Text.literal(Formatting.WHITE + entity.getName().getString() + " has selected " + Formatting.GOLD + "[" + scoreboardObjective.getDisplayName().getString() + "]"));
         }
         return text;
     }
@@ -174,7 +176,7 @@ public class ScoreboardExtension extends GenericExtension implements Extensions 
                 return;
             }
             ScoreboardCriterion criteria = opCriteria.get();
-            scoreboard.addObjective(objectiveName, criteria, Text.literal(displayName).formatted(Formatting.GOLD), criteria.getDefaultRenderType());
+            scoreboard.addObjective(objectiveName, criteria, Text.literal(displayName).formatted(Formatting.GOLD), criteria.getDefaultRenderType(), true, new StyledNumberFormat(Style.EMPTY));
             ScoreboardObjective newScoreboardObjective = scoreboardObjective = scoreboard.getNullableObjective(objectiveName);
             try {
                 initScoreboard(source, newScoreboardObjective, entityType, type);
@@ -194,7 +196,7 @@ public class ScoreboardExtension extends GenericExtension implements Extensions 
             }
             assert entity != null;
             assert scoreboardObjective != null;
-            text = MarkEnum.TICK.appendText(Text.literal(Formatting.WHITE + entity.getEntityName() + " has selected " + Formatting.GOLD + "[" + scoreboardObjective.getDisplayName().getString() + "]"));
+            text = MarkEnum.TICK.appendText(Text.literal(Formatting.WHITE + entity.getName().getString() + " has selected " + Formatting.GOLD + "[" + scoreboardObjective.getDisplayName().getString() + "]"));
         }
         source.getServer().getPlayerManager().broadcast(text, false);
     }
@@ -219,8 +221,7 @@ public class ScoreboardExtension extends GenericExtension implements Extensions 
                 return;
             }
             ScoreboardCriterion criteria = opCriteria.get();
-
-            scoreboard.addObjective(objectiveName, criteria, Text.literal(displayName).formatted(Formatting.GOLD), criteria.getDefaultRenderType());
+            scoreboard.addObjective(objectiveName, criteria, Text.literal(displayName).formatted(Formatting.GOLD), criteria.getDefaultRenderType(), true, new StyledNumberFormat(Style.EMPTY));
 
             ScoreboardObjective newScoreboardObjective = scoreboardObjective = scoreboard.getNullableObjective(objectiveName);
             try {
@@ -241,7 +242,7 @@ public class ScoreboardExtension extends GenericExtension implements Extensions 
             }
             assert entity != null;
             assert scoreboardObjective != null;
-            text = MarkEnum.TICK.appendText(Text.literal(Formatting.WHITE + entity.getEntityName() + " has selected " + Formatting.GOLD + "[" + scoreboardObjective.getDisplayName().getString() + "]"));
+            text = MarkEnum.TICK.appendText(Text.literal(Formatting.WHITE + entity.getName().getString() + " has selected " + Formatting.GOLD + "[" + scoreboardObjective.getDisplayName().getString() + "]"));
         }
         source.getServer().getPlayerManager().broadcast(text, false);
     }
@@ -258,11 +259,9 @@ public class ScoreboardExtension extends GenericExtension implements Extensions 
             UUID uuid = UUID.fromString(uuidString);
             ServerPlayerEntity player = server.getPlayerManager().getPlayer(uuid);
             int value;
-            String playerName;
             Stat<?> finalStat = Stats.CUSTOM.getOrCreateStat(id);
             if (player != null) {
                 value = player.getStatHandler().getStat(finalStat);
-                playerName = player.getEntityName();
             } else {
                 ServerStatHandler serverStatHandler = new ServerStatHandler(server, stat);
                 value = serverStatHandler.getStat(finalStat);
@@ -270,12 +269,11 @@ public class ScoreboardExtension extends GenericExtension implements Extensions 
                 if (gameProfile.isEmpty()) {
                     continue;
                 }
-                playerName = gameProfile.get().getName();
             }
             if (value == 0) {
                 continue;
             }
-            ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(playerName, scoreboardObjective);
+            ScoreAccess scoreboardPlayerScore = scoreboard.getOrCreateScore(player, scoreboardObjective);
             scoreboardPlayerScore.setScore(value);
         }
     }
@@ -306,10 +304,8 @@ public class ScoreboardExtension extends GenericExtension implements Extensions 
                 finalStat = Stats.DROPPED.getOrCreateStat(item);
             }
             int value;
-            String playerName;
             if (player != null) {
                 value = player.getStatHandler().getStat(finalStat);
-                playerName = player.getEntityName();
             } else {
                 ServerStatHandler serverStatHandler = new ServerStatHandler(server, stat);
                 value = serverStatHandler.getStat(finalStat);
@@ -318,12 +314,11 @@ public class ScoreboardExtension extends GenericExtension implements Extensions 
                 if (gameProfile.isEmpty()) {
                     continue;
                 }
-                playerName = gameProfile.get().getName();
             }
             if (value == 0) {
                 continue;
             }
-            ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(playerName, scoreboardObjective);
+            ScoreAccess scoreboardPlayerScore = scoreboard.getOrCreateScore(player, scoreboardObjective);
             scoreboardPlayerScore.setScore(value);
         }
     }
@@ -346,10 +341,8 @@ public class ScoreboardExtension extends GenericExtension implements Extensions 
                 finalStat = Stats.KILLED_BY.getOrCreateStat(entityType);
             }
             int value;
-            String playerName;
             if (player != null) {
                 value = player.getStatHandler().getStat(finalStat);
-                playerName = player.getEntityName();
             } else {
                 ServerStatHandler serverStatHandler = new ServerStatHandler(server, stat);
                 value = serverStatHandler.getStat(finalStat);
@@ -358,12 +351,11 @@ public class ScoreboardExtension extends GenericExtension implements Extensions 
                 if (gameProfile.isEmpty()) {
                     continue;
                 }
-                playerName = gameProfile.get().getName();
             }
             if (value == 0) {
                 continue;
             }
-            ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(playerName, scoreboardObjective);
+            ScoreAccess scoreboardPlayerScore = scoreboard.getOrCreateScore(player, scoreboardObjective);
             scoreboardPlayerScore.setScore(value);
         }
     }

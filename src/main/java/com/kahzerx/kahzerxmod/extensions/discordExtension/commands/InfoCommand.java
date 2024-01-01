@@ -156,7 +156,7 @@ public class InfoCommand extends GenericCommand {
         long dsId = extension.getDiscordID(uuid);
         Member dsName = guild.retrieveMemberById(dsId).complete();
         String mcName = extension.getMinecraftNick(uuid);
-        Team serverTeam = server.getScoreboard().getPlayerTeam(mcName);
+        Team serverTeam = server.getScoreboard().getTeam(mcName);
         String playerRole = "**Has no role**";
         if (serverTeam != null) {
             String playerTeam = serverTeam.getName();

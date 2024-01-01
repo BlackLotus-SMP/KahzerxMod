@@ -26,7 +26,7 @@ public class ServerConfigMixin<K, V extends ServerConfigEntry<K>> {
                 JSONParser parser = new JSONParser();
                 JSONObject obj = (JSONObject) parser.parse(new Gson().toJson(entry));
                 Set<?> keys = obj.keySet();
-                if (keys.size() == 0) {
+                if (keys.isEmpty()) {
                     return;
                 }
                 Optional<?> k = keys.stream().findFirst();
@@ -51,7 +51,7 @@ public class ServerConfigMixin<K, V extends ServerConfigEntry<K>> {
                 JSONParser parser = new JSONParser();
                 JSONObject obj = (JSONObject) parser.parse(new Gson().toJson(entry));
                 Set<?> keys = obj.keySet();
-                if (keys.size() == 0) {
+                if (keys.isEmpty()) {
                     return;
                 }
                 Optional<?> k = keys.stream().findFirst();
