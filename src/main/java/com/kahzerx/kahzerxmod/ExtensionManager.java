@@ -168,6 +168,7 @@ public class ExtensionManager {
         String prefix = "";
         boolean isRunning = false;
         long chatChannelID = 0L;
+        boolean chatBridge = true;
         boolean shouldFeedback = true;
         List<Long> allowedChats = new ArrayList<>();
         DiscordJsonSettings djs = gson.fromJson(settings, DiscordJsonSettings.class);
@@ -182,6 +183,7 @@ public class ExtensionManager {
                     prefix = ds.getPrefix() != null ? ds.getPrefix().replaceAll(" ", "_") : "";
                     isRunning = ds.isRunning();
                     chatChannelID = ds.getChatChannelID();
+                    chatBridge = ds.isChatBridge();
                     allowedChats = ds.getAllowedChats() != null ? ds.getAllowedChats() : new ArrayList<>();
                     shouldFeedback = ds.isShouldFeedback();
                     break;
@@ -194,6 +196,7 @@ public class ExtensionManager {
                         isEnabled(found, "discord"),
                         "Connects minecraft chat + some events with a discord chat (chatbridge). Prefix is necessary if you want crossServerChat to work properly and not having duplicated messages.",
                         token,
+                        chatBridge,
                         crossServerChat,
                         prefix,
                         isRunning,

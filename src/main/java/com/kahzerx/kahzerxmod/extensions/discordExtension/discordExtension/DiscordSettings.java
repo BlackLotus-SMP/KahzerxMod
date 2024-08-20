@@ -6,15 +6,17 @@ import java.util.List;
 
 public class DiscordSettings extends ExtensionSettings {
     private String token;
+    private boolean chatBridge;
     private boolean crossServerChat;
     private String prefix;
     private boolean running;
     private long chatChannelID;
     private List<Long> allowedChats;
     private boolean shouldFeedback;
-    public DiscordSettings(String name, boolean enabled, String description, String token, boolean crossServerChat, String prefix, boolean running, long chatChannelID, List<Long> allowedChats, boolean shouldFeedback) {
+    public DiscordSettings(String name, boolean enabled, String description, String token, boolean chatBridge, boolean crossServerChat, String prefix, boolean running, long chatChannelID, List<Long> allowedChats, boolean shouldFeedback) {
         super(name, enabled, description);
         this.token = token;
+        this.chatBridge = chatBridge;
         this.crossServerChat = crossServerChat;
         this.prefix = prefix;
         this.running = running;
@@ -25,6 +27,14 @@ public class DiscordSettings extends ExtensionSettings {
 
     public boolean isShouldFeedback() {
         return shouldFeedback;
+    }
+
+    public boolean isChatBridge() {
+        return chatBridge;
+    }
+
+    public void setChatBridge(boolean chatBridge) {
+        this.chatBridge = chatBridge;
     }
 
     public void setShouldFeedback(boolean shouldFeedback) {

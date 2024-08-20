@@ -58,8 +58,8 @@ public class DiscordListener extends ListenerAdapter {
                 }
             }
             if (!webhookFlag){
-                Webhook webook = jda.getTextChannelById(channelId).createWebhook("ChatBridge").complete();
-                String WebhookUrl = webook.getUrl();
+                Webhook webhook = jda.getTextChannelById(channelId).createWebhook("ChatBridge").complete();
+                String WebhookUrl = webhook.getUrl();
                 webhookC = WebhookClient.withUrl(WebhookUrl);
             }
             discordExtension.extensionSettings().setRunning(true);
@@ -82,10 +82,10 @@ public class DiscordListener extends ListenerAdapter {
         if (!chatbridge) {
             return;
         }
-        if (event.getMessage().getContentDisplay().equals("")) {
+        if (event.getMessage().getContentDisplay().isEmpty()) {
             return;
         }
-        if (event.getMessage().getContentRaw().equals("")) {
+        if (event.getMessage().getContentRaw().isEmpty()) {
             return;
         }
         if (event.getAuthor().isBot()) {
@@ -123,7 +123,7 @@ public class DiscordListener extends ListenerAdapter {
         }
         WebhookMessageBuilder builder = new WebhookMessageBuilder();
         String playerName = player.getName().getString();
-        if (prefix.equals("")) {
+        if (prefix.isEmpty()) {
             builder.setUsername(String.format("%s", playerName));
         } else {
             builder.setUsername(String.format("[%s] %s", prefix, playerName));
@@ -134,12 +134,12 @@ public class DiscordListener extends ListenerAdapter {
         webhookC.send(builder.build());
     }
 
-    public static void sendSysMessage(String msg, String prefix){
+    public static void sendSysMessage(String msg, String prefix) {
         if (!chatbridge){
             return;
         }
         WebhookMessageBuilder builder = new WebhookMessageBuilder();
-        if (prefix.equals("")) {
+        if (prefix.isEmpty()) {
             builder.setUsername("System :D");
         } else {
             builder.setUsername(String.format("[%s] System :D", prefix));

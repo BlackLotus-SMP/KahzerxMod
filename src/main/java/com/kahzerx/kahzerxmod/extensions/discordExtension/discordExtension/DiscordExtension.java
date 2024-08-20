@@ -31,7 +31,7 @@ public class DiscordExtension extends GenericExtension implements Extensions {
         if (!extensionSettings().isEnabled()) {
             return;
         }
-        if (extensionSettings().getPrefix().equals("")) {
+        if (extensionSettings().getPrefix().isEmpty()) {
             extensionSettings().setCrossServerChat(false);
             ExtensionManager.saveSettings();
         }
@@ -40,6 +40,9 @@ public class DiscordExtension extends GenericExtension implements Extensions {
 
     @Override
     public void onServerStarted(MinecraftServer minecraftServer) {
+        if (!extensionSettings().isChatBridge()) {
+            return;
+        }
         DiscordListener.sendSysMessage("**Server is ON**", this.extensionSettings().getPrefix());
     }
 
@@ -52,6 +55,9 @@ public class DiscordExtension extends GenericExtension implements Extensions {
 
     @Override
     public void onPlayerJoined(ServerPlayerEntity player) {
+        if (!extensionSettings().isChatBridge()) {
+            return;
+        }
         boolean isBot = player.getClass() == KlonePlayerEntity.class;
         String msg = ":arrow_right: **" + player.getName().getString().replace("_", "\\_") + (isBot ? " [Bot]" : "") + " joined the game!**";
         DiscordListener.sendSysMessage(msg, this.extensionSettings().getPrefix());
@@ -59,6 +65,9 @@ public class DiscordExtension extends GenericExtension implements Extensions {
 
     @Override
     public void onPlayerLeft(ServerPlayerEntity player) {
+        if (!extensionSettings().isChatBridge()) {
+            return;
+        }
         boolean isBot = player.getClass() == KlonePlayerEntity.class;
         String msg = ":arrow_left: **" + player.getName().getString().replace("_", "\\_") + (isBot ? " [Bot]" : "") + " left the game!**";
         DiscordListener.sendSysMessage(msg, this.extensionSettings().getPrefix());
@@ -66,6 +75,9 @@ public class DiscordExtension extends GenericExtension implements Extensions {
 
     @Override
     public void onPlayerDied(ServerPlayerEntity player) {
+        if (!extensionSettings().isChatBridge()) {
+            return;
+        }
         boolean isBot = player.getClass() == KlonePlayerEntity.class;
         String msg = ":skull_crossbones: **" + player.getDamageTracker().getDeathMessage().getString().replace("_", "\\_") + (isBot ? " [Bot]" : "") + "**";
         DiscordListener.sendSysMessage(msg, this.extensionSettings().getPrefix());
@@ -73,6 +85,9 @@ public class DiscordExtension extends GenericExtension implements Extensions {
 
     @Override
     public void onChatMessage(ServerPlayerEntity player, String chatMessage) {
+        if (!extensionSettings().isChatBridge()) {
+            return;
+        }
         if (chatMessage.startsWith("/me ") || !chatMessage.startsWith("/")) {
             DiscordListener.sendChatMessage(player, chatMessage, this.extensionSettings().getPrefix());
         }
@@ -80,6 +95,9 @@ public class DiscordExtension extends GenericExtension implements Extensions {
 
     @Override
     public void onAdvancement(String advancement) {
+        if (!extensionSettings().isChatBridge()) {
+            return;
+        }
         String msg = ":confetti_ball: **" + advancement + "**";
         DiscordListener.sendSysMessage(msg, this.extensionSettings().getPrefix());
     }
@@ -100,7 +118,9 @@ public class DiscordExtension extends GenericExtension implements Extensions {
             return;
         }
         DiscordListener.start(KahzerxServer.minecraftServer, extensionSettings().getToken(), String.valueOf(extensionSettings().getChatChannelID()), this);
-        DiscordListener.sendSysMessage("**Server is ON**", this.extensionSettings().getPrefix());
+        if (extensionSettings().isChatBridge()) {
+            DiscordListener.sendSysMessage("**Server is ON**", this.extensionSettings().getPrefix());
+        }
         PlayerUtils.reloadCommands();
     }
 
@@ -169,6 +189,18 @@ public class DiscordExtension extends GenericExtension implements Extensions {
                             context.getSource().sendFeedback(() -> Text.literal("[shouldFeedback] > " + extensionSettings().isShouldFeedback() + "."), false);
                             return 1;
                         })).
+                then(literal("chatBridge").
+                        then(argument("chatbridge", BoolArgumentType.bool()).
+                                executes(context -> {
+                                    extensionSettings().setChatBridge(BoolArgumentType.getBool(context, "chatbridge"));
+                                    context.getSource().sendFeedback(() -> Text.literal("[chatBridge] > " + extensionSettings().isChatBridge() + "."), false);
+                                    ExtensionManager.saveSettings();
+                                    return 1;
+                                })).
+                        executes(context -> {
+                            context.getSource().sendFeedback(() -> Text.literal("[chatBridge] > " + extensionSettings().isChatBridge() + "."), false);
+                            return 1;
+                        })).
                 then(literal("chatBridgePrefix").
                         then(argument("prefix", StringArgumentType.string()).
                                 executes(context -> {
@@ -181,13 +213,13 @@ public class DiscordExtension extends GenericExtension implements Extensions {
                             String help = "Server prefix.";
                             context.getSource().sendFeedback(() -> Text.literal(help), false);
                             String prefix = extensionSettings().getPrefix();
-                            context.getSource().sendFeedback(() -> Text.literal(prefix.equals("") ? "There is no prefix." : "[Prefix] > " + extensionSettings().getPrefix() + "."), false);
+                            context.getSource().sendFeedback(() -> Text.literal(prefix.isEmpty() ? "There is no prefix." : "[Prefix] > " + extensionSettings().getPrefix() + "."), false);
                             return 1;
                         })).
                 then(literal("crossServerChat").
                         then(argument("enabled", BoolArgumentType.bool()).
                                 executes(context -> {
-                                    if (extensionSettings().getPrefix().equals("")) {
+                                    if (extensionSettings().getPrefix().isEmpty()) {
                                         context.getSource().sendFeedback(() -> Text.literal("You need to set a prefix!"), false);
                                         return 1;
                                     }
