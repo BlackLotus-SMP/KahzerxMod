@@ -47,20 +47,22 @@ public class DiscordListener extends ListenerAdapter {
             chatbridge = false;
             jda = JDABuilder.createDefault(t).addEventListeners(new DiscordListener(server)).build();
             jda.awaitReady();
-            List<Webhook> webhookList = jda.getTextChannelById(channelId).retrieveWebhooks().complete();
-            boolean webhookFlag = false;
-            for (Webhook webdook: webhookList){
-                if (webdook.getName().equals("ChatBridge")){
-                    webhookFlag = true;
-                    String WebhookUrl = webdook.getUrl();
-                    webhookC = WebhookClient.withUrl(WebhookUrl);
-                    break;
+            if (discordSettings.isChatBridge()) {
+                List<Webhook> webhookList = jda.getTextChannelById(channelId).retrieveWebhooks().complete();
+                boolean webhookFlag = false;
+                for (Webhook webdook: webhookList) {
+                    if (webdook.getName().equals("ChatBridge")){
+                        webhookFlag = true;
+                        String WebhookUrl = webdook.getUrl();
+                        webhookC = WebhookClient.withUrl(WebhookUrl);
+                        break;
+                    }
                 }
-            }
-            if (!webhookFlag){
-                Webhook webhook = jda.getTextChannelById(channelId).createWebhook("ChatBridge").complete();
-                String WebhookUrl = webhook.getUrl();
-                webhookC = WebhookClient.withUrl(WebhookUrl);
+                if (!webhookFlag){
+                    Webhook webhook = jda.getTextChannelById(channelId).createWebhook("ChatBridge").complete();
+                    String WebhookUrl = webhook.getUrl();
+                    webhookC = WebhookClient.withUrl(WebhookUrl);
+                }
             }
             discordExtension.extensionSettings().setRunning(true);
             chatbridge = true;
