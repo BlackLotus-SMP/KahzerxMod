@@ -8,8 +8,7 @@ import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordUtils;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-
+import net.minecraft.server.level.ServerPlayer;
 import java.util.List;
 import java.util.Objects;
 
@@ -26,8 +25,8 @@ public class OnlineCommand extends GenericCommand {
         String serverPrefix = discordExtension.extensionSettings().getPrefix();
         boolean feedback = discordExtension.extensionSettings().isShouldFeedback();
         StringBuilder msg = new StringBuilder();
-        int n = server.getPlayerManager().getPlayerList().size();
-        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+        int n = server.getPlayerList().getPlayers().size();
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             if (getHiddenPlayers().contains(player)) {
                 continue;
             }

@@ -1,8 +1,8 @@
 package com.kahzerx.kahzerxmod.extensions.blockInfoExtension.helpers;
 
-import net.minecraft.screen.ScreenHandler;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 
 public interface SlotHandler {
-    ScreenHandler getHandler();
-    void setHandler(ScreenHandler handler);
+    AbstractContainerMenu getHandler();
+    void setHandler(AbstractContainerMenu handler);
 }

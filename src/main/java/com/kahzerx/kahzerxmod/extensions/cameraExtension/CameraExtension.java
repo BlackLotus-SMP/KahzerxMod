@@ -7,13 +7,12 @@ import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.kahzerx.kahzerxmod.extensions.permsExtension.PermsExtension;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.world.GameMode;
-
 import java.util.HashMap;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.level.GameType;
 
 public class CameraExtension extends GenericExtension implements Extensions {
     public PermsExtension permsExtension;
@@ -23,7 +22,7 @@ public class CameraExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onRegisterCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public void onRegisterCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
         new CameraCommand().register(dispatcher, this);
     }
 
@@ -37,14 +36,14 @@ public class CameraExtension extends GenericExtension implements Extensions {
         return this.getSettings();
     }
 
-    public int setCameraMode(ServerCommandSource src) {
-        ServerPlayerEntity player = src.getPlayer();
+    public int setCameraMode(CommandSourceStack src) {
+        ServerPlayer player = src.getPlayer();
         if (player == null) {
             return 1;
         }
-        player.changeGameMode(GameMode.SPECTATOR);
-        player.addStatusEffect(new StatusEffectInstance(StatusEffects.NIGHT_VISION, 999999, 0, false, false));
-        player.addStatusEffect(new StatusEffectInstance(StatusEffects.CONDUIT_POWER, 999999, 0, false, false));
+        player.setGameMode(GameType.SPECTATOR);
+        player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 999999, 0, false, false));
+        player.addEffect(new MobEffectInstance(MobEffects.CONDUIT_POWER, 999999, 0, false, false));
         return 1;
     }
 }

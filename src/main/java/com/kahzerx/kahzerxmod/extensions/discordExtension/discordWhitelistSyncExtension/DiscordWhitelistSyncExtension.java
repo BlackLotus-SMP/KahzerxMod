@@ -10,20 +10,19 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-
 import java.util.HashMap;
 import java.util.Timer;
 
-import static net.minecraft.command.CommandSource.suggestMatching;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.SharedSuggestionProvider.suggest;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 public class DiscordWhitelistSyncExtension extends DiscordGenericExtension implements Extensions {
     private DiscordExtension discordExtension;
@@ -72,41 +71,41 @@ public class DiscordWhitelistSyncExtension extends DiscordGenericExtension imple
     }
 
     @Override
-    public void onExtensionEnabled(ServerCommandSource source) { }
+    public void onExtensionEnabled(CommandSourceStack source) { }
 
     @Override
-    public void onExtensionDisabled(ServerCommandSource source) { }
+    public void onExtensionDisabled(CommandSourceStack source) { }
 
     @Override
-    public void settingsCommand(LiteralArgumentBuilder<ServerCommandSource> builder) {
+    public void settingsCommand(LiteralArgumentBuilder<CommandSourceStack> builder) {
         builder.  // TODO Interact with the description and add functionality maybe other than just if its enabled and the description
                 then(literal("notifyChatID").
                         then(argument("chatID", LongArgumentType.longArg()).
-                                suggests((c, b) -> suggestMatching(new String[]{"0"}, b)).
+                                suggests((c, b) -> suggest(new String[]{"0"}, b)).
                                 executes(context -> {
                                     this.extensionSettings().setNotifyChannelID(LongArgumentType.getLong(context, "chatID"));
-                                    context.getSource().sendFeedback(() -> this.getLongSettingMessage(true, "notifyChatID", this.extensionSettings().getNotifyChannelID(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName()), false);
+                                    context.getSource().sendSuccess(() -> this.getLongSettingMessage(true, "notifyChatID", this.extensionSettings().getNotifyChannelID(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName()), false);
                                     this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
-                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/notifyChatID\n").styled(style -> style.withBold(true)).
-                                    append(MarkEnum.INFO.appendMsg("Channel where you get notified when someone gets removed from the whitelist\n", Formatting.GRAY).styled(style -> style.withBold(false))).
+                            context.getSource().sendSuccess(() -> Component.literal("\n" + this.extensionSettings().getName() + "/notifyChatID\n").withStyle(style -> style.withBold(true)).
+                                    append(MarkEnum.INFO.appendMsg("Channel where you get notified when someone gets removed from the whitelist\n", ChatFormatting.GRAY).withStyle(style -> style.withBold(false))).
                                     append(this.getLongSettingMessage(false, "notifyChatID", this.extensionSettings().getNotifyChannelID(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName())), false);
                             return 1;
                         })).
                 then(literal("groupID").
                         then(argument("groupID", LongArgumentType.longArg()).
-                                suggests((c, b) -> suggestMatching(new String[]{"0"}, b)).
+                                suggests((c, b) -> suggest(new String[]{"0"}, b)).
                                 executes(context -> {
                                     extensionSettings().setGroupID(LongArgumentType.getLong(context, "groupID"));
-                                    context.getSource().sendFeedback(() -> this.getLongSettingMessage(true, "groupID", this.extensionSettings().getGroupID(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName()), false);
+                                    context.getSource().sendSuccess(() -> this.getLongSettingMessage(true, "groupID", this.extensionSettings().getGroupID(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName()), false);
                                     this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
-                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/groupID\n").styled(style -> style.withBold(true)).
-                                    append(MarkEnum.INFO.appendMsg("ServerID, to know where to check members\n", Formatting.GRAY).styled(style -> style.withBold(false))).
+                            context.getSource().sendSuccess(() -> Component.literal("\n" + this.extensionSettings().getName() + "/groupID\n").withStyle(style -> style.withBold(true)).
+                                    append(MarkEnum.INFO.appendMsg("ServerID, to know where to check members\n", ChatFormatting.GRAY).withStyle(style -> style.withBold(false))).
                                     append(this.getLongSettingMessage(false, "groupID", this.extensionSettings().getGroupID(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName())), false);
                             return 1;
                         })).
@@ -114,91 +113,91 @@ public class DiscordWhitelistSyncExtension extends DiscordGenericExtension imple
                         then(argument("aggressive", BoolArgumentType.bool()).
                                 executes(context -> {
                                     extensionSettings().setAggressive(BoolArgumentType.getBool(context, "aggressive"));
-                                    context.getSource().sendFeedback(() -> this.getBooleanSettingMessage(true, this.extensionSettings().isAggressive(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "aggressive"), false);
+                                    context.getSource().sendSuccess(() -> this.getBooleanSettingMessage(true, this.extensionSettings().isAggressive(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "aggressive"), false);
                                     this.em.saveSettings();
                                     return 1;
                                 })).
                         executes(context -> {
-                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/aggressive\n").styled(style -> style.withBold(true)).
-                                    append(MarkEnum.INFO.appendMsg("Full whitelist/database sync\n", Formatting.GRAY).styled(style -> style.withBold(false))).
+                            context.getSource().sendSuccess(() -> Component.literal("\n" + this.extensionSettings().getName() + "/aggressive\n").withStyle(style -> style.withBold(true)).
+                                    append(MarkEnum.INFO.appendMsg("Full whitelist/database sync\n", ChatFormatting.GRAY).withStyle(style -> style.withBold(false))).
                                     append(this.getBooleanSettingMessage(false, this.extensionSettings().isAggressive(), this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "aggressive")), false);
                             return 1;
                         })).
                 then(literal("validRoles").
                         then(literal("add").
                                 then(argument("roleID", LongArgumentType.longArg()).
-                                        suggests((c, b) -> suggestMatching(new String[]{"1234"}, b)).
+                                        suggests((c, b) -> suggest(new String[]{"1234"}, b)).
                                         executes(context -> {
                                             long role = LongArgumentType.getLong(context, "roleID");
                                             if (extensionSettings().getValidRoles().contains(role)) {
-                                                context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendText(this.formatLongID("The role ID ", role, " was already on the list", true, false, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "validRoles")), false);
+                                                context.getSource().sendSuccess(() -> MarkEnum.CROSS.appendText(this.formatLongID("The role ID ", role, " was already on the list", true, false, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "validRoles")), false);
                                             } else {
                                                 extensionSettings().addValidRoleID(role);
-                                                context.getSource().sendFeedback(() -> MarkEnum.TICK.appendText(this.formatLongID("The role with ID ", role, " has been", true, true, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "validRoles")), false);
+                                                context.getSource().sendSuccess(() -> MarkEnum.TICK.appendText(this.formatLongID("The role with ID ", role, " has been", true, true, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "validRoles")), false);
                                                 this.em.saveSettings();
                                             }
                                             return 1;
                                         }))).
                         then(literal("remove").
                                 then(argument("roleID", LongArgumentType.longArg()).
-                                        suggests((c, b) -> suggestMatching(this.extensionSettings().getValidRoles().stream().map(Object::toString), b)).
+                                        suggests((c, b) -> suggest(this.extensionSettings().getValidRoles().stream().map(Object::toString), b)).
                                         executes(context -> {
                                             long role = LongArgumentType.getLong(context, "roleID");
                                             if (extensionSettings().getValidRoles().contains(role)) {
                                                 extensionSettings().removeValidRoleID(role);
-                                                context.getSource().sendFeedback(() -> MarkEnum.TICK.appendText(this.formatLongID("The role with ID ", role, " has been", false, true, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "validRoles")), false);
+                                                context.getSource().sendSuccess(() -> MarkEnum.TICK.appendText(this.formatLongID("The role with ID ", role, " has been", false, true, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "validRoles")), false);
                                                 this.em.saveSettings();
                                             } else {
-                                                context.getSource().sendFeedback(() -> MarkEnum.CROSS.appendText(this.formatLongID("The role ID ", role," does not exist!", false, false, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "validRoles")), false);
+                                                context.getSource().sendSuccess(() -> MarkEnum.CROSS.appendText(this.formatLongID("The role ID ", role," does not exist!", false, false, this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), "validRoles")), false);
                                             }
                                             return 1;
                                         }))).
                         then(literal("list").
                                 executes(context -> {
-                                    MutableText roles = Text.literal("");
+                                    MutableComponent roles = Component.literal("");
                                     int roleCount = this.extensionSettings().getValidRoles().size();
                                     if (roleCount == 0) {
-                                        roles.append(Text.literal("Not set!").styled(style -> style.
-                                                withColor(Formatting.RED).
-                                                withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to add!"))).
-                                                withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/%s %s validRoles add ", this.em.getSettingsBaseCommand(), this.extensionSettings().getName())))));
+                                        roles.append(Component.literal("Not set!").withStyle(style -> style.
+                                                withColor(ChatFormatting.RED).
+                                                withHoverEvent(new HoverEvent.ShowText(Component.literal("Click to add!"))).
+                                                withClickEvent(new ClickEvent.SuggestCommand(String.format("/%s %s validRoles add ", this.em.getSettingsBaseCommand(), this.extensionSettings().getName())))));
                                     } else {
                                         roles.
-                                                append(Text.literal("[+]").styled(style -> style.
-                                                        withColor(Formatting.GREEN).
-                                                        withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to add!"))).
-                                                        withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/%s %s validRoles add ", this.em.getSettingsBaseCommand(), this.extensionSettings().getName()))))).
-                                                append(Text.literal(" ")).
-                                                append(Text.literal("[-]\n").styled(style -> style.
-                                                        withColor(Formatting.RED).
-                                                        withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to remove!"))).
-                                                        withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format("/%s %s validRoles remove ", this.em.getSettingsBaseCommand(), this.extensionSettings().getName())))));
+                                                append(Component.literal("[+]").withStyle(style -> style.
+                                                        withColor(ChatFormatting.GREEN).
+                                                        withHoverEvent(new HoverEvent.ShowText(Component.literal("Click to add!"))).
+                                                        withClickEvent(new ClickEvent.SuggestCommand(String.format("/%s %s validRoles add ", this.em.getSettingsBaseCommand(), this.extensionSettings().getName()))))).
+                                                append(Component.literal(" ")).
+                                                append(Component.literal("[-]\n").withStyle(style -> style.
+                                                        withColor(ChatFormatting.RED).
+                                                        withHoverEvent(new HoverEvent.ShowText(Component.literal("Click to remove!"))).
+                                                        withClickEvent(new ClickEvent.SuggestCommand(String.format("/%s %s validRoles remove ", this.em.getSettingsBaseCommand(), this.extensionSettings().getName())))));
                                         for (int i = 0; i < roleCount; i++) {
                                             long role = this.extensionSettings().getValidRoles().get(i);
                                             roles.
-                                                    append(MarkEnum.DOT.appendText(Text.literal(String.format("%d", role)).styled(style -> style.
+                                                    append(MarkEnum.DOT.appendText(Component.literal(String.format("%d", role)).withStyle(style -> style.
                                                             withBold(false).
-                                                            withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(String.format("Click to copy %d", role)))).
-                                                            withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, String.format("%d", role)))), Formatting.GRAY)).
-                                                    append(Text.literal(" ")).
-                                                    append(MarkEnum.CROSS.getFormattedIdentifier().styled(style -> style.
-                                                            withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(String.format("Click to delete %d", role)))).
-                                                            withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/%s %s validRoles remove %d", this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), role))))).
-                                                    append(i == roleCount-1 ? Text.literal("") : Text.literal("\n"));
+                                                            withHoverEvent(new HoverEvent.ShowText(Component.literal(String.format("Click to copy %d", role)))).
+                                                            withClickEvent(new ClickEvent.CopyToClipboard(String.format("%d", role)))), ChatFormatting.GRAY)).
+                                                    append(Component.literal(" ")).
+                                                    append(MarkEnum.CROSS.getFormattedIdentifier().withStyle(style -> style.
+                                                            withHoverEvent(new HoverEvent.ShowText(Component.literal(String.format("Click to delete %d", role)))).
+                                                            withClickEvent(new ClickEvent.RunCommand(String.format("/%s %s validRoles remove %d", this.em.getSettingsBaseCommand(), this.extensionSettings().getName(), role))))).
+                                                    append(i == roleCount-1 ? Component.literal("") : Component.literal("\n"));
                                         }
                                     }
-                                    context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/validRoles/list" + "\n").styled(style -> style.withBold(true)).
+                                    context.getSource().sendSuccess(() -> Component.literal("\n" + this.extensionSettings().getName() + "/validRoles/list" + "\n").withStyle(style -> style.withBold(true)).
                                             append(roles), false);
                                     return 1;
                                 })).
                         executes(context -> {
-                            context.getSource().sendFeedback(() -> Text.literal("\n" + this.extensionSettings().getName() + "/validRoles\n").styled(style -> style.withBold(true)).
-                                    append(MarkEnum.INFO.appendMsg("Role list that a member needs to have (at least one) so dont get kicked from the whitelist (ex: sub role)\n", Formatting.GRAY).styled(style -> style.withBold(false))).
-                                    append(Text.literal("[Roles]").styled(style -> style.
-                                            withColor(Formatting.DARK_GRAY).
-                                            withUnderline(true).
-                                            withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to display the already added valid role IDs"))).
-                                            withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/%s %s validRoles list", this.em.getSettingsBaseCommand(), this.extensionSettings().getName()))))), false);
+                            context.getSource().sendSuccess(() -> Component.literal("\n" + this.extensionSettings().getName() + "/validRoles\n").withStyle(style -> style.withBold(true)).
+                                    append(MarkEnum.INFO.appendMsg("Role list that a member needs to have (at least one) so dont get kicked from the whitelist (ex: sub role)\n", ChatFormatting.GRAY).withStyle(style -> style.withBold(false))).
+                                    append(Component.literal("[Roles]").withStyle(style -> style.
+                                            withColor(ChatFormatting.DARK_GRAY).
+                                            withUnderlined(true).
+                                            withHoverEvent(new HoverEvent.ShowText(Component.literal("Click to display the already added valid role IDs"))).
+                                            withClickEvent(new ClickEvent.RunCommand(String.format("/%s %s validRoles list", this.em.getSettingsBaseCommand(), this.extensionSettings().getName()))))), false);
                             return 1;
                         }));
     }

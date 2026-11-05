@@ -1,19 +1,19 @@
 package com.kahzerx.kahzerxmod.extensions.slabExtension.utils;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SlabBlock;
-import net.minecraft.block.enums.SlabType;
-import net.minecraft.item.Item;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.SlabType;
 
 public class SlabUtils {
     public static boolean isSlab(Item item) {
-        return Block.getBlockFromItem(item) instanceof SlabBlock;
+        return Block.byItem(item) instanceof SlabBlock;
     }
 
-    public static void flipSlab(World world, BlockPos pos, BlockState state) {
-        world.setBlockState(pos, state.with(SlabBlock.TYPE, world.getBlockState(pos).get(SlabBlock.TYPE) == SlabType.DOUBLE ? SlabType.DOUBLE : SlabType.TOP));
+    public static void flipSlab(Level world, BlockPos pos, BlockState state) {
+        world.setBlockAndUpdate(pos, state.setValue(SlabBlock.TYPE, world.getBlockState(pos).getValue(SlabBlock.TYPE) == SlabType.DOUBLE ? SlabType.DOUBLE : SlabType.TOP));
     }
 }

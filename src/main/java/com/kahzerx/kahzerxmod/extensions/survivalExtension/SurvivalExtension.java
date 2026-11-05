@@ -5,12 +5,11 @@ import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.world.GameMode;
-
 import java.util.HashMap;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.level.GameType;
 
 public class SurvivalExtension extends GenericExtension implements Extensions {
     public SurvivalExtension(HashMap<String, String> fileSettings) {
@@ -18,7 +17,7 @@ public class SurvivalExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onRegisterCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public void onRegisterCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
         new SurvivalCommand().register(dispatcher, this);
     }
 
@@ -27,15 +26,15 @@ public class SurvivalExtension extends GenericExtension implements Extensions {
         return this.getSettings();
     }
 
-    public int setSurvivalMode(ServerCommandSource src) throws CommandSyntaxException {
-        ServerPlayerEntity player = src.getPlayer();
+    public int setSurvivalMode(CommandSourceStack src) throws CommandSyntaxException {
+        ServerPlayer player = src.getPlayer();
         if (player == null) {
             return 1;
         }
         if (player.isSpectator() || player.isCreative()) {
-            player.changeGameMode(GameMode.SURVIVAL);
-            player.removeStatusEffect(StatusEffects.NIGHT_VISION);
-            player.removeStatusEffect(StatusEffects.CONDUIT_POWER);
+            player.setGameMode(GameType.SURVIVAL);
+            player.removeEffect(MobEffects.NIGHT_VISION);
+            player.removeEffect(MobEffects.CONDUIT_POWER);
         }
         return 1;
     }

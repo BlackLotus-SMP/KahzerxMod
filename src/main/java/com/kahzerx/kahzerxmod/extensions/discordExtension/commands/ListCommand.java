@@ -24,7 +24,7 @@ public class ListCommand extends GenericCommand {
         DiscordExtension discordExtension = extensionManager.getDiscordExtension();
         String serverPrefix = discordExtension.extensionSettings().getPrefix();
         boolean feedback = discordExtension.extensionSettings().isShouldFeedback();
-        String[] names = server.getPlayerManager().getWhitelistedNames();
+        String[] names = server.getPlayerList().getWhiteListNames();
         Arrays.sort(names, String.CASE_INSENSITIVE_ORDER);
         EmbedBuilder embed;
         if (names.length == 0) {

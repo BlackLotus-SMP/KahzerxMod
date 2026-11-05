@@ -9,11 +9,10 @@ import com.kahzerx.kahzerxmod.extensions.memberExtension.MemberExtension;
 import com.kahzerx.kahzerxmod.utils.MarkEnum;
 import com.kahzerx.kahzerxmod.utils.PlayerUtils;
 import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.scoreboard.Team;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.scores.PlayerTeam;
 import java.sql.*;
 import java.util.Collection;
 import java.util.HashMap;
@@ -45,7 +44,7 @@ public class PermsExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onRegisterCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public void onRegisterCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
         new PermsCommand().register(dispatcher, this);
     }
 
@@ -66,8 +65,8 @@ public class PermsExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onPlayerJoined(ServerPlayerEntity player) {
-        String playerUUID = player.getUuidAsString();
+    public void onPlayerJoined(ServerPlayer player) {
+        String playerUUID = player.getStringUUID();
         try {
             String query = "INSERT OR IGNORE INTO perms(uuid, level) VALUES (?, ?);";
             PreparedStatement ps = this.conn.prepareStatement(query);
@@ -86,24 +85,24 @@ public class PermsExtension extends GenericExtension implements Extensions {
         if (!memberExtension.extensionSettings().isEnabled() || !this.extensionSettings().isEnabled()) {
             return;
         }
-        MinecraftServer server = player.getServer();
+        MinecraftServer server = player.level().getServer();
         if (server == null) {
             return;
         }
-        Team actual = server.getScoreboard().getScoreHolderTeam(player.getName().getString());
-        Team shouldTeam = server.getScoreboard().getTeam(playerPerms.get(playerUUID).getName());
+        PlayerTeam actual = server.getScoreboard().getPlayersTeam(player.getName().getString());
+        PlayerTeam shouldTeam = server.getScoreboard().getPlayerTeam(playerPerms.get(playerUUID).getName());
         if (actual == null || shouldTeam == null) {
             return;
         }
-        if (!actual.isEqual(shouldTeam)) {
-            server.getScoreboard().addScoreHolderToTeam(player.getName().getString(), shouldTeam);
+        if (!actual.isAlliedTo(shouldTeam)) {
+            server.getScoreboard().addPlayerToTeam(player.getName().getString(), shouldTeam);
         }
     }
 
     @Override
-    public void onExtensionDisabled(ServerCommandSource source) {
+    public void onExtensionDisabled(CommandSourceStack source) {
         if (this.minecraftServer != null) {
-            for (ServerPlayerEntity player : this.minecraftServer.getPlayerManager().getPlayerList()) {
+            for (ServerPlayer player : this.minecraftServer.getPlayerList().getPlayers()) {
                 this.onPlayerLeft(player);
             }
         }
@@ -111,9 +110,9 @@ public class PermsExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onExtensionEnabled(ServerCommandSource source) {
+    public void onExtensionEnabled(CommandSourceStack source) {
         if (this.minecraftServer != null) {
-            for (ServerPlayerEntity player : this.minecraftServer.getPlayerManager().getPlayerList()) {
+            for (ServerPlayer player : this.minecraftServer.getPlayerList().getPlayers()) {
                 this.onPlayerJoined(player);
             }
         }
@@ -121,11 +120,17 @@ public class PermsExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onPlayerLeft(ServerPlayerEntity player) {
-        String playerUUID = player.getUuidAsString();
+    public void onPlayerLeft(ServerPlayer player) {
+        String playerUUID = player.getStringUUID();
         if (this.playerPerms.containsKey(playerUUID)) {
             playerPerms.remove(playerUUID);
         }
+    }
+
+    // Sin jugador (consola o el source de compilación que usa 26.x para marcar comandos restringidos) no hay nivel.
+    public boolean hasLevel(CommandSourceStack source, PermsLevels level) {
+        ServerPlayer player = source.getPlayer();
+        return player != null && getDBPlayerPerms(player.getStringUUID()).getId() >= level.getId();
     }
 
     public PermsLevels getDBPlayerPerms(String playerUUID) {
@@ -167,14 +172,14 @@ public class PermsExtension extends GenericExtension implements Extensions {
         return playerUUID;
     }
 
-    public int updatePerms(ServerCommandSource source, String player, String value) {
+    public int updatePerms(CommandSourceStack source, String player, String value) {
         String playerUUID = getPlayerUUID(player);
         if (playerUUID == null) {
             return 1;
         }
         int level = PermsLevels.getLevel(value);
         if (level == -1) {
-            source.sendFeedback(MarkEnum.CROSS.appendMessage("Not a valid level!"), false);
+            source.sendSuccess(MarkEnum.CROSS.appendMessage("Not a valid level!"), false);
             return 1;
         }
         try {
@@ -186,7 +191,7 @@ public class PermsExtension extends GenericExtension implements Extensions {
             ps.setInt(3, level);
             ps.executeUpdate();
             ps.close();
-            source.sendFeedback(MarkEnum.TICK.appendMessage(String.format("Player %s > %s", player, value)), false);
+            source.sendSuccess(MarkEnum.TICK.appendMessage(String.format("Player %s > %s", player, value)), false);
             if (this.playerPerms.containsKey(playerUUID)) {
                 playerPerms.remove(playerUUID);
             }
@@ -199,7 +204,7 @@ public class PermsExtension extends GenericExtension implements Extensions {
 
         Collection<String> teamNames = source.getServer().getScoreboard().getTeamNames();
         if (teamNames.contains(PermsLevels.getValue(level).getName())) {
-            source.getServer().getScoreboard().addScoreHolderToTeam(player, source.getServer().getScoreboard().getTeam(PermsLevels.getValue(level).getName()));
+            source.getServer().getScoreboard().addPlayerToTeam(player, source.getServer().getScoreboard().getPlayerTeam(PermsLevels.getValue(level).getName()));
         }
 
         return 1;

@@ -4,9 +4,8 @@ import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.mojang.brigadier.CommandDispatcher;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
-
 import java.util.HashMap;
 
 public class SlabExtension extends GenericExtension implements Extensions {
@@ -22,19 +21,19 @@ public class SlabExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onExtensionDisabled(ServerCommandSource source) {
+    public void onExtensionDisabled(CommandSourceStack source) {
         Extensions.super.onExtensionDisabled(source);
         isExtensionEnabled = false;
     }
 
     @Override
-    public void onExtensionEnabled(ServerCommandSource source) {
+    public void onExtensionEnabled(CommandSourceStack source) {
         Extensions.super.onExtensionEnabled(source);
         isExtensionEnabled = true;
     }
 
     @Override
-    public void onRegisterCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public void onRegisterCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
         new SlabCommand().register(dispatcher, this);
     }
 

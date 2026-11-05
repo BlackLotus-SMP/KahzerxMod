@@ -3,11 +3,10 @@ package com.kahzerx.kahzerxmod.extensions.maintenanceExtension;
 import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-
+import net.minecraft.server.level.ServerPlayer;
 import java.util.HashMap;
 
 public class MaintenanceExtension extends GenericExtension implements Extensions {
@@ -30,17 +29,17 @@ public class MaintenanceExtension extends GenericExtension implements Extensions
     }
 
     @Override
-    public void onExtensionEnabled(ServerCommandSource source) {
+    public void onExtensionEnabled(CommandSourceStack source) {
         isExtensionEnabled = true;
-        for (ServerPlayerEntity player : this.server.getPlayerManager().getPlayerList()) {
-            if (!this.server.getPlayerManager().isOperator(player.getGameProfile())) {
-                player.networkHandler.disconnect(Text.literal("Server is closed for maintenance"));
+        for (ServerPlayer player : this.server.getPlayerList().getPlayers()) {
+            if (!this.server.getPlayerList().isOp(player.nameAndId())) {
+                player.connection.disconnect(Component.literal("Server is closed for maintenance"));
             }
         }
     }
 
     @Override
-    public void onExtensionDisabled(ServerCommandSource source) {
+    public void onExtensionDisabled(CommandSourceStack source) {
         isExtensionEnabled = false;
     }
 }

@@ -1,5 +1,6 @@
 package com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistSyncExtension;
 
+import net.minecraft.server.players.NameAndId;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordWhitelistExtension.DiscordWhitelistExtension;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils;
@@ -12,8 +13,8 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.Whitelist;
-import net.minecraft.server.WhitelistEntry;
+import net.minecraft.server.players.UserWhiteList;
+import net.minecraft.server.players.UserWhiteListEntry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.simple.JSONArray;
@@ -60,7 +61,7 @@ public class DiscordWhitelistSyncThread extends TimerTask {
             LOGGER.info("STARTING WHITELIST SYNC.");
             database2WhitelistSync();
             if (discordWhitelistSyncExtension.extensionSettings().isAggressive()) {
-                server.getPlayerManager().reloadWhitelist();
+                server.getPlayerList().reloadWhiteList();
                 whitelist2Database();
                 database2Whitelist();
             }
@@ -148,14 +149,14 @@ public class DiscordWhitelistSyncThread extends TimerTask {
 
     private void onSyncAction(ArrayList<String> whitelistedPlayers, long discordID, Guild guild) {
         for (String whitelistedPlayerUUID : whitelistedPlayers) {
-            Optional<GameProfile> p = server.getUserCache().getByUuid(UUID.fromString(whitelistedPlayerUUID));
+            Optional<NameAndId> p = server.services().nameToIdCache().get(UUID.fromString(whitelistedPlayerUUID));
             if (p.isEmpty()) {
                 continue;
             }
-            discordWhitelistExtension.tryVanillaWhitelistRemove(server.getPlayerManager().getWhitelist(), p.get(), server);
+            discordWhitelistExtension.tryVanillaWhitelistRemove(server.getPlayerList().getWhiteList(), p.get(), server);
             discordWhitelistExtension.deletePlayer(discordID, whitelistedPlayerUUID);
 
-            EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{String.format("**F %s**", p.get().getName())}, "", true, Color.RED, true, discordWhitelistExtension.getDiscordExtension().extensionSettings().isShouldFeedback());
+            EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{String.format("**F %s**", p.get().name())}, "", true, Color.RED, true, discordWhitelistExtension.getDiscordExtension().extensionSettings().isShouldFeedback());
             if (embed != null) {
                 TextChannel channel = guild.getTextChannelById(discordWhitelistSyncExtension.extensionSettings().getNotifyChannelID());
                 if (channel != null) {
@@ -169,7 +170,7 @@ public class DiscordWhitelistSyncThread extends TimerTask {
         List<String> whitelistedUUIDs = new ArrayList<>();
         try {
             JSONParser parser = new JSONParser();
-            Object obj = parser.parse(new FileReader(server.getPlayerManager().getWhitelist().getFile()));
+            Object obj = parser.parse(new FileReader(server.getPlayerList().getWhiteList().getFile()));
             JSONArray jsonArray = (JSONArray) obj;
             for (JSONObject jsonObject : (Iterable<JSONObject>) jsonArray) {
                 whitelistedUUIDs.add((String) jsonObject.get("uuid"));
@@ -179,14 +180,14 @@ public class DiscordWhitelistSyncThread extends TimerTask {
             return;
         }
 
-        Whitelist whitelist = server.getPlayerManager().getWhitelist();
+        UserWhiteList whitelist = server.getPlayerList().getWhiteList();
         for (String uuid : whitelistedUUIDs) {
-            Optional<GameProfile> profile = server.getUserCache().getByUuid(UUID.fromString(uuid));
+            Optional<NameAndId> profile = server.services().nameToIdCache().get(UUID.fromString(uuid));
             if (profile.isEmpty()) {
                 continue;
             }
-            GameProfile p = profile.get();
-            if (discordWhitelistExtension.alreadyAddedBySomeone(p.getId())) {
+            NameAndId p = profile.get();
+            if (discordWhitelistExtension.alreadyAddedBySomeone(p.id())) {
                 continue;
             }
             discordWhitelistExtension.tryVanillaWhitelistRemove(whitelist, p, server);
@@ -198,16 +199,16 @@ public class DiscordWhitelistSyncThread extends TimerTask {
         for (long discordID : discordIDs) {
             ArrayList<String> whitelistedUUID = discordWhitelistExtension.getWhitelistedPlayers(discordID);
             for (String playerUUID : whitelistedUUID) {
-                Optional<GameProfile> profile = server.getUserCache().getByUuid(UUID.fromString(playerUUID));
+                Optional<NameAndId> profile = server.services().nameToIdCache().get(UUID.fromString(playerUUID));
                 if (profile.isEmpty()) {
                     discordWhitelistExtension.deletePlayer(discordID, playerUUID);
                     continue;
                 }
-                Whitelist whitelist = server.getPlayerManager().getWhitelist();
-                if (whitelist.isAllowed(profile.get())) {
+                UserWhiteList whitelist = server.getPlayerList().getWhiteList();
+                if (whitelist.isWhiteListed(profile.get())) {
                     continue;
                 }
-                WhitelistEntry entry = new WhitelistEntry(profile.get());
+                UserWhiteListEntry entry = new UserWhiteListEntry(profile.get());
                 whitelist.add(entry);
             }
         }

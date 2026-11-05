@@ -1,21 +1,22 @@
 package com.kahzerx.kahzerxmod.extensions.spoofExtension;
 
+import com.kahzerx.kahzerxmod.utils.PermUtils;
 import com.kahzerx.kahzerxmod.utils.PlayerUtils;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 
-import static net.minecraft.command.CommandSource.suggestMatching;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.SharedSuggestionProvider.suggest;
+import static net.minecraft.commands.Commands.literal;
 
 public class SpoofCommand {
-    public void register(CommandDispatcher<ServerCommandSource> dispatcher, SpoofExtension spoof) {
+    public void register(CommandDispatcher<CommandSourceStack> dispatcher, SpoofExtension spoof) {
         dispatcher.register(literal("spoof").
-                requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(2) && spoof.extensionSettings().isEnabled()).
-                then(CommandManager.argument("player", StringArgumentType.word()).
-                        suggests((c, b) -> suggestMatching(PlayerUtils.getPlayers(c.getSource()), b)).
-                        then(CommandManager.literal("enderChest").
+                requires(serverCommandSource -> PermUtils.hasPermission(serverCommandSource, 2) && spoof.extensionSettings().isEnabled()).
+                then(Commands.argument("player", StringArgumentType.word()).
+                        suggests((c, b) -> suggest(PlayerUtils.getPlayers(c.getSource()), b)).
+                        then(Commands.literal("enderChest").
                                 executes(context -> spoof.spoofEC(
                                         context.getSource(),
                                         StringArgumentType.getString(context, "player"))))

@@ -6,22 +6,22 @@ import com.kahzerx.kahzerxmod.extensions.blockInfoExtension.BlockInfoExtension;
 import com.kahzerx.kahzerxmod.extensions.blockInfoExtension.utils.BlockInfoUtils;
 import com.kahzerx.kahzerxmod.utils.DateUtils;
 import com.kahzerx.kahzerxmod.utils.DimUtils;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.network.ServerPlayerInteractionManager;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerPlayerGameMode;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(ServerPlayerInteractionManager.class)
+@Mixin(ServerPlayerGameMode.class)
 public class BlockInteractionLoggingMixin {
-    @Inject(method = "interactBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;shouldCancelInteraction()Z"))
-    private void onRightClick(ServerPlayerEntity player, World world, ItemStack stack, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
+    @Inject(method = "useItemOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;isSecondaryUseActive()Z"))
+    private void onRightClick(ServerPlayer player, Level world, ItemStack stack, InteractionHand hand, BlockHitResult hitResult, CallbackInfoReturnable<InteractionResult> cir) {
         if (BlockInfoUtils.shouldRegisterBlock(world.getBlockState(hitResult.getBlockPos()).getBlock(), player)) {
             BlockActionLog actionLog = new BlockActionLog(
                     player.getName().getString(),
@@ -30,7 +30,7 @@ public class BlockInteractionLoggingMixin {
                     hitResult.getBlockPos().getX(),
                     hitResult.getBlockPos().getY(),
                     hitResult.getBlockPos().getZ(),
-                    DimUtils.getWorldID(DimUtils.getDim(player.getWorld())),
+                    DimUtils.getWorldID(DimUtils.getDim(player.level())),
                     ActionTypes.INTERACT.getId(),
                     DateUtils.getDate()
             );
@@ -39,11 +39,11 @@ public class BlockInteractionLoggingMixin {
             BlockActionLog actionLog = new BlockActionLog(
                     player.getName().getString(),
                     1,
-                    stack.getItem().getName().getString(),
+                    stack.getItem().getName(stack).getString(),
                     hitResult.getBlockPos().getX(),
                     hitResult.getBlockPos().getY(),
                     hitResult.getBlockPos().getZ(),
-                    DimUtils.getWorldID(DimUtils.getDim(player.getWorld())),
+                    DimUtils.getWorldID(DimUtils.getDim(player.level())),
                     ActionTypes.INTERACT.getId(),
                     DateUtils.getDate()
             );

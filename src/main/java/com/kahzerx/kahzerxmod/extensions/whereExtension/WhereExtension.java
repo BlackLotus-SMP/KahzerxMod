@@ -6,9 +6,8 @@ import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.kahzerx.kahzerxmod.extensions.permsExtension.PermsExtension;
 import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.server.command.ServerCommandSource;
-
 import java.util.HashMap;
+import net.minecraft.commands.CommandSourceStack;
 
 public class WhereExtension extends GenericExtension implements Extensions {
     private PermsExtension permsExtension;
@@ -27,7 +26,7 @@ public class WhereExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onRegisterCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public void onRegisterCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
         new WhereCommand().register(dispatcher, this);
     }
 

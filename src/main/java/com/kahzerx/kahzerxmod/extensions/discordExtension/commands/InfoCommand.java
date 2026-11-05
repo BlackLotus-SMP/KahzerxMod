@@ -1,5 +1,6 @@
 package com.kahzerx.kahzerxmod.extensions.discordExtension.commands;
 
+import net.minecraft.server.players.NameAndId;
 import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordPermission;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordExtension;
@@ -10,10 +11,9 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.WorldSavePath;
-
+import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.scores.PlayerTeam;
 import java.awt.*;
 import java.io.*;
 import java.net.URL;
@@ -41,7 +41,7 @@ public class InfoCommand extends GenericCommand {
         String msg = event.getMessage().getContentRaw();
         if (msg.split(" ").length == 2) {
             String playerName = msg.split(" ")[1];
-            Optional<GameProfile> profile = server.getUserCache().findByName(playerName);
+            Optional<NameAndId> profile = server.services().nameToIdCache().get(playerName);
             if (profile.isEmpty()) {
                 EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**Not premium.**"}, serverPrefix, true, Color.RED, true, feedback);
                 if (embed != null) {
@@ -49,7 +49,7 @@ public class InfoCommand extends GenericCommand {
                 }
                 return;
             }
-            UUID playerUuid = profile.get().getId();
+            UUID playerUuid = profile.get().id();
             if (discordWhitelistExtension.alreadyAddedBySomeone(playerUuid)) {
                 try {
                     File skinPng = saveImage(playerUuid.toString(), server, serverPrefix, event, feedback);
@@ -109,7 +109,7 @@ public class InfoCommand extends GenericCommand {
 
     public File saveImage(String uuid, MinecraftServer server, String serverPrefix, MessageReceivedEvent event, Boolean feedback) throws IOException {
         URL url = new URL(String.format("https://crafatar.com/renders/body/%s?overlay", uuid));
-        Path worldPath = server.getSavePath(WorldSavePath.ROOT);
+        Path worldPath = server.getWorldPath(LevelResource.ROOT);
         File finalPath = new File(worldPath.toFile().getAbsolutePath() + String.format("skins/%s.png", uuid));
         File directoryPath = finalPath.getParentFile();
         if (!directoryPath.exists()) {
@@ -156,7 +156,7 @@ public class InfoCommand extends GenericCommand {
         long dsId = extension.getDiscordID(uuid);
         Member dsName = guild.retrieveMemberById(dsId).complete();
         String mcName = extension.getMinecraftNick(uuid);
-        Team serverTeam = server.getScoreboard().getTeam(mcName);
+        PlayerTeam serverTeam = server.getScoreboard().getPlayerTeam(mcName);
         String playerRole = "**Has no role**";
         if (serverTeam != null) {
             String playerTeam = serverTeam.getName();

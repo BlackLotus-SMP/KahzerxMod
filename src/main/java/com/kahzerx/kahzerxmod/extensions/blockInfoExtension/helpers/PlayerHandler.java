@@ -1,7 +1,7 @@
 package com.kahzerx.kahzerxmod.extensions.blockInfoExtension.helpers;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 
 public interface PlayerHandler {
-    PlayerEntity getPlayer();
+    Player getPlayer();
 }

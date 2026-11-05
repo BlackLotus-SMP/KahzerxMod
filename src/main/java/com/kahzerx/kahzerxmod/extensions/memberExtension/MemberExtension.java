@@ -3,13 +3,12 @@ package com.kahzerx.kahzerxmod.extensions.memberExtension;
 import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
-import net.minecraft.scoreboard.Team;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.scores.PlayerTeam;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -19,45 +18,45 @@ public class MemberExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onPlayerJoined(ServerPlayerEntity player) {
+    public void onPlayerJoined(ServerPlayer player) {
         if (!this.getSettings().isEnabled()) {
             return;
         }
-        MinecraftServer server = player.getServer();
+        MinecraftServer server = player.level().getServer();
         assert server != null;
         Collection<String> teamNames = server.getScoreboard().getTeamNames();
         if (!teamNames.contains("ADMIN")) {
-            Team team = server.getScoreboard().addTeam("ADMIN");
-            team.setPrefix(Text.literal("[ADMIN] ").styled(style -> style.withBold(true).withColor(Formatting.GOLD)));
-            team.setShowFriendlyInvisibles(false);
+            PlayerTeam team = server.getScoreboard().addPlayerTeam("ADMIN");
+            team.setPlayerPrefix(Component.literal("[ADMIN] ").withStyle(style -> style.withBold(true).withColor(ChatFormatting.GOLD)));
+            team.setSeeFriendlyInvisibles(false);
         }
         if (!teamNames.contains("MOD")) {
-            Team team = server.getScoreboard().addTeam("MOD");
-            team.setPrefix(Text.literal("[MOD] ").styled(style -> style.withBold(true).withColor(Formatting.DARK_AQUA)));
-            team.setShowFriendlyInvisibles(false);
+            PlayerTeam team = server.getScoreboard().addPlayerTeam("MOD");
+            team.setPlayerPrefix(Component.literal("[MOD] ").withStyle(style -> style.withBold(true).withColor(ChatFormatting.DARK_AQUA)));
+            team.setSeeFriendlyInvisibles(false);
         }
         if (!teamNames.contains("HELPER")) {
-            Team team = server.getScoreboard().addTeam("HELPER");
-            team.setPrefix(Text.literal("[HELPER] ").styled(style -> style.withBold(true).withColor(Formatting.AQUA)));
-            team.setShowFriendlyInvisibles(false);
+            PlayerTeam team = server.getScoreboard().addPlayerTeam("HELPER");
+            team.setPlayerPrefix(Component.literal("[HELPER] ").withStyle(style -> style.withBold(true).withColor(ChatFormatting.AQUA)));
+            team.setSeeFriendlyInvisibles(false);
         }
         if (!teamNames.contains("MEMBER")) {
-            Team team = server.getScoreboard().addTeam("MEMBER");
-            team.setPrefix(Text.literal("[MEMBER] ").styled(style -> style.withBold(true).withColor(Formatting.DARK_PURPLE)));
-            team.setShowFriendlyInvisibles(false);
+            PlayerTeam team = server.getScoreboard().addPlayerTeam("MEMBER");
+            team.setPlayerPrefix(Component.literal("[MEMBER] ").withStyle(style -> style.withBold(true).withColor(ChatFormatting.DARK_PURPLE)));
+            team.setSeeFriendlyInvisibles(false);
         }
         if (!teamNames.contains("TEST_MEMBER")) {
-            Team team = server.getScoreboard().addTeam("TEST_MEMBER");
-            team.setPrefix(Text.literal("[TEST_MEMBER] ").styled(style -> style.withBold(true).withColor(Formatting.LIGHT_PURPLE)));
-            team.setShowFriendlyInvisibles(false);
+            PlayerTeam team = server.getScoreboard().addPlayerTeam("TEST_MEMBER");
+            team.setPlayerPrefix(Component.literal("[TEST_MEMBER] ").withStyle(style -> style.withBold(true).withColor(ChatFormatting.LIGHT_PURPLE)));
+            team.setSeeFriendlyInvisibles(false);
         }
         if (teamNames.contains("TEST_MEMBER")) {
-            Team playerTeam = server.getScoreboard().getScoreHolderTeam(player.getName().getString());
+            PlayerTeam playerTeam = server.getScoreboard().getPlayersTeam(player.getName().getString());
             if (playerTeam != null) {
                 return;
             }
-            Team team = server.getScoreboard().getTeam("TEST_MEMBER");
-            server.getScoreboard().addScoreHolderToTeam(player.getName().getString(), team);
+            PlayerTeam team = server.getScoreboard().getPlayerTeam("TEST_MEMBER");
+            server.getScoreboard().addPlayerToTeam(player.getName().getString(), team);
         }
     }
 
@@ -67,8 +66,8 @@ public class MemberExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onExtensionEnabled(ServerCommandSource source) { }
+    public void onExtensionEnabled(CommandSourceStack source) { }
 
     @Override
-    public void onExtensionDisabled(ServerCommandSource source) { }
+    public void onExtensionDisabled(CommandSourceStack source) { }
 }

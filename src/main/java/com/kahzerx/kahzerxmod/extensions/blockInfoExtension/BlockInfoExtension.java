@@ -9,12 +9,11 @@ import com.kahzerx.kahzerxmod.extensions.blockInfoExtension.helpers.BlockActionL
 import com.kahzerx.kahzerxmod.utils.DateUtils;
 import com.kahzerx.kahzerxmod.utils.DimUtils;
 import com.mojang.brigadier.CommandDispatcher;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -42,7 +41,7 @@ public class BlockInfoExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onPlayerBreakBlock(ServerPlayerEntity player, World world, BlockPos pos) {
+    public void onPlayerBreakBlock(ServerPlayer player, Level world, BlockPos pos) {
         enqueue(new BlockActionLog(
                 player.getName().getString(),
                 1,
@@ -57,7 +56,7 @@ public class BlockInfoExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onPlayerPlaceBlock(ServerPlayerEntity player, World world, BlockPos pos) {
+    public void onPlayerPlaceBlock(ServerPlayer player, Level world, BlockPos pos) {
         enqueue(new BlockActionLog(
                 player.getName().getString(),
                 1,
@@ -72,7 +71,7 @@ public class BlockInfoExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onRegisterCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public void onRegisterCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
         new BlockInfoCommand().register(dispatcher, this);
     }
 
@@ -101,7 +100,7 @@ public class BlockInfoExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onExtensionEnabled(ServerCommandSource source) {
+    public void onExtensionEnabled(CommandSourceStack source) {
         Extensions.super.onExtensionEnabled(source);
         if (logger.isAlive()) {
             return;
@@ -112,7 +111,7 @@ public class BlockInfoExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onExtensionDisabled(ServerCommandSource source) {
+    public void onExtensionDisabled(CommandSourceStack source) {
         Extensions.super.onExtensionDisabled(source);
         if (!logger.isAlive()) {
             return;

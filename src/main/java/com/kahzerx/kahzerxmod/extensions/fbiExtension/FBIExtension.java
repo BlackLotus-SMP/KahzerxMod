@@ -4,26 +4,25 @@ import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
 
 public class FBIExtension extends GenericExtension implements Extensions {
-    private static final List<ServerPlayerEntity> hiddenPlayers = new ArrayList<>();
+    private static final List<ServerPlayer> hiddenPlayers = new ArrayList<>();
     public FBIExtension(HashMap<String, String> fileSettings) {
         super(new ExtensionSettings(fileSettings, "fbi", "Allows ops and mods to be in the server without players noticing."));
     }
 
     @Override
-    public void onPlayerLeft(ServerPlayerEntity player) {
+    public void onPlayerLeft(ServerPlayer player) {
         hiddenPlayers.remove(player);
     }
 
     @Override
-    public void onRegisterCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public void onRegisterCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
         new FBICommand().register(dispatcher, this);
     }
 
@@ -32,7 +31,7 @@ public class FBIExtension extends GenericExtension implements Extensions {
         return this.getSettings();
     }
 
-    public static List<ServerPlayerEntity> getHiddenPlayers() {
+    public static List<ServerPlayer> getHiddenPlayers() {
         return hiddenPlayers;
     }
 }

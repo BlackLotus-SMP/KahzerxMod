@@ -1,9 +1,9 @@
 package com.kahzerx.kahzerxmod.extensions.blockInfoExtension.helpers;
 
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 public interface LocationalInventory {
     BlockPos getLoc();
-    World getInvWorld();
+    Level getInvWorld();
 }

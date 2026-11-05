@@ -1,5 +1,6 @@
 package com.kahzerx.kahzerxmod.extensions.badgeExtension;
 
+import net.minecraft.world.scores.TeamColor;
 import com.google.common.collect.Sets;
 import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.Extensions;
@@ -8,11 +9,10 @@ import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.kahzerx.kahzerxmod.extensions.permsExtension.PermsExtension;
 import com.kahzerx.kahzerxmod.utils.MarkEnum;
 import com.mojang.brigadier.CommandDispatcher;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Formatting;
-
+import net.minecraft.server.level.ServerPlayer;
 import java.sql.*;
 import java.util.*;
 
@@ -33,8 +33,8 @@ public class BadgeExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onPlayerJoined(ServerPlayerEntity player) {
-        String playerUUID = player.getUuidAsString();
+    public void onPlayerJoined(ServerPlayer player) {
+        String playerUUID = player.getStringUUID();
         playerBadges.remove(playerUUID);
         playerBadges.put(playerUUID, new ArrayList<>());
         for (String badge : getPlayerBadges(player.getName().getString())) {
@@ -47,8 +47,8 @@ public class BadgeExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onPlayerLeft(ServerPlayerEntity player) {
-        String playerUUID = player.getUuidAsString();
+    public void onPlayerLeft(ServerPlayer player) {
+        String playerUUID = player.getStringUUID();
         playerBadges.remove(playerUUID);
     }
 
@@ -59,21 +59,21 @@ public class BadgeExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onRegisterCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public void onRegisterCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
         new BadgeCommand().register(dispatcher, this);
     }
 
     @Override
-    public void onExtensionEnabled(ServerCommandSource source) {
+    public void onExtensionEnabled(CommandSourceStack source) {
         Extensions.super.onExtensionEnabled(source);
         isExtensionEnabled = true;
-        for (ServerPlayerEntity player : this.server.getPlayerManager().getPlayerList()) {
+        for (ServerPlayer player : this.server.getPlayerList().getPlayers()) {
             this.onPlayerJoined(player);
         }
     }
 
     @Override
-    public void onExtensionDisabled(ServerCommandSource source) {
+    public void onExtensionDisabled(CommandSourceStack source) {
         Extensions.super.onExtensionDisabled(source);
         isExtensionEnabled = false;
         playerBadges.clear();
@@ -324,22 +324,22 @@ public class BadgeExtension extends GenericExtension implements Extensions {
         return playerUUID;
     }
 
-    public void getID(ServerCommandSource source, String badge) {
+    public void getID(CommandSourceStack source, String badge) {
         if (!badgeExists(badge)) {
-            source.sendFeedback(MarkEnum.CROSS.appendMessage("Badge does not exist!"), false);
+            source.sendSuccess(MarkEnum.CROSS.appendMessage("Badge does not exist!"), false);
             return;
         }
         int id = this.getBadgeID(badge);
         if (id == -1) {
-            source.sendFeedback(MarkEnum.CROSS.appendMessage("Badge does not exist!"), false);
+            source.sendSuccess(MarkEnum.CROSS.appendMessage("Badge does not exist!"), false);
         } else {
-            source.sendFeedback(MarkEnum.INFO.appendMessage(String.format("Badge ID is %d", id), Formatting.WHITE), false);
+            source.sendSuccess(MarkEnum.INFO.appendMessage(String.format("Badge ID is %d", id), ChatFormatting.WHITE), false);
         }
     }
 
-    public void insertBadge(ServerCommandSource source, String badge) {
+    public void insertBadge(CommandSourceStack source, String badge) {
         if (badgeExists(badge)) {
-            source.sendFeedback(MarkEnum.CROSS.appendMessage("Badge already exists!"), false);
+            source.sendSuccess(MarkEnum.CROSS.appendMessage("Badge already exists!"), false);
             return;
         }
         try {
@@ -348,17 +348,17 @@ public class BadgeExtension extends GenericExtension implements Extensions {
             ps.setString(1, badge);
             ps.executeUpdate();
             ps.close();
-            source.sendFeedback(MarkEnum.TICK.appendMessage("Badge created!"), false);
+            source.sendSuccess(MarkEnum.TICK.appendMessage("Badge created!"), false);
             reload();
         } catch (SQLException e) {
             e.printStackTrace();
-            source.sendFeedback(MarkEnum.CROSS.appendMessage("Error creating badge!"), false);
+            source.sendSuccess(MarkEnum.CROSS.appendMessage("Error creating badge!"), false);
         }
     }
 
-    public void removeBadge(ServerCommandSource source, String badge) {
+    public void removeBadge(CommandSourceStack source, String badge) {
         if (!badgeExists(badge)) {
-            source.sendFeedback(MarkEnum.CROSS.appendMessage("Badge does not exist!"), false);
+            source.sendSuccess(MarkEnum.CROSS.appendMessage("Badge does not exist!"), false);
             return;
         }
         try {
@@ -367,37 +367,37 @@ public class BadgeExtension extends GenericExtension implements Extensions {
             ps.setString(1, badge);
             ps.executeUpdate();
             ps.close();
-            source.sendFeedback(MarkEnum.TICK.appendMessage("Badge removed!"), false);
+            source.sendSuccess(MarkEnum.TICK.appendMessage("Badge removed!"), false);
             reload();
         } catch (SQLException e) {
             e.printStackTrace();
-            source.sendFeedback(MarkEnum.CROSS.appendMessage("Error removing badge!"), false);
+            source.sendSuccess(MarkEnum.CROSS.appendMessage("Error removing badge!"), false);
         }
     }
 
-    public void modifyBadgeColor(ServerCommandSource source, int badgeID, Formatting color) {
+    public void modifyBadgeColor(CommandSourceStack source, int badgeID, TeamColor color) {
         if (!badgeExists(badgeID)) {
-            source.sendFeedback(MarkEnum.CROSS.appendMessage("Badge does not exist!"), false);
+            source.sendSuccess(MarkEnum.CROSS.appendMessage("Badge does not exist!"), false);
             return;
         }
         try {
             String editColor = "UPDATE badges SET color = ? WHERE id = ?;";
             PreparedStatement ps = this.conn.prepareStatement(editColor);
-            ps.setInt(1, color.getColorIndex());
+            ps.setInt(1, color.ordinal());
             ps.setInt(2, badgeID);
             ps.executeUpdate();
             ps.close();
-            source.sendFeedback(MarkEnum.TICK.appendMessage("Badge color edited!"), false);
+            source.sendSuccess(MarkEnum.TICK.appendMessage("Badge color edited!"), false);
             reload();
         } catch (SQLException e) {
             e.printStackTrace();
-            source.sendFeedback(MarkEnum.CROSS.appendMessage("Error editing badge color!"), false);
+            source.sendSuccess(MarkEnum.CROSS.appendMessage("Error editing badge color!"), false);
         }
     }
 
-    public void modifyBadgeDesc(ServerCommandSource source, int badgeID, String description) {
+    public void modifyBadgeDesc(CommandSourceStack source, int badgeID, String description) {
         if (!badgeExists(badgeID)) {
-            source.sendFeedback(MarkEnum.CROSS.appendMessage("Badge does not exist!"), false);
+            source.sendSuccess(MarkEnum.CROSS.appendMessage("Badge does not exist!"), false);
             return;
         }
         try {
@@ -407,27 +407,27 @@ public class BadgeExtension extends GenericExtension implements Extensions {
             ps.setInt(2, badgeID);
             ps.executeUpdate();
             ps.close();
-            source.sendFeedback(MarkEnum.TICK.appendMessage("Badge description edited!"), false);
+            source.sendSuccess(MarkEnum.TICK.appendMessage("Badge description edited!"), false);
             reload();
         } catch (SQLException e) {
             e.printStackTrace();
-            source.sendFeedback(MarkEnum.CROSS.appendMessage("Error editing badge desc!"), false);
+            source.sendSuccess(MarkEnum.CROSS.appendMessage("Error editing badge desc!"), false);
         }
     }
 
-    public void addBadge(ServerCommandSource source, String badge, String playerName) {
+    public void addBadge(CommandSourceStack source, String badge, String playerName) {
         if (!badgeExists(badge)) {
-            source.sendFeedback(MarkEnum.CROSS.appendMessage("Badge does not exist!"), false);
+            source.sendSuccess(MarkEnum.CROSS.appendMessage("Badge does not exist!"), false);
             return;
         }
         String playerUUID = getPlayerUUID(playerName);
         if (playerUUID == null) {
-            source.sendFeedback(MarkEnum.CROSS.appendMessage("Player does not exist!"), false);
+            source.sendSuccess(MarkEnum.CROSS.appendMessage("Player does not exist!"), false);
             return;
         }
         int badgeID = getBadgeID(badge);
         if (relationExists(badgeID, playerUUID)) {
-            source.sendFeedback(MarkEnum.CROSS.appendMessage("Player already has this badge!"), false);
+            source.sendSuccess(MarkEnum.CROSS.appendMessage("Player already has this badge!"), false);
             return;
         }
         try {
@@ -437,27 +437,27 @@ public class BadgeExtension extends GenericExtension implements Extensions {
             ps.setString(2, playerUUID);
             ps.executeUpdate();
             ps.close();
-            source.sendFeedback(MarkEnum.TICK.appendMessage("Badge added!"), false);
+            source.sendSuccess(MarkEnum.TICK.appendMessage("Badge added!"), false);
             reload();
         } catch (SQLException e) {
             e.printStackTrace();
-            source.sendFeedback(MarkEnum.CROSS.appendMessage("Error adding badge!"), false);
+            source.sendSuccess(MarkEnum.CROSS.appendMessage("Error adding badge!"), false);
         }
     }
 
-    public void deleteBadge(ServerCommandSource source, String badge, String playerName) {
+    public void deleteBadge(CommandSourceStack source, String badge, String playerName) {
         String playerUUID = getPlayerUUID(playerName);
         if (playerUUID == null) {
-            source.sendFeedback(MarkEnum.CROSS.appendMessage("Player does not exist!"), false);
+            source.sendSuccess(MarkEnum.CROSS.appendMessage("Player does not exist!"), false);
             return;
         }
         if (!badgeExists(badge)) {
-            source.sendFeedback(MarkEnum.CROSS.appendMessage("Badge does not exist!"), false);
+            source.sendSuccess(MarkEnum.CROSS.appendMessage("Badge does not exist!"), false);
             return;
         }
         int badgeID = getBadgeID(badge);
         if (!relationExists(badgeID, playerUUID)) {
-            source.sendFeedback(MarkEnum.CROSS.appendMessage("Player does not have this badge!"), false);
+            source.sendSuccess(MarkEnum.CROSS.appendMessage("Player does not have this badge!"), false);
             return;
         }
         try {
@@ -467,11 +467,11 @@ public class BadgeExtension extends GenericExtension implements Extensions {
             ps.setString(2, playerUUID);
             ps.executeUpdate();
             ps.close();
-            source.sendFeedback(MarkEnum.TICK.appendMessage("Badge deleted!"), false);
+            source.sendSuccess(MarkEnum.TICK.appendMessage("Badge deleted!"), false);
             reload();
         } catch (SQLException e) {
             e.printStackTrace();
-            source.sendFeedback(MarkEnum.CROSS.appendMessage("Error deleting badge!"), false);
+            source.sendSuccess(MarkEnum.CROSS.appendMessage("Error deleting badge!"), false);
         }
     }
 

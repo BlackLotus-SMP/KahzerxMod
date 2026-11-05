@@ -4,14 +4,13 @@ import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.particle.DustParticleEffect;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.Vec3d;
-
 import java.awt.*;
 import java.util.HashMap;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.phys.Vec3;
 
 public class TotopoExtension extends GenericExtension implements Extensions {
     public TotopoExtension(HashMap<String, String> fileSettings) {
@@ -19,7 +18,7 @@ public class TotopoExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onRegisterCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public void onRegisterCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
         new TotopoCommand().register(dispatcher, this);
     }
 
@@ -28,11 +27,11 @@ public class TotopoExtension extends GenericExtension implements Extensions {
         return this.getSettings();
     }
 
-    public void totopoShape(ServerPlayerEntity player, ServerWorld world, double pX, double pY, double pZ) {
+    public void totopoShape(ServerPlayer player, ServerLevel world, double pX, double pY, double pZ) {
         int abovePlayer = 7;
         float rows = 6;
         pY += abovePlayer;
-        float playerYaw = player.getYaw();
+        float playerYaw = player.getYRot();
         double finalPY = pY;
         new Thread(() -> {
             for (int k = 0; k < 5; k++) {
@@ -74,11 +73,12 @@ public class TotopoExtension extends GenericExtension implements Extensions {
         }).start();
     }
 
-    private void spawnDustParticle(ServerWorld world, double x, double y, double z) {
-        world.spawnParticles(
-                new DustParticleEffect(
-                        Vec3d.unpackRgb(new Color(255, 220, 0).getRGB()).toVector3f(), 1.0F
+    private void spawnDustParticle(ServerLevel world, double x, double y, double z) {
+        // Se llama desde un hilo propio: el envío se hace en el hilo del servidor.
+        world.getServer().execute(() -> world.sendParticles(
+                new DustParticleOptions(
+                        new Color(255, 220, 0).getRGB() & 0xFFFFFF, 1.0F
                 ), x, y, z, 50, 0, 0, 0, 1
-        );
+        ));
     }
 }

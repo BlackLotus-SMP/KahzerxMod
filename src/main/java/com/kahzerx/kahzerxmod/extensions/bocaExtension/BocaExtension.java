@@ -4,9 +4,8 @@ import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.server.command.ServerCommandSource;
-
 import java.util.HashMap;
+import net.minecraft.commands.CommandSourceStack;
 
 public class BocaExtension extends GenericExtension implements Extensions {
     public BocaExtension(HashMap<String, String> fileSettings) {
@@ -14,7 +13,7 @@ public class BocaExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onRegisterCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public void onRegisterCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
         new BocaCommand().register(dispatcher, this);
         new BoquitaCommand().register(dispatcher, this);
     }

@@ -17,7 +17,7 @@ public class ServerEventsMixin {
         KahzerxServer.onCreateDatabase();
     }
 
-    @Inject(method = "runServer", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/server/MinecraftServer;setupServer()Z"))
+    @Inject(method = "runServer", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/server/MinecraftServer;initServer()Z"))
     private void onStarted(CallbackInfo ci) {
         KahzerxServer.onServerStarted((MinecraftServer) (Object) this);
     }
@@ -27,13 +27,14 @@ public class ServerEventsMixin {
         KahzerxServer.onStopServer();
     }
 
-    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;saveAll(ZZZ)Z"))
+    // En 26.x el autosave está en MinecraftServer#autoSave (llamado desde tickServer).
+    @Inject(method = "autoSave", at = @At("HEAD"))
     private void onSave(CallbackInfo ci) {
         KahzerxServer.onAutoSave();
         KahzerxServer.onAutoSave((MinecraftServer) (Object) this);
     }
 
-    @Inject(method = "tick", at = @At("HEAD"))
+    @Inject(method = "tickServer", at = @At("HEAD"))
     private void onTick(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
         KahzerxServer.onTick((MinecraftServer) (Object) this);
     }

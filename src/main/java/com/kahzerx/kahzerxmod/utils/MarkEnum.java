@@ -1,35 +1,34 @@
 package com.kahzerx.kahzerxmod.utils;
 
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-
 import java.util.function.Supplier;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 public enum MarkEnum {
-    TICK("✔", Formatting.GREEN),
-    CROSS("✘", Formatting.DARK_RED),
-    INFO("ⓘ", Formatting.GOLD),
-    WARNING("⚠", Formatting.GOLD),
-    RIP("☠", Formatting.DARK_RED),
-    SUN("☀", Formatting.GOLD),
-    QUESTION("?", Formatting.YELLOW),
-    OTAKU_COIN("\uD83D\uDD25", Formatting.RED),
-    SLEEP("zZz", Formatting.BLUE),
-    DIAMOND_LIKE("✧", Formatting.AQUA),
-    NETHERITE_LIKE("✦", Formatting.GRAY),
-    DOT("•", Formatting.WHITE);
+    TICK("✔", ChatFormatting.GREEN),
+    CROSS("✘", ChatFormatting.DARK_RED),
+    INFO("ⓘ", ChatFormatting.GOLD),
+    WARNING("⚠", ChatFormatting.GOLD),
+    RIP("☠", ChatFormatting.DARK_RED),
+    SUN("☀", ChatFormatting.GOLD),
+    QUESTION("?", ChatFormatting.YELLOW),
+    OTAKU_COIN("\uD83D\uDD25", ChatFormatting.RED),
+    SLEEP("zZz", ChatFormatting.BLUE),
+    DIAMOND_LIKE("✧", ChatFormatting.AQUA),
+    NETHERITE_LIKE("✦", ChatFormatting.GRAY),
+    DOT("•", ChatFormatting.WHITE);
 
     private final String identifier;
-    private final Formatting formatting;
+    private final ChatFormatting formatting;
 
-    MarkEnum(String identifier, Formatting formatting) {
+    MarkEnum(String identifier, ChatFormatting formatting) {
         this.identifier = identifier;
         this.formatting = formatting;
     }
 
-    public Formatting getFormatting() {
+    public ChatFormatting getFormatting() {
         return formatting;
     }
 
@@ -37,51 +36,51 @@ public enum MarkEnum {
         return identifier;
     }
 
-    public MutableText getFormattedIdentifier() {
-        return Text.literal(identifier).styled(style -> style.withColor(formatting).withBold(false).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, identifier)));
+    public MutableComponent getFormattedIdentifier() {
+        return Component.literal(identifier).withStyle(style -> style.withColor(formatting).withBold(false).withClickEvent(new ClickEvent.CopyToClipboard(identifier)));
     }
 
-    public MutableText getFormattedIdentifierBold() {
-        return Text.literal(identifier).styled(style -> style.withColor(formatting).withBold(true).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, identifier)));
+    public MutableComponent getFormattedIdentifierBold() {
+        return Component.literal(identifier).withStyle(style -> style.withColor(formatting).withBold(true).withClickEvent(new ClickEvent.CopyToClipboard(identifier)));
     }
 
-    public Supplier<Text> appendMessage(String message, Formatting color) {
-        return () -> getFormattedIdentifier().append(Text.literal(" " + message).styled(style -> style.withColor(color)));
+    public Supplier<Component> appendMessage(String message, ChatFormatting color) {
+        return () -> getFormattedIdentifier().append(Component.literal(" " + message).withStyle(style -> style.withColor(color)));
     }
 
-    public Supplier<Text> appendMessage(String message) {
-        return appendMessage(message, Formatting.WHITE);
+    public Supplier<Component> appendMessage(String message) {
+        return appendMessage(message, ChatFormatting.WHITE);
     }
 
-    public MutableText appendMsg(String message, Formatting color) {
-        return getFormattedIdentifier().append(Text.literal(" " + message).styled(style -> style.withColor(color)));
+    public MutableComponent appendMsg(String message, ChatFormatting color) {
+        return getFormattedIdentifier().append(Component.literal(" " + message).withStyle(style -> style.withColor(color)));
     }
 
-    public MutableText appendMsg(String message) {
-        return appendMsg(message, Formatting.WHITE);
+    public MutableComponent appendMsg(String message) {
+        return appendMsg(message, ChatFormatting.WHITE);
     }
 
-    public MutableText appendText(MutableText t, Formatting color) {
-        return getFormattedIdentifier().append(Text.literal(" ").append(t.styled(style -> style.withColor(color))));
+    public MutableComponent appendText(MutableComponent t, ChatFormatting color) {
+        return getFormattedIdentifier().append(Component.literal(" ").append(t.withStyle(style -> style.withColor(color))));
     }
 
-    public MutableText appendText(MutableText t) {
-        return appendText(t, Formatting.WHITE);
+    public MutableComponent appendText(MutableComponent t) {
+        return appendText(t, ChatFormatting.WHITE);
     }
 
-    public MutableText boldAppendMessage(String message, Formatting color) {
-        return getFormattedIdentifierBold().append(Text.literal(" " + message).styled(style -> style.withColor(color).withBold(false)));
+    public MutableComponent boldAppendMessage(String message, ChatFormatting color) {
+        return getFormattedIdentifierBold().append(Component.literal(" " + message).withStyle(style -> style.withColor(color).withBold(false)));
     }
 
-    public MutableText appendSuffix(String message, Formatting color) {
-        return Text.literal(message + " ").styled(style -> style.withColor(color).withBold(false)).append(getFormattedIdentifier());
+    public MutableComponent appendSuffix(String message, ChatFormatting color) {
+        return Component.literal(message + " ").withStyle(style -> style.withColor(color).withBold(false)).append(getFormattedIdentifier());
     }
 
-    public MutableText appendSuffix(String message) {
-        return appendSuffix(message, Formatting.WHITE);
+    public MutableComponent appendSuffix(String message) {
+        return appendSuffix(message, ChatFormatting.WHITE);
     }
 
-    public MutableText boldAppendMessage(String message) {
-        return boldAppendMessage(message, Formatting.WHITE);
+    public MutableComponent boldAppendMessage(String message) {
+        return boldAppendMessage(message, ChatFormatting.WHITE);
     }
 }

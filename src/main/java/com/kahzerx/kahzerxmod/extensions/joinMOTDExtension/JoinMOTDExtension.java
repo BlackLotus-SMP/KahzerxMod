@@ -6,16 +6,15 @@ import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.kahzerx.kahzerxmod.extensions.permsExtension.PermsExtension;
 import com.kahzerx.kahzerxmod.utils.MarkEnum;
 import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.level.ServerPlayer;
 
 public class JoinMOTDExtension extends GenericExtension implements Extensions {
     public PermsExtension permsExtension;
@@ -31,24 +30,24 @@ public class JoinMOTDExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onRegisterCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public void onRegisterCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
         new JoinMOTDCommand().register(dispatcher, this);
     }
 
-    public void updateMessage(ServerCommandSource source, String message) {
+    public void updateMessage(CommandSourceStack source, String message) {
         this.extensionSettings().setMessage(message);
-        source.sendFeedback(MarkEnum.TICK.appendMessage("New join message configured!"), false);
-        source.sendFeedback(() -> getFormatted(message), false);
+        source.sendSuccess(MarkEnum.TICK.appendMessage("New join message configured!"), false);
+        source.sendSuccess(() -> getFormatted(message), false);
     }
 
     @Override
-    public void onPlayerConnected(ServerPlayerEntity player) {
+    public void onPlayerConnected(ServerPlayer player) {
         if (this.extensionSettings().isEnabled() && !this.extensionSettings().getMessage().equals("")) {
-            player.sendMessage(getFormatted(this.extensionSettings().getMessage()));
+            player.sendSystemMessage(getFormatted(this.extensionSettings().getMessage()));
         }
     }
 
-    public MutableText getFormatted(String message) {
+    public MutableComponent getFormatted(String message) {
         // /joinMOTD set awdawd [%1awdawd1]{click=/say a} \n[awdawd test]{display=test} a [%dawdawd1]{display=test2,click=/say a} a
         message = message.replace('%', '§');
         message = message.replace("\\n", "\n");
@@ -87,7 +86,7 @@ public class JoinMOTDExtension extends GenericExtension implements Extensions {
             }
         }
 
-        MutableText text = Text.literal("");
+        MutableComponent text = Component.literal("");
         int actualStartPos = 0;
         if (correctStyled.size() == 0) {
             text.append(message);
@@ -98,7 +97,7 @@ public class JoinMOTDExtension extends GenericExtension implements Extensions {
                 String styleFormat = message.substring(correctStyles.get(i).starts(), correctStyles.get(i).ends() + 1);
                 text.append(format(custom, styleFormat));
             } else {
-                text.append(Text.literal(message.substring(actualStartPos, correctStyled.get(i).starts())));
+                text.append(Component.literal(message.substring(actualStartPos, correctStyled.get(i).starts())));
                 String custom = message.substring(correctStyled.get(i).starts() + 1, correctStyled.get(i).ends());
                 String styleFormat = message.substring(correctStyles.get(i).starts(), correctStyles.get(i).ends() + 1);
                 text.append(format(custom, styleFormat));
@@ -111,8 +110,8 @@ public class JoinMOTDExtension extends GenericExtension implements Extensions {
         return text;
     }
 
-    public MutableText format(String text, String formats) {
-        MutableText msg = Text.literal(text);
+    public MutableComponent format(String text, String formats) {
+        MutableComponent msg = Component.literal(text);
         String[] configs = formats.substring(1, formats.length() - 1).split(",");
         for (String config : configs) {
             config = config.strip();
@@ -123,11 +122,11 @@ public class JoinMOTDExtension extends GenericExtension implements Extensions {
                 }
                 if (kv[0].strip().equals("display")) {
                     String hoverText = kv[1].strip();
-                    msg.styled(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(hoverText))));
+                    msg.withStyle(style -> style.withHoverEvent(new HoverEvent.ShowText(Component.literal(hoverText))));
                 }
                 if (kv[0].strip().equals("click")) {
                     String click = kv[1].strip();
-                    msg.styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, click)));
+                    msg.withStyle(style -> style.withClickEvent(new ClickEvent.RunCommand(click)));
                 }
             }
         }
