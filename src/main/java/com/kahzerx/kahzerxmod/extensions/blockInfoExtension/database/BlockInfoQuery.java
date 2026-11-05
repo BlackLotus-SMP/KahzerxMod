@@ -3,15 +3,14 @@ package com.kahzerx.kahzerxmod.extensions.blockInfoExtension.database;
 import com.kahzerx.kahzerxmod.extensions.blockInfoExtension.helpers.BlockActionLog;
 import com.kahzerx.kahzerxmod.extensions.blockInfoExtension.utils.BlockInfoUtils;
 import com.kahzerx.kahzerxmod.utils.DimUtils;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 public record BlockInfoQuery(Connection connection) {
     public void onCreateDatabase() {
@@ -73,8 +72,8 @@ public record BlockInfoQuery(Connection connection) {
         }
     }
 
-    public List<MutableText> getBlockInfo(int x, int y, int z, int dim, int page) {
-        List<MutableText> msg = new ArrayList<>();
+    public List<MutableComponent> getBlockInfo(int x, int y, int z, int dim, int page) {
+        List<MutableComponent> msg = new ArrayList<>();
         try {
             String q = "SELECT amount, action, date, playerName, block FROM `action_logger` " +
                     "WHERE posX = ? AND posY = ? AND posZ = ? AND dim = ? ORDER BY id DESC LIMIT 10 OFFSET ?;";
@@ -87,19 +86,19 @@ public record BlockInfoQuery(Connection connection) {
             ResultSet rs = ps.executeQuery();
             int i = 0;
             while (rs.next() && i <= 10) {
-                MutableText line = BlockInfoUtils.buildLine(rs);
+                MutableComponent line = BlockInfoUtils.buildLine(rs);
                 msg.add(line);
                 i++;
             }
             if (msg.isEmpty()) {
-                msg.add(Text.literal("No logs :("));
+                msg.add(Component.literal("No logs :("));
             }
             rs.close();
             ps.close();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
             msg.clear();
-            msg.add(Text.literal("Error."));
+            msg.add(Component.literal("Error."));
         }
         return msg;
     }
@@ -124,41 +123,41 @@ public record BlockInfoQuery(Connection connection) {
         return lines;
     }
 
-    public void getInfo(ServerCommandSource source, BlockPos pos, int page) {
+    public void getInfo(CommandSourceStack source, BlockPos pos, int page) {
         int x = pos.getX();
         int y = pos.getY();
         int z = pos.getZ();
 
-        List<MutableText> msg = getBlockInfo(x, y, z, DimUtils.getWorldID(DimUtils.getDim(source.getWorld())), page);
+        List<MutableComponent> msg = getBlockInfo(x, y, z, DimUtils.getWorldID(DimUtils.getDim(source.getLevel())), page);
         Collections.reverse(msg);
-        source.sendFeedback(() -> Text.literal("======BlockInfo======"), false);
-        int nLine = getLines(x, y, z, DimUtils.getWorldID(DimUtils.getDim(source.getWorld())));
+        source.sendSuccess(() -> Component.literal("======BlockInfo======"), false);
+        int nLine = getLines(x, y, z, DimUtils.getWorldID(DimUtils.getDim(source.getLevel())));
 
-        for (MutableText line : msg) {
-            source.sendFeedback(() -> line, false);
+        for (MutableComponent line : msg) {
+            source.sendSuccess(() -> line, false);
         }
 
         if (page > nLine) {  // No pages.
             return;
         } else if (page == nLine && page == 1) {  // There is only 1 page.
-            source.sendFeedback(() -> Text.literal(String.format("%d/%d.", page, nLine)), false);
+            source.sendSuccess(() -> Component.literal(String.format("%d/%d.", page, nLine)), false);
         } else if (page == 1) {  // First page but there are more
-            MutableText pages = BlockInfoUtils.getPages(page, nLine);
-            MutableText next = BlockInfoUtils.getNext(x, y, z, page);
-            source.sendFeedback(() -> Text.literal("").append(pages).append(next).append(BlockInfoUtils.getHelp(x, y, z)), false);
+            MutableComponent pages = BlockInfoUtils.getPages(page, nLine);
+            MutableComponent next = BlockInfoUtils.getNext(x, y, z, page);
+            source.sendSuccess(() -> Component.literal("").append(pages).append(next).append(BlockInfoUtils.getHelp(x, y, z)), false);
         } else if (page == nLine) {  // The last page.
-            MutableText prev = BlockInfoUtils.getPrev(x, y, z, page);
-            MutableText pages = BlockInfoUtils.getPages(page, nLine);
-            source.sendFeedback(() -> Text.literal("").append(prev).append(pages).append(BlockInfoUtils.getHelp(x, y, z)), false);
+            MutableComponent prev = BlockInfoUtils.getPrev(x, y, z, page);
+            MutableComponent pages = BlockInfoUtils.getPages(page, nLine);
+            source.sendSuccess(() -> Component.literal("").append(prev).append(pages).append(BlockInfoUtils.getHelp(x, y, z)), false);
         } else {  // Have pages before and after the one you are in.
-            MutableText prev = BlockInfoUtils.getPrev(x, y, z, page);
-            MutableText pages = BlockInfoUtils.getPages(page, nLine);
-            MutableText next = BlockInfoUtils.getNext(x, y, z, page);
-            source.sendFeedback(() -> Text.literal("").append(prev).append(pages).append(next).append(BlockInfoUtils.getHelp(x, y, z)), false);
+            MutableComponent prev = BlockInfoUtils.getPrev(x, y, z, page);
+            MutableComponent pages = BlockInfoUtils.getPages(page, nLine);
+            MutableComponent next = BlockInfoUtils.getNext(x, y, z, page);
+            source.sendSuccess(() -> Component.literal("").append(prev).append(pages).append(next).append(BlockInfoUtils.getHelp(x, y, z)), false);
         }
     }
 
-    public int threadedGetInfo(ServerCommandSource source, BlockPos pos, int page) {
+    public int threadedGetInfo(CommandSourceStack source, BlockPos pos, int page) {
         new Thread(() -> getInfo(source, pos, page)).start();
         return 1;
     }

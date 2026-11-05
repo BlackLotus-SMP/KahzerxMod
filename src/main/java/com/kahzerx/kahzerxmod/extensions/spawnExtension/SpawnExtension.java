@@ -6,12 +6,11 @@ import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.kahzerx.kahzerxmod.utils.DimUtils;
 import com.kahzerx.kahzerxmod.utils.MarkEnum;
 import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
-
 import java.sql.*;
 import java.util.HashMap;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 
 public class SpawnExtension extends GenericExtension implements Extensions {
     private Connection conn;
@@ -20,7 +19,7 @@ public class SpawnExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onRegisterCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public void onRegisterCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
         new SpawnCommand().register(dispatcher, this);
     }
 
@@ -81,19 +80,19 @@ public class SpawnExtension extends GenericExtension implements Extensions {
         return new SpawnPos(x, y, z, dim);
     }
 
-    public int updateSpawnPos(BlockPos pos, ServerCommandSource source) {
+    public int updateSpawnPos(BlockPos pos, CommandSourceStack source) {
         try {
-            ServerPlayerEntity player = source.getPlayer();
+            ServerPlayer player = source.getPlayer();
             deleteSpawn();
             String updateSpawnPos = "INSERT INTO spawn(x, y, z, dim) VALUES (?, ?, ?, ?);";
             PreparedStatement ps = conn.prepareStatement(updateSpawnPos);
             ps.setDouble(1, pos.getX());
             ps.setDouble(2, pos.getY());
             ps.setDouble(3, pos.getZ());
-            ps.setInt(4, DimUtils.getWorldID(DimUtils.getDim(player.getWorld())));
+            ps.setInt(4, DimUtils.getWorldID(DimUtils.getDim(player.level())));
             ps.executeUpdate();
             ps.close();
-            source.sendFeedback(MarkEnum.TICK.appendMessage(String.format("Spawn @: %s %s", DimUtils.getDimensionWithColor(player.getWorld()), DimUtils.formatCoords(pos.getX(), pos.getY(), pos.getZ()))), false);
+            source.sendSuccess(MarkEnum.TICK.appendMessage(String.format("Spawn @: %s %s", DimUtils.getDimensionWithColor(player.level()), DimUtils.formatCoords(pos.getX(), pos.getY(), pos.getZ()))), false);
         } catch (SQLException e) {
             e.printStackTrace();
         }

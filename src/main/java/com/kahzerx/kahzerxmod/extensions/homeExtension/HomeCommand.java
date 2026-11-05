@@ -1,12 +1,12 @@
 package com.kahzerx.kahzerxmod.extensions.homeExtension;
 
 import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSourceStack;
 
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.literal;
 
 public class HomeCommand {
-    public void register(CommandDispatcher<ServerCommandSource> dispatcher, HomeExtension home) {
+    public void register(CommandDispatcher<CommandSourceStack> dispatcher, HomeExtension home) {
         dispatcher.register(literal("home").
                 requires(server -> home.extensionSettings().isEnabled()).
                 executes(context -> home.tpHome(context.getSource())));

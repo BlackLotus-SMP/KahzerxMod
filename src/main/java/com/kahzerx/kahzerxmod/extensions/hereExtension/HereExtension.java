@@ -6,17 +6,16 @@ import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.kahzerx.kahzerxmod.utils.DimUtils;
 import com.kahzerx.kahzerxmod.utils.PlayerUtils;
 import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.block.enums.Instrument;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.world.World;
-
 import java.util.HashMap;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 
 public class HereExtension extends GenericExtension implements Extensions {
     public HereExtension(HashMap<String, String> fileSettings) {
@@ -24,7 +23,7 @@ public class HereExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onRegisterCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public void onRegisterCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
         new HereCommand().register(dispatcher, this);
     }
 
@@ -33,58 +32,58 @@ public class HereExtension extends GenericExtension implements Extensions {
         return this.getSettings();
     }
 
-    public int sendLocation(ServerCommandSource src, ServerPlayerEntity toPlayer) {
-        ServerPlayerEntity player = src.getPlayer();
+    public int sendLocation(CommandSourceStack src, ServerPlayer toPlayer) {
+        ServerPlayer player = src.getPlayer();
         if (player == null) {
             return 1;
         }
         double x = player.getX();
         double y = player.getY();
         double z = player.getZ();
-        MutableText msg;
-        if (player.getWorld().getRegistryKey().getValue().equals(World.OVERWORLD.getValue())) {
-            msg = Text.literal(String.format(
+        MutableComponent msg;
+        if (player.level().dimension().identifier().equals(Level.OVERWORLD.identifier())) {
+            msg = Component.literal(String.format(
                     "%s %s %s -> %s %s",
                     PlayerUtils.getPlayerWithColor(player),
-                    DimUtils.getDimensionWithColor(player.getWorld()),
+                    DimUtils.getDimensionWithColor(player.level()),
                     DimUtils.formatCoords(x, y, z),
-                    DimUtils.getDimensionWithColor(World.NETHER.getValue()),
+                    DimUtils.getDimensionWithColor(Level.NETHER.identifier()),
                     DimUtils.formatCoords(x / 8, y, z / 8)
             ));
             if (toPlayer != null) {
-                toPlayer.sendMessage(msg, false);
+                toPlayer.sendSystemMessage(msg);
             } else {
-                src.getServer().getPlayerManager().broadcast(msg, false);
+                src.getServer().getPlayerList().broadcastSystemMessage(msg, false);
             }
-        } else if (player.getWorld().getRegistryKey().getValue().equals(World.NETHER.getValue())) {
-            msg = Text.literal(String.format(
+        } else if (player.level().dimension().identifier().equals(Level.NETHER.identifier())) {
+            msg = Component.literal(String.format(
                     "%s %s %s -> %s %s",
                     PlayerUtils.getPlayerWithColor(player),
-                    DimUtils.getDimensionWithColor(player.getWorld()),
+                    DimUtils.getDimensionWithColor(player.level()),
                     DimUtils.formatCoords(x, y, z),
-                    DimUtils.getDimensionWithColor(World.OVERWORLD.getValue()),
+                    DimUtils.getDimensionWithColor(Level.OVERWORLD.identifier()),
                     DimUtils.formatCoords(x *  8, y, z * 8)
             ));
             if (toPlayer != null) {
-                toPlayer.sendMessage(msg, false);
+                toPlayer.sendSystemMessage(msg);
             } else {
-                src.getServer().getPlayerManager().broadcast(msg, false);
+                src.getServer().getPlayerList().broadcastSystemMessage(msg, false);
             }
-        } else if (player.getWorld().getRegistryKey().getValue().equals(World.END.getValue())) {
-            msg = Text.literal(String.format(
+        } else if (player.level().dimension().identifier().equals(Level.END.identifier())) {
+            msg = Component.literal(String.format(
                     "%s %s %s",
                     PlayerUtils.getPlayerWithColor(player),
-                    DimUtils.getDimensionWithColor(player.getWorld()),
+                    DimUtils.getDimensionWithColor(player.level()),
                     DimUtils.formatCoords(x, y, z)
             ));
             if (toPlayer != null) {
-                toPlayer.sendMessage(msg, false);
+                toPlayer.sendSystemMessage(msg);
             } else {
-                src.getServer().getPlayerManager().broadcast(msg, false);
+                src.getServer().getPlayerList().broadcastSystemMessage(msg, false);
             }
         }
-        player.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 200, 0, false, false));
-        player.getWorld().playSound(null, player.getBlockPos(), Instrument.HARP.getSound().value(), SoundCategory.RECORDS, 3.0f, (float)Math.pow(2.0, (double)(24 - 12) / 12.0));
+        player.addEffect(new MobEffectInstance(MobEffects.GLOWING, 200, 0, false, false));
+        player.level().playSound(null, player.blockPosition(), NoteBlockInstrument.HARP.getSoundEvent().value(), SoundSource.RECORDS, 3.0f, (float)Math.pow(2.0, (double)(24 - 12) / 12.0));
         return 1;
     }
 }

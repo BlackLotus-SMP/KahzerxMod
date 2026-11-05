@@ -3,12 +3,12 @@ package com.kahzerx.kahzerxmod.extensions.fckPrivacyExtension;
 import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
 
 public class FckPrivacyExtension extends GenericExtension implements Extensions {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -18,7 +18,7 @@ public class FckPrivacyExtension extends GenericExtension implements Extensions 
     }
 
     @Override
-    public void onCommand(ServerPlayerEntity player, String command) {
+    public void onCommand(ServerPlayer player, String command) {
         if (this.getSettings().isEnabled()) {
             LOGGER.info(String.format("<%s> /%s", player.getName().getString(), command));
         }
@@ -30,8 +30,8 @@ public class FckPrivacyExtension extends GenericExtension implements Extensions 
     }
 
     @Override
-    public void onExtensionEnabled(ServerCommandSource source) { }
+    public void onExtensionEnabled(CommandSourceStack source) { }
 
     @Override
-    public void onExtensionDisabled(ServerCommandSource source) { }
+    public void onExtensionDisabled(CommandSourceStack source) { }
 }

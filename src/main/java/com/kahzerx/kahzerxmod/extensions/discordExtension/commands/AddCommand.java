@@ -1,5 +1,6 @@
 package com.kahzerx.kahzerxmod.extensions.discordExtension.commands;
 
+import net.minecraft.server.players.NameAndId;
 import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordPermission;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordExtension.DiscordExtension;
@@ -13,9 +14,8 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.Whitelist;
-import net.minecraft.server.WhitelistEntry;
-
+import net.minecraft.server.players.UserWhiteList;
+import net.minecraft.server.players.UserWhiteListEntry;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +53,7 @@ public class AddCommand extends GenericCommand {
             this.sendHelpCommand(serverPrefix, event.getChannel(), feedback);
             return;
         }
-        Optional<GameProfile> profile = server.getUserCache().findByName(playerName);
+        Optional<NameAndId> profile = server.services().nameToIdCache().get(playerName);
         if (profile.isEmpty()) {
             EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**Not premium**"}, serverPrefix, true, Color.RED, true, feedback);
             if (embed != null) {
@@ -68,23 +68,23 @@ public class AddCommand extends GenericCommand {
             }
             return;
         }
-        Whitelist whitelist = server.getPlayerManager().getWhitelist();
-        if (whitelist.isAllowed(profile.get())) {
+        UserWhiteList whitelist = server.getPlayerList().getWhiteList();
+        if (whitelist.isWhiteListed(profile.get())) {
             EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**" + playerName + " already whitelisted**"}, serverPrefix, true, Color.YELLOW, true, feedback);
             if (embed != null) {
                 event.getChannel().sendMessageEmbeds(embed.build()).queue();
             }
             return;
         }
-        WhitelistEntry whitelistEntry = new WhitelistEntry(profile.get());
-        if (discordWhitelistExtension.isPlayerBanned(profile.get().getId().toString())) {
+        UserWhiteListEntry whitelistEntry = new UserWhiteListEntry(profile.get());
+        if (discordWhitelistExtension.isPlayerBanned(profile.get().id().toString())) {
             EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**Looks like that player is banned**"}, serverPrefix, true, Color.RED, true, feedback);
             if (embed != null) {
                 event.getChannel().sendMessageEmbeds(embed.build()).queue();
             }
             return;
         }
-        discordWhitelistExtension.addPlayer(id, profile.get().getId().toString(), profile.get().getName());
+        discordWhitelistExtension.addPlayer(id, profile.get().id().toString(), profile.get().name());
         whitelist.add(whitelistEntry);
 
         Guild guild = event.getGuild();
@@ -98,7 +98,7 @@ public class AddCommand extends GenericCommand {
             }
         }
 
-        EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**" + profile.get().getName() + " added :D**"}, serverPrefix, true, Color.GREEN, true, feedback);
+        EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**" + profile.get().name() + " added :D**"}, serverPrefix, true, Color.GREEN, true, feedback);
         if (embed != null) {
             event.getChannel().sendMessageEmbeds(embed.build()).queue();
         }

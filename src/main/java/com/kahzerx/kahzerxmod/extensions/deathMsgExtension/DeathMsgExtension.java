@@ -5,10 +5,9 @@ import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.kahzerx.kahzerxmod.utils.DimUtils;
 import com.kahzerx.kahzerxmod.utils.MarkEnum;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-
 import java.util.HashMap;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
 
 public class DeathMsgExtension extends GenericExtension implements Extensions {
     public DeathMsgExtension(HashMap<String, String> fileSettings) {
@@ -16,9 +15,9 @@ public class DeathMsgExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onPlayerDied(ServerPlayerEntity player) {
+    public void onPlayerDied(ServerPlayer player) {
         if (this.getSettings().isEnabled()) {
-            player.sendMessage(MarkEnum.RIP.appendMsg(String.format("%s %s", DimUtils.getDimensionWithColor(player.getWorld()), DimUtils.formatCoords(player.getX(), player.getY(), player.getZ()))), false);
+            player.sendSystemMessage(MarkEnum.RIP.appendMsg(String.format("%s %s", DimUtils.getDimensionWithColor(player.level()), DimUtils.formatCoords(player.getX(), player.getY(), player.getZ()))));
         }
     }
 
@@ -28,8 +27,8 @@ public class DeathMsgExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onExtensionEnabled(ServerCommandSource source) { }
+    public void onExtensionEnabled(CommandSourceStack source) { }
 
     @Override
-    public void onExtensionDisabled(ServerCommandSource source) { }
+    public void onExtensionDisabled(CommandSourceStack source) { }
 }

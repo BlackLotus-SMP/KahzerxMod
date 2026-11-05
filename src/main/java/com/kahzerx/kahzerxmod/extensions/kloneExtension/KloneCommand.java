@@ -3,22 +3,22 @@ package com.kahzerx.kahzerxmod.extensions.kloneExtension;
 import com.kahzerx.kahzerxmod.extensions.permsExtension.PermsLevels;
 import com.kahzerx.kahzerxmod.klone.KlonePlayerEntity;
 import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
 
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.literal;
 
 public class KloneCommand {
-    public void register(CommandDispatcher<ServerCommandSource> dispatcher, KloneExtension klone) {
+    public void register(CommandDispatcher<CommandSourceStack> dispatcher, KloneExtension klone) {
         dispatcher.register(literal("klone").
                 requires(server -> {
                     if (klone.extensionSettings().isEnabled() && klone.getPermsExtension().extensionSettings().isEnabled()) {
-                        return klone.getPermsExtension().getDBPlayerPerms(server.getPlayer().getUuidAsString()).getId() >= PermsLevels.MEMBER.getId();
+                        return klone.getPermsExtension().hasLevel(server, PermsLevels.MEMBER);
                     }
                     return false;
                 }).
                 executes(context -> {
-                    ServerPlayerEntity sourcePlayer = context.getSource().getPlayer();
+                    ServerPlayer sourcePlayer = context.getSource().getPlayer();
                     KlonePlayerEntity klonePlayer = KlonePlayerEntity.createKlone(context.getSource().getServer(), sourcePlayer, klone);
                     klone.addKlone(klonePlayer);
                     return 1;
@@ -26,12 +26,12 @@ public class KloneCommand {
         dispatcher.register(literal("clown").
                 requires(server -> {
                     if (klone.extensionSettings().isEnabled() && klone.getPermsExtension().extensionSettings().isEnabled()) {
-                        return klone.getPermsExtension().getDBPlayerPerms(server.getPlayer().getUuidAsString()).getId() >= PermsLevels.MEMBER.getId();
+                        return klone.getPermsExtension().hasLevel(server, PermsLevels.MEMBER);
                     }
                     return false;
                 }).
                 executes(context -> {
-                    ServerPlayerEntity sourcePlayer = context.getSource().getPlayer();
+                    ServerPlayer sourcePlayer = context.getSource().getPlayer();
                     KlonePlayerEntity.createKlone(context.getSource().getServer(), sourcePlayer, klone);
                     return 1;
                 }));

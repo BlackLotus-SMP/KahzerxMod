@@ -1,5 +1,6 @@
 package com.kahzerx.kahzerxmod.extensions.homeExtension;
 
+import java.util.Set;
 import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
@@ -7,15 +8,14 @@ import com.kahzerx.kahzerxmod.utils.DimUtils;
 import com.kahzerx.kahzerxmod.utils.MarkEnum;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-
+import net.minecraft.server.level.ServerPlayer;
 import java.sql.*;
 import java.util.HashMap;
 
@@ -53,28 +53,28 @@ public class HomeExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onPlayerJoined(ServerPlayerEntity player) {
-        String playerUUID = player.getUuidAsString();
+    public void onPlayerJoined(ServerPlayer player) {
+        String playerUUID = player.getStringUUID();
         playerHomes.remove(playerUUID);
         playerHomes.put(playerUUID, getHomePos(player));
     }
 
     @Override
-    public void onPlayerLeft(ServerPlayerEntity player) {
-        String playerUUID = player.getUuidAsString();
+    public void onPlayerLeft(ServerPlayer player) {
+        String playerUUID = player.getStringUUID();
         playerHomes.remove(playerUUID);
     }
 
     @Override
-    public void onExtensionDisabled(ServerCommandSource source) {
+    public void onExtensionDisabled(CommandSourceStack source) {
         Extensions.super.onExtensionDisabled(source);
         playerHomes.clear();
     }
 
     @Override
-    public void onExtensionEnabled(ServerCommandSource source) {
+    public void onExtensionEnabled(CommandSourceStack source) {
         Extensions.super.onExtensionEnabled(source);
-        for (ServerPlayerEntity player : this.server.getPlayerManager().getPlayerList()) {
+        for (ServerPlayer player : this.server.getPlayerList().getPlayers()) {
             this.onPlayerJoined(player);
         }
     }
@@ -85,19 +85,19 @@ public class HomeExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onRegisterCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public void onRegisterCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
         new HomeCommand().register(dispatcher, this);
         new SetHomeCommand().register(dispatcher, this);
     }
 
-    private void updateHomePos(ServerPlayerEntity player, HomePos pos) {
+    private void updateHomePos(ServerPlayer player, HomePos pos) {
         try {
             String q = "INSERT INTO `home` (uuid, homeX, homeY, homeZ, homeDim)" +
                     "VALUES (?, ?, ?, ?, ?)" +
                     "ON CONFLICT (uuid)" +
                     "DO UPDATE SET homeX = ?, homeY = ?, homeZ = ?, homeDim = ?;";
             PreparedStatement ps = conn.prepareStatement(q);
-            ps.setString(1, player.getUuidAsString());
+            ps.setString(1, player.getStringUUID());
             ps.setDouble(2, pos.getX());
             ps.setDouble(3, pos.getY());
             ps.setDouble(4, pos.getZ());
@@ -113,11 +113,11 @@ public class HomeExtension extends GenericExtension implements Extensions {
         }
     }
 
-    private HomePos getHomePos(ServerPlayerEntity player) {
+    private HomePos getHomePos(ServerPlayer player) {
         try {
             String query = "SELECT homeX, homeY, homeZ, homeDim FROM home WHERE uuid = ?";
             PreparedStatement ps = conn.prepareStatement(query);
-            ps.setString(1, player.getUuidAsString());
+            ps.setString(1, player.getStringUUID());
             ResultSet rs = ps.executeQuery();
             double x = rs.getDouble("homeX");
             double y = rs.getDouble("homeY");
@@ -131,40 +131,42 @@ public class HomeExtension extends GenericExtension implements Extensions {
         }
     }
 
-    public int tpHome(ServerCommandSource src) throws CommandSyntaxException {
-        ServerPlayerEntity player = src.getPlayer();
+    public int tpHome(CommandSourceStack src) throws CommandSyntaxException {
+        ServerPlayer player = src.getPlayer();
         if (player == null) {
             return 1;
         }
-        String playerUUID = player.getUuidAsString();
+        String playerUUID = player.getStringUUID();
         HomePos homePos = playerHomes.get(playerUUID);
         if (homePos.isValid()) {
-            player.teleport(
+            player.teleportTo(
                     DimUtils.getWorld(homePos.getDim(), player),
                     homePos.getX(),
                     homePos.getY(),
                     homePos.getZ(),
-                    player.getYaw(),
-                    player.getPitch()
+                    Set.of(),
+                    player.getYRot(),
+                    player.getXRot(),
+                    true
             );
-            player.addExperience(0);  // xp resets when you tp from other dimension and needs to update smh, mojang pls.
+            player.giveExperiencePoints(0);  // xp resets when you tp from other dimension and needs to update smh, mojang pls.
         } else {
-            player.sendMessage(MarkEnum.INFO.appendText(Text.literal("You don't have a home yet, use ").styled(style -> style.withColor(Formatting.WHITE)).append(getClickableSetHomeCommand())), false);
+            player.sendSystemMessage(MarkEnum.INFO.appendText(Component.literal("You don't have a home yet, use ").withStyle(style -> style.withColor(ChatFormatting.WHITE)).append(getClickableSetHomeCommand())));
         }
         return 1;
     }
 
-    public int saveHome(ServerCommandSource src) throws CommandSyntaxException {
-        ServerPlayerEntity player = src.getPlayer();
+    public int saveHome(CommandSourceStack src) throws CommandSyntaxException {
+        ServerPlayer player = src.getPlayer();
         if (player == null) {
             return 1;
         }
-        HomePos newHomePos = new HomePos(player.getX(), player.getY(), player.getZ(), DimUtils.getDim(player.getWorld()));
-        String playerUUID = player.getUuidAsString();
+        HomePos newHomePos = new HomePos(player.getX(), player.getY(), player.getZ(), DimUtils.getDim(player.level()));
+        String playerUUID = player.getStringUUID();
         playerHomes.put(playerUUID, newHomePos);
-        src.sendFeedback(() -> Text.literal(String.format(
+        src.sendSuccess(() -> Component.literal(String.format(
                 "Home @ %s %s",
-                DimUtils.getDimensionWithColor(player.getWorld()),
+                DimUtils.getDimensionWithColor(player.level()),
                 DimUtils.formatCoords(player.getX(), player.getY(), player.getZ())
             )),
             false
@@ -173,9 +175,9 @@ public class HomeExtension extends GenericExtension implements Extensions {
         return 1;
     }
 
-    public static MutableText getClickableSetHomeCommand() {
-        return Text.literal("/setHome").styled((style -> style.withColor(Formatting.DARK_GREEN).
-                withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/setHome")).
-                withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("setHome")))));
+    public static MutableComponent getClickableSetHomeCommand() {
+        return Component.literal("/setHome").withStyle((style -> style.withColor(ChatFormatting.DARK_GREEN).
+                withClickEvent(new ClickEvent.RunCommand("/setHome")).
+                withHoverEvent(new HoverEvent.ShowText(Component.literal("setHome")))));
     }
 }

@@ -5,11 +5,8 @@ import com.kahzerx.kahzerxmod.KahzerxServer;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.server.command.SeedCommand;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-
 import java.util.HashMap;
+import net.minecraft.commands.CommandSourceStack;
 
 public class SeedExtension extends GenericExtension implements Extensions {
     public SeedExtension(HashMap<String, String> fileSettings) {
@@ -17,7 +14,7 @@ public class SeedExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onRegisterCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public void onRegisterCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
         new KSeedCommand().register(dispatcher, this);
     }
 

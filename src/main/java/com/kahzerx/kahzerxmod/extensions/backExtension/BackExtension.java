@@ -1,5 +1,6 @@
 package com.kahzerx.kahzerxmod.extensions.backExtension;
 
+import java.util.Set;
 import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
@@ -9,11 +10,10 @@ import com.kahzerx.kahzerxmod.utils.DimUtils;
 import com.kahzerx.kahzerxmod.utils.MarkEnum;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-
 import java.sql.*;
 import java.util.HashMap;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
 
 public class BackExtension extends GenericExtension implements Extensions {
     private final HashMap<String, BackPos> playerBack = new HashMap<>();
@@ -49,8 +49,8 @@ public class BackExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onPlayerJoined(ServerPlayerEntity player) {
-        String playerUUID = player.getUuidAsString();
+    public void onPlayerJoined(ServerPlayer player) {
+        String playerUUID = player.getStringUUID();
         if (this.playerBack.containsKey(playerUUID)) {
             playerBack.remove(playerUUID);
         }
@@ -58,17 +58,17 @@ public class BackExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onPlayerLeft(ServerPlayerEntity player) {
-        String playerUUID = player.getUuidAsString();
+    public void onPlayerLeft(ServerPlayer player) {
+        String playerUUID = player.getStringUUID();
         if (this.playerBack.containsKey(playerUUID)) {
             playerBack.remove(playerUUID);
         }
     }
 
     @Override
-    public void onPlayerDied(ServerPlayerEntity player) {
-        String playerUUID = player.getUuidAsString();
-        BackPos backPos = new BackPos(player.getX(), player.getY(), player.getZ(), DimUtils.getDim(player.getWorld()));
+    public void onPlayerDied(ServerPlayer player) {
+        String playerUUID = player.getStringUUID();
+        BackPos backPos = new BackPos(player.getX(), player.getY(), player.getZ(), DimUtils.getDim(player.level()));
         playerBack.put(playerUUID, backPos);
         updateDeathPos(player, backPos);
     }
@@ -79,18 +79,18 @@ public class BackExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onRegisterCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public void onRegisterCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
         new BackCommand().register(dispatcher, this);
     }
 
-    private void updateDeathPos(ServerPlayerEntity player, BackPos pos) {
+    private void updateDeathPos(ServerPlayer player, BackPos pos) {
         try {
             String q = "INSERT INTO `back` (uuid, deathX, deathY, deathZ, deathDim)" +
                     "VALUES (?, ?, ?, ?, ?)" +
                     "ON CONFLICT (uuid)" +
                     "DO UPDATE SET deathX = ?, deathY = ?, deathZ = ?, deathDim = ?;";
             PreparedStatement ps = conn.prepareStatement(q);
-            ps.setString(1, player.getUuidAsString());
+            ps.setString(1, player.getStringUUID());
             ps.setDouble(2, pos.getX());
             ps.setDouble(3, pos.getY());
             ps.setDouble(4, pos.getZ());
@@ -106,11 +106,11 @@ public class BackExtension extends GenericExtension implements Extensions {
         }
     }
 
-    private BackPos getDeathPos(ServerPlayerEntity player) {
+    private BackPos getDeathPos(ServerPlayer player) {
         try {
             String query = "SELECT deathX, deathY, deathZ, deathDim FROM back WHERE uuid = ?";
             PreparedStatement ps = conn.prepareStatement(query);
-            ps.setString(1, player.getUuidAsString());
+            ps.setString(1, player.getStringUUID());
             ResultSet rs = ps.executeQuery();
             double x = rs.getDouble("deathX");
             double y = rs.getDouble("deathY");
@@ -124,29 +124,31 @@ public class BackExtension extends GenericExtension implements Extensions {
         }
     }
 
-    public int tpBack(ServerCommandSource src) throws CommandSyntaxException {
-        ServerPlayerEntity player = src.getPlayer();
+    public int tpBack(CommandSourceStack src) throws CommandSyntaxException {
+        ServerPlayer player = src.getPlayer();
         if (player == null) {
             return 1;
         }
-        String playerUUID = player.getUuidAsString();
+        String playerUUID = player.getStringUUID();
         if (!this.playerBack.containsKey(playerUUID)) {
-            player.sendMessage(MarkEnum.CROSS.appendMsg("Error"), false);
+            player.sendSystemMessage(MarkEnum.CROSS.appendMsg("Error"));
             return 1;
         }
         BackPos backPos = playerBack.get(playerUUID);
         if (backPos.isValid()) {
-            player.teleport(
+            player.teleportTo(
                     DimUtils.getWorld(backPos.getDim(), player),
                     backPos.getX(),
                     backPos.getY(),
                     backPos.getZ(),
-                    player.getYaw(),
-                    player.getPitch()
+                    Set.of(),
+                    player.getYRot(),
+                    player.getXRot(),
+                    true
             );
-            player.addExperience(0);  // xp resets when you tp from other dimension and needs to update smh, mojang pls.
+            player.giveExperiencePoints(0);  // xp resets when you tp from other dimension and needs to update smh, mojang pls.
         } else {
-            player.sendMessage(MarkEnum.INFO.appendMsg("You haven't died yet :("), false);
+            player.sendSystemMessage(MarkEnum.INFO.appendMsg("You haven't died yet :("));
         }
         return 1;
     }

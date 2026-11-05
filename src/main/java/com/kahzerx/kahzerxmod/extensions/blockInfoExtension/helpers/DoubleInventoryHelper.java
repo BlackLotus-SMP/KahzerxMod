@@ -1,7 +1,7 @@
 package com.kahzerx.kahzerxmod.extensions.blockInfoExtension.helpers;
 
-import net.minecraft.inventory.Inventory;
+import net.minecraft.world.Container;
 
 public interface DoubleInventoryHelper {
-    Inventory getInventory(int slot);
+    Container getInventory(int slot);
 }

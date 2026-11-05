@@ -4,10 +4,9 @@ import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.kahzerx.kahzerxmod.utils.MarkEnum;
+import net.minecraft.ChatFormatting;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Formatting;
-
+import net.minecraft.server.level.ServerPlayer;
 import java.util.HashMap;
 
 public class BedTimeExtension extends GenericExtension implements Extensions {
@@ -21,18 +20,18 @@ public class BedTimeExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onPlayerSleep(ServerPlayerEntity player) {
-        MinecraftServer server = player.getServer();
+    public void onPlayerSleep(ServerPlayer player) {
+        MinecraftServer server = player.level().getServer();
         if (server != null && this.extensionSettings().isEnabled()) {
-            server.getPlayerManager().broadcast(MarkEnum.SLEEP.appendMsg(player.getName().getString() + " went to sleep", Formatting.YELLOW), false);
+            server.getPlayerList().broadcastSystemMessage(MarkEnum.SLEEP.appendMsg(player.getName().getString() + " went to sleep", ChatFormatting.YELLOW), false);
         }
     }
 
     @Override
-    public void onPlayerWakeUp(ServerPlayerEntity player) {
-        MinecraftServer server = player.getServer();
+    public void onPlayerWakeUp(ServerPlayer player) {
+        MinecraftServer server = player.level().getServer();
         if (server != null && this.extensionSettings().isEnabled()) {
-            server.getPlayerManager().broadcast(MarkEnum.SLEEP.appendMsg(player.getName().getString() + " woke up", Formatting.YELLOW), false);
+            server.getPlayerList().broadcastSystemMessage(MarkEnum.SLEEP.appendMsg(player.getName().getString() + " woke up", ChatFormatting.YELLOW), false);
         }
     }
 }

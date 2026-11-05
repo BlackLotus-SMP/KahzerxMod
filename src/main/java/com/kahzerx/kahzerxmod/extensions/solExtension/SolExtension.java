@@ -4,18 +4,20 @@ import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.entity.projectile.FireworkRocketEntity;
-import net.minecraft.item.FireworkRocketItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
+import it.unimi.dsi.fastutil.ints.IntList;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.projectile.FireworkRocketEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.FireworkExplosion;
+import net.minecraft.world.item.component.Fireworks;
+import net.minecraft.world.item.Items;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -57,155 +59,155 @@ public class SolExtension extends GenericExtension implements Extensions {
 
     static {
         SAKURA_TREE = createFirework(
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{8405535, 10247480, 16758232, 16762084, 16768754}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{16759544, 8405535, 10247480, 16758232, 16762084, 16768754, 16759544}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{8405535, 10247480, 16758232, 16762084, 16768754, 16759544}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{8405535}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{10247480, 16758232, 16762084, 16768754, 16759544, 8405535, 10247480, 16758232, 16762084, 16768754, 16759544})
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{8405535, 10247480, 16758232, 16762084, 16768754}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{16759544, 8405535, 10247480, 16758232, 16762084, 16768754, 16759544}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{8405535, 10247480, 16758232, 16762084, 16768754, 16759544}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{8405535}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{10247480, 16758232, 16762084, 16768754, 16759544, 8405535, 10247480, 16758232, 16762084, 16768754, 16759544})
         );
         ADMIN = createFirework(
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), 1, new int[]{13057598, 14373715, 13057598, 14373715}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{13057598, 14373715, 13057598, 14373715}),
-                new FireworkHelper(FireworkRocketItem.Type.STAR.getId(), 1, new int[]{16777215}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{13057598, 14373715, 13057598, 14373715}),
-                new FireworkHelper(FireworkRocketItem.Type.STAR.getId(), 1, new int[]{16777215}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{13057598, 14373715, 13057598, 14373715}),
-                new FireworkHelper(FireworkRocketItem.Type.STAR.getId(), 1, new int[]{16777215})
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), 1, new int[]{13057598, 14373715, 13057598, 14373715}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{13057598, 14373715, 13057598, 14373715}),
+                new FireworkHelper(FireworkExplosion.Shape.STAR.getId(), 1, new int[]{16777215}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{13057598, 14373715, 13057598, 14373715}),
+                new FireworkHelper(FireworkExplosion.Shape.STAR.getId(), 1, new int[]{16777215}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{13057598, 14373715, 13057598, 14373715}),
+                new FireworkHelper(FireworkExplosion.Shape.STAR.getId(), 1, new int[]{16777215})
         );
         BLANK = createFirework(
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), 1, new int[]{16777215, 16777215, 16777215, 16777215}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{16777215, 16777215, 16777215, 16777215}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{16777215, 16777215, 16777215, 16777215})
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), 1, new int[]{16777215, 16777215, 16777215, 16777215}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{16777215, 16777215, 16777215, 16777215}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{16777215, 16777215, 16777215, 16777215})
         );
         RAINY = createFirework(
-                new FireworkHelper(FireworkRocketItem.Type.SMALL_BALL.getId(), 1, 1, new int[]{6066343, 11846573, 15000794, 12829635}),
-                new FireworkHelper(FireworkRocketItem.Type.SMALL_BALL.getId(), 1, new int[]{10724260, 4543597, 6066343, 11846573, 15000794, 12829635, 10724260, 4543597}, new int[]{2714316, 2714316})
+                new FireworkHelper(FireworkExplosion.Shape.SMALL_BALL.getId(), 1, 1, new int[]{6066343, 11846573, 15000794, 12829635}),
+                new FireworkHelper(FireworkExplosion.Shape.SMALL_BALL.getId(), 1, new int[]{10724260, 4543597, 6066343, 11846573, 15000794, 12829635, 10724260, 4543597}, new int[]{2714316, 2714316})
         );
         FIRE = createFirework(
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), 1, 1, new int[]{14032425, 15809846, 15954764, 16037719}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), 1, new int[]{16177762, 14032425, 15809846, 15954764, 16037719, 16177762}, new int[]{14032425})
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), 1, 1, new int[]{14032425, 15809846, 15954764, 16037719}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), 1, new int[]{16177762, 14032425, 15809846, 15954764, 16037719, 16177762}, new int[]{14032425})
         );
         IG = createFirework(
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{2636472, 9254814, 16736349, 16689497, 16704122}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{15807620, 2636472, 9254814, 15807620, 16736349, 16689497, 16704122}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{2636472, 9254814, 15807620, 16736349, 16689497, 16704122}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{2636472}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{9254814, 15807620, 16736349, 16689497, 16704122, 2636472, 9254814, 15807620, 16736349, 16689497, 16704122})
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{2636472, 9254814, 16736349, 16689497, 16704122}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{15807620, 2636472, 9254814, 15807620, 16736349, 16689497, 16704122}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{2636472, 9254814, 15807620, 16736349, 16689497, 16704122}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{2636472}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{9254814, 15807620, 16736349, 16689497, 16704122, 2636472, 9254814, 15807620, 16736349, 16689497, 16704122})
         );
         LATTE = createFirework(
-                new FireworkHelper(FireworkRocketItem.Type.BURST.getId(), 1, new int[]{10780518, 11703160, 13877160, 15127738}),
-                new FireworkHelper(FireworkRocketItem.Type.BURST.getId(), 1, new int[]{9003077, 10780518, 11703160, 13877160, 15127738, 9003077}),
-                new FireworkHelper(FireworkRocketItem.Type.BURST.getId(), 1, new int[]{9003077, 10780518, 11703160, 13877160, 15127738, 9003077}),
-                new FireworkHelper(FireworkRocketItem.Type.BURST.getId(), 1, new int[]{9003077, 10780518, 11703160, 13877160, 15127738, 9003077}),
-                new FireworkHelper(FireworkRocketItem.Type.BURST.getId(), 1, new int[]{9003077, 10780518, 11703160, 13877160, 15127738, 9003077})
+                new FireworkHelper(FireworkExplosion.Shape.BURST.getId(), 1, new int[]{10780518, 11703160, 13877160, 15127738}),
+                new FireworkHelper(FireworkExplosion.Shape.BURST.getId(), 1, new int[]{9003077, 10780518, 11703160, 13877160, 15127738, 9003077}),
+                new FireworkHelper(FireworkExplosion.Shape.BURST.getId(), 1, new int[]{9003077, 10780518, 11703160, 13877160, 15127738, 9003077}),
+                new FireworkHelper(FireworkExplosion.Shape.BURST.getId(), 1, new int[]{9003077, 10780518, 11703160, 13877160, 15127738, 9003077}),
+                new FireworkHelper(FireworkExplosion.Shape.BURST.getId(), 1, new int[]{9003077, 10780518, 11703160, 13877160, 15127738, 9003077})
         );
         NONAME1 = createFirework(
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{270627}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{40100}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{10083555}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{13977409}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{16702842, 16758897})
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{270627}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{40100}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{10083555}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{13977409}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{16702842, 16758897})
         );
         NONAME2 = createFirework(
-                new FireworkHelper(FireworkRocketItem.Type.BURST.getId(), 1, new int[]{14794471, 13955312, 16762363})
+                new FireworkHelper(FireworkExplosion.Shape.BURST.getId(), 1, new int[]{14794471, 13955312, 16762363})
         );
         MAINCRA = createFirework(
-                new FireworkHelper(FireworkRocketItem.Type.STAR.getId(), new int[]{4684318}),
-                new FireworkHelper(FireworkRocketItem.Type.STAR.getId(), new int[]{7385655}),
-                new FireworkHelper(FireworkRocketItem.Type.STAR.getId(), new int[]{9423452}),
-                new FireworkHelper(FireworkRocketItem.Type.STAR.getId(), new int[]{6371103}),
-                new FireworkHelper(FireworkRocketItem.Type.STAR.getId(), new int[]{8736555, 12747584}),
-                new FireworkHelper(FireworkRocketItem.Type.STAR.getId(), new int[]{4684318, 7385655, 9423452, 6371103}),
-                new FireworkHelper(FireworkRocketItem.Type.STAR.getId(), new int[]{8736555}),
-                new FireworkHelper(FireworkRocketItem.Type.STAR.getId(), new int[]{12747584})
+                new FireworkHelper(FireworkExplosion.Shape.STAR.getId(), new int[]{4684318}),
+                new FireworkHelper(FireworkExplosion.Shape.STAR.getId(), new int[]{7385655}),
+                new FireworkHelper(FireworkExplosion.Shape.STAR.getId(), new int[]{9423452}),
+                new FireworkHelper(FireworkExplosion.Shape.STAR.getId(), new int[]{6371103}),
+                new FireworkHelper(FireworkExplosion.Shape.STAR.getId(), new int[]{8736555, 12747584}),
+                new FireworkHelper(FireworkExplosion.Shape.STAR.getId(), new int[]{4684318, 7385655, 9423452, 6371103}),
+                new FireworkHelper(FireworkExplosion.Shape.STAR.getId(), new int[]{8736555}),
+                new FireworkHelper(FireworkExplosion.Shape.STAR.getId(), new int[]{12747584})
         );
         NONAME3 = createFirework(
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{16735436}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{14439103}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{12142513}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{9911716}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{7615126})
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{16735436}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{14439103}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{12142513}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{9911716}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{7615126})
         );
         SUPER_NENAS = createFirework(
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), 1, new int[]{3386595, 10017521, 15362404, 15174793}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), 1, new int[]{4896300, 8506225, 3386595, 10017521, 15362404, 15174793, 4896300, 8506225, 283}, new int[]{283, 283})
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), 1, new int[]{3386595, 10017521, 15362404, 15174793}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), 1, new int[]{4896300, 8506225, 3386595, 10017521, 15362404, 15174793, 4896300, 8506225, 283}, new int[]{283, 283})
         );
         NATURE = createFirework(
-                new FireworkHelper(FireworkRocketItem.Type.SMALL_BALL.getId(), 1, new int[]{1536580, 3901265, 6200414}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), 1, new int[]{1536580, 3901265, 6200414}),
-                new FireworkHelper(FireworkRocketItem.Type.SMALL_BALL.getId(), new int[]{8565356, 10864505, 13229190, 8565356, 10864505, 13229190}),
-                new FireworkHelper(FireworkRocketItem.Type.SMALL_BALL.getId(), new int[]{8565356, 10864505, 13229190, 8565356, 10864505, 13229190}),
-                new FireworkHelper(FireworkRocketItem.Type.SMALL_BALL.getId(), new int[]{8565356, 10864505, 13229190, 8565356, 10864505, 13229190})
+                new FireworkHelper(FireworkExplosion.Shape.SMALL_BALL.getId(), 1, new int[]{1536580, 3901265, 6200414}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), 1, new int[]{1536580, 3901265, 6200414}),
+                new FireworkHelper(FireworkExplosion.Shape.SMALL_BALL.getId(), new int[]{8565356, 10864505, 13229190, 8565356, 10864505, 13229190}),
+                new FireworkHelper(FireworkExplosion.Shape.SMALL_BALL.getId(), new int[]{8565356, 10864505, 13229190, 8565356, 10864505, 13229190}),
+                new FireworkHelper(FireworkExplosion.Shape.SMALL_BALL.getId(), new int[]{8565356, 10864505, 13229190, 8565356, 10864505, 13229190})
         );
         OCEAN = createFirework(
-                new FireworkHelper(FireworkRocketItem.Type.BURST.getId(), new int[]{11789544, 11129320, 10204139, 6587605, 8429544}),
-                new FireworkHelper(FireworkRocketItem.Type.BURST.getId(), new int[]{7849197, 11789544, 11129320, 10204139, 6587605, 8429544, 7849197}),
-                new FireworkHelper(FireworkRocketItem.Type.BURST.getId(), new int[]{7849197, 11789544, 11129320, 10204139, 6587605, 8429544, 7849197})
+                new FireworkHelper(FireworkExplosion.Shape.BURST.getId(), new int[]{11789544, 11129320, 10204139, 6587605, 8429544}),
+                new FireworkHelper(FireworkExplosion.Shape.BURST.getId(), new int[]{7849197, 11789544, 11129320, 10204139, 6587605, 8429544, 7849197}),
+                new FireworkHelper(FireworkExplosion.Shape.BURST.getId(), new int[]{7849197, 11789544, 11129320, 10204139, 6587605, 8429544, 7849197})
         );
         NONAME4 = createFirework(
-                new FireworkHelper(FireworkRocketItem.Type.BURST.getId(), new int[]{9563112, 15399673, 12709370, 11462138, 10540280})
+                new FireworkHelper(FireworkExplosion.Shape.BURST.getId(), new int[]{9563112, 15399673, 12709370, 11462138, 10540280})
         );
         PRINCESS = createFirework(
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), 1, new int[]{15502525, 16358849, 16710118, 10743523}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), 0, 1, new int[]{7981529, 15502525, 16358849, 16710118, 10743523, 7981529}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), 0, 1, new int[]{7981529, 15502525, 16358849, 16710118, 10743523, 7981529}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), 0, 1, new int[]{7981529, 15502525, 16358849, 16710118, 10743523, 7981529})
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), 1, new int[]{15502525, 16358849, 16710118, 10743523}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), 0, 1, new int[]{7981529, 15502525, 16358849, 16710118, 10743523, 7981529}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), 0, 1, new int[]{7981529, 15502525, 16358849, 16710118, 10743523, 7981529}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), 0, 1, new int[]{7981529, 15502525, 16358849, 16710118, 10743523, 7981529})
         );
         SUN = createFirework(
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), 1, new int[]{13408512, 15122176, 16769024, 16773471}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), 1, new int[]{16776062, 16777113, 13408512, 15122176, 16769024, 16773471, 16776062, 16777113})
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), 1, new int[]{13408512, 15122176, 16769024, 16773471}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), 1, new int[]{16776062, 16777113, 13408512, 15122176, 16769024, 16773471, 16776062, 16777113})
         );
         RAINBOW = createFirework(
-                new FireworkHelper(FireworkRocketItem.Type.STAR.getId(), 1, new int[]{13975927, 15698267, 15916648, 7456096}),
-                new FireworkHelper(FireworkRocketItem.Type.STAR.getId(), 1, new int[]{5280975, 8734145, 13975927, 15698267, 15916648, 7456096, 5280975, 8734145}),
-                new FireworkHelper(FireworkRocketItem.Type.STAR.getId(), 1, new int[]{5280975, 8734145, 13975927, 15698267, 15916648, 7456096, 5280975, 8734145})
+                new FireworkHelper(FireworkExplosion.Shape.STAR.getId(), 1, new int[]{13975927, 15698267, 15916648, 7456096}),
+                new FireworkHelper(FireworkExplosion.Shape.STAR.getId(), 1, new int[]{5280975, 8734145, 13975927, 15698267, 15916648, 7456096, 5280975, 8734145}),
+                new FireworkHelper(FireworkExplosion.Shape.STAR.getId(), 1, new int[]{5280975, 8734145, 13975927, 15698267, 15916648, 7456096, 5280975, 8734145})
         );
         SUNRISE = createFirework(
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{9754593, 13951971, 16708812, 16572842, 16631198}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{16689801, 9754593, 13951971, 16708812, 16572842, 16631198, 16689801}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{9754593, 13951971, 16708812, 16572842, 16631198, 16689801}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{9754593}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{13951971, 16708812, 16572842, 16631198, 16689801, 9754593, 13951971, 16708812, 16572842, 16631198, 16689801})
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{9754593, 13951971, 16708812, 16572842, 16631198}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{16689801, 9754593, 13951971, 16708812, 16572842, 16631198, 16689801}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{9754593, 13951971, 16708812, 16572842, 16631198, 16689801}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{9754593}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{13951971, 16708812, 16572842, 16631198, 16689801, 9754593, 13951971, 16708812, 16572842, 16631198, 16689801})
         );
         ARGENTINA = createFirework(
-                new FireworkHelper(FireworkRocketItem.Type.STAR.getId(), new int[]{11789544, 11129320, 16711422, 15260072}),
-                new FireworkHelper(FireworkRocketItem.Type.STAR.getId(), new int[]{7849197, 11789544, 11129320, 16711422, 15260072, 7849197}),
-                new FireworkHelper(FireworkRocketItem.Type.STAR.getId(), new int[]{7849197, 11789544, 11129320, 16711422, 15260072, 7849197}),
-                new FireworkHelper(FireworkRocketItem.Type.STAR.getId(), new int[]{7849197, 11789544, 11129320, 16711422, 15260072, 7849197})
+                new FireworkHelper(FireworkExplosion.Shape.STAR.getId(), new int[]{11789544, 11129320, 16711422, 15260072}),
+                new FireworkHelper(FireworkExplosion.Shape.STAR.getId(), new int[]{7849197, 11789544, 11129320, 16711422, 15260072, 7849197}),
+                new FireworkHelper(FireworkExplosion.Shape.STAR.getId(), new int[]{7849197, 11789544, 11129320, 16711422, 15260072, 7849197}),
+                new FireworkHelper(FireworkExplosion.Shape.STAR.getId(), new int[]{7849197, 11789544, 11129320, 16711422, 15260072, 7849197})
         );
         ZAPAHORIAS = createFirework(
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), 1, new int[]{15296295, 16750208, 16764321, 6939273, 6344840}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{15296295, 16750208, 16764321, 6939273, 6344840})
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), 1, new int[]{15296295, 16750208, 16764321, 6939273, 6344840}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{15296295, 16750208, 16764321, 6939273, 6344840})
         );
         SHADES = createFirework(
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{11184810}),
-                new FireworkHelper(FireworkRocketItem.Type.SMALL_BALL.getId(), new int[]{12303291}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{12303291}),
-                new FireworkHelper(FireworkRocketItem.Type.SMALL_BALL.getId(), new int[]{14540253}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{15658734, 14540253}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{11184810, 12303291, 13421772, 14540253}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{15658734}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), new int[]{16777215})
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{11184810}),
+                new FireworkHelper(FireworkExplosion.Shape.SMALL_BALL.getId(), new int[]{12303291}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{12303291}),
+                new FireworkHelper(FireworkExplosion.Shape.SMALL_BALL.getId(), new int[]{14540253}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{15658734, 14540253}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{11184810, 12303291, 13421772, 14540253}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{15658734}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), new int[]{16777215})
         );
         PINK_LEMONADE = createFirework(
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), 0, 1, new int[]{16777151, 16773062, 16768717, 16764628}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), 0, 1, new int[]{16760283, 16777151, 16773062, 16768717, 16764628, 16760283}, new int[]{16764628, 16773062}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), 0, 1, new int[]{16760283, 16777151, 16773062, 16768717, 16764628, 16760283}, new int[]{16764628, 16773062})
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), 0, 1, new int[]{16777151, 16773062, 16768717, 16764628}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), 0, 1, new int[]{16760283, 16777151, 16773062, 16768717, 16764628, 16760283}, new int[]{16764628, 16773062}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), 0, 1, new int[]{16760283, 16777151, 16773062, 16768717, 16764628, 16760283}, new int[]{16764628, 16773062})
         );
         TODOROKI = createFirework(
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), 1, 1, new int[]{14221312, 16777215, 15809846, 13955576}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), 1, new int[]{10865137, 7711708, 14221312, 16777215, 15809846, 13955576, 10865137, 7711708}, new int[]{14096673, 14096673}),
-                new FireworkHelper(FireworkRocketItem.Type.LARGE_BALL.getId(), 1, new int[]{10865137, 7711708, 14221312, 16777215, 15809846, 13955576, 10865137, 7711708}, new int[]{14096673, 14096673})
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), 1, 1, new int[]{14221312, 16777215, 15809846, 13955576}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), 1, new int[]{10865137, 7711708, 14221312, 16777215, 15809846, 13955576, 10865137, 7711708}, new int[]{14096673, 14096673}),
+                new FireworkHelper(FireworkExplosion.Shape.LARGE_BALL.getId(), 1, new int[]{10865137, 7711708, 14221312, 16777215, 15809846, 13955576, 10865137, 7711708}, new int[]{14096673, 14096673})
         );
         FIJI = createFirework(
-                new FireworkHelper(FireworkRocketItem.Type.SMALL_BALL.getId(), 1, new int[]{32896, 2332821, 4698282}),
-                new FireworkHelper(FireworkRocketItem.Type.STAR.getId(), 1, new int[]{32896, 2332821, 4698282}),
-                new FireworkHelper(FireworkRocketItem.Type.SMALL_BALL.getId(), new int[]{6998462, 9363923, 11663848, 6998462, 9363923, 11663848}),
-                new FireworkHelper(FireworkRocketItem.Type.SMALL_BALL.getId(), new int[]{6998462, 9363923, 11663848, 6998462, 9363923, 11663848}),
-                new FireworkHelper(FireworkRocketItem.Type.SMALL_BALL.getId(), new int[]{6998462, 9363923, 11663848, 6998462, 9363923, 11663848})
+                new FireworkHelper(FireworkExplosion.Shape.SMALL_BALL.getId(), 1, new int[]{32896, 2332821, 4698282}),
+                new FireworkHelper(FireworkExplosion.Shape.STAR.getId(), 1, new int[]{32896, 2332821, 4698282}),
+                new FireworkHelper(FireworkExplosion.Shape.SMALL_BALL.getId(), new int[]{6998462, 9363923, 11663848, 6998462, 9363923, 11663848}),
+                new FireworkHelper(FireworkExplosion.Shape.SMALL_BALL.getId(), new int[]{6998462, 9363923, 11663848, 6998462, 9363923, 11663848}),
+                new FireworkHelper(FireworkExplosion.Shape.SMALL_BALL.getId(), new int[]{6998462, 9363923, 11663848, 6998462, 9363923, 11663848})
         );
 
         fws.add(SAKURA_TREE);
@@ -242,58 +244,58 @@ public class SolExtension extends GenericExtension implements Extensions {
         }
         String v = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM"));
         if (v.equals("14-02") || v.equals("02-06") || v.startsWith("30-")) {
-            if (server.getTicks() == solJoined) {
-                ServerPlayerEntity player = server.getPlayerManager().getPlayer(UUID.fromString(SOL_UUID));
+            if (server.getTickCount() == solJoined) {
+                ServerPlayer player = server.getPlayerList().getPlayer(UUID.fromString(SOL_UUID));
                 if (player == null) {
                     solJoined = -100;
                     return;
                 }
-                FireworkRocketEntity f1 = new FireworkRocketEntity(player.getWorld(), player, player.getX() + 10, player.getY() + 10, player.getZ() + 10, fws.get(new Random().nextInt(fws.size())));
-                FireworkRocketEntity f2 = new FireworkRocketEntity(player.getWorld(), player, player.getX(), player.getY() + 10, player.getZ() + 6, fws.get(new Random().nextInt(fws.size())));
-                f1.noClip = true;
-                f2.noClip = true;
-                player.getWorld().spawnEntity(f1);
-                player.getWorld().spawnEntity(f2);
+                FireworkRocketEntity f1 = new FireworkRocketEntity(player.level(), player, player.getX() + 10, player.getY() + 10, player.getZ() + 10, fws.get(new Random().nextInt(fws.size())));
+                FireworkRocketEntity f2 = new FireworkRocketEntity(player.level(), player, player.getX(), player.getY() + 10, player.getZ() + 6, fws.get(new Random().nextInt(fws.size())));
+                f1.noPhysics = true;
+                f2.noPhysics = true;
+                player.level().addFreshEntity(f1);
+                player.level().addFreshEntity(f2);
             }
-            if (server.getTicks() == solJoined + 10) {
-                ServerPlayerEntity player = server.getPlayerManager().getPlayer(UUID.fromString(SOL_UUID));
+            if (server.getTickCount() == solJoined + 10) {
+                ServerPlayer player = server.getPlayerList().getPlayer(UUID.fromString(SOL_UUID));
                 if (player == null) {
                     solJoined = -100;
                     return;
                 }
-                FireworkRocketEntity f1 = new FireworkRocketEntity(player.getWorld(), player, player.getX() - 10, player.getY() + 10, player.getZ() - 10, fws.get(new Random().nextInt(fws.size())));
-                FireworkRocketEntity f2 = new FireworkRocketEntity(player.getWorld(), player, player.getX() - 6, player.getY() + 10, player.getZ(), fws.get(new Random().nextInt(fws.size())));
-                f1.noClip = true;
-                f2.noClip = true;
-                player.getWorld().spawnEntity(f1);
-                player.getWorld().spawnEntity(f2);
+                FireworkRocketEntity f1 = new FireworkRocketEntity(player.level(), player, player.getX() - 10, player.getY() + 10, player.getZ() - 10, fws.get(new Random().nextInt(fws.size())));
+                FireworkRocketEntity f2 = new FireworkRocketEntity(player.level(), player, player.getX() - 6, player.getY() + 10, player.getZ(), fws.get(new Random().nextInt(fws.size())));
+                f1.noPhysics = true;
+                f2.noPhysics = true;
+                player.level().addFreshEntity(f1);
+                player.level().addFreshEntity(f2);
             }
-            if (server.getTicks() == solJoined + 20) {
-                ServerPlayerEntity player = server.getPlayerManager().getPlayer(UUID.fromString(SOL_UUID));
+            if (server.getTickCount() == solJoined + 20) {
+                ServerPlayer player = server.getPlayerList().getPlayer(UUID.fromString(SOL_UUID));
                 if (player == null) {
                     solJoined = -100;
                     return;
                 }
-                FireworkRocketEntity f1 = new FireworkRocketEntity(player.getWorld(), player, player.getX() - 10, player.getY() + 10, player.getZ() + 10, fws.get(new Random().nextInt(fws.size())));
-                FireworkRocketEntity f2 = new FireworkRocketEntity(player.getWorld(), player, player.getX() + 6, player.getY() + 10, player.getZ(), fws.get(new Random().nextInt(fws.size())));
-                f1.noClip = true;
-                f2.noClip = true;
-                player.getWorld().spawnEntity(f1);
-                player.getWorld().spawnEntity(f2);
-                player.networkHandler.sendPacket(new TitleS2CPacket(Text.literal(new String(Base64.getDecoder().decode(B64[new Random().nextInt(B64.length)])))));
+                FireworkRocketEntity f1 = new FireworkRocketEntity(player.level(), player, player.getX() - 10, player.getY() + 10, player.getZ() + 10, fws.get(new Random().nextInt(fws.size())));
+                FireworkRocketEntity f2 = new FireworkRocketEntity(player.level(), player, player.getX() + 6, player.getY() + 10, player.getZ(), fws.get(new Random().nextInt(fws.size())));
+                f1.noPhysics = true;
+                f2.noPhysics = true;
+                player.level().addFreshEntity(f1);
+                player.level().addFreshEntity(f2);
+                player.connection.send(new ClientboundSetTitleTextPacket(Component.literal(new String(Base64.getDecoder().decode(B64[new Random().nextInt(B64.length)])))));
             }
-            if (server.getTicks() == solJoined + 30) {
-                ServerPlayerEntity player = server.getPlayerManager().getPlayer(UUID.fromString(SOL_UUID));
+            if (server.getTickCount() == solJoined + 30) {
+                ServerPlayer player = server.getPlayerList().getPlayer(UUID.fromString(SOL_UUID));
                 if (player == null) {
                     solJoined = -100;
                     return;
                 }
-                FireworkRocketEntity f1 = new FireworkRocketEntity(player.getWorld(), player, player.getX() + 10, player.getY() + 10, player.getZ() - 10, fws.get(new Random().nextInt(fws.size())));
-                FireworkRocketEntity f2 = new FireworkRocketEntity(player.getWorld(), player, player.getX(), player.getY() + 10, player.getZ() - 6, fws.get(new Random().nextInt(fws.size())));
-                f1.noClip = true;
-                f2.noClip = true;
-                player.getWorld().spawnEntity(f1);
-                player.getWorld().spawnEntity(f2);
+                FireworkRocketEntity f1 = new FireworkRocketEntity(player.level(), player, player.getX() + 10, player.getY() + 10, player.getZ() - 10, fws.get(new Random().nextInt(fws.size())));
+                FireworkRocketEntity f2 = new FireworkRocketEntity(player.level(), player, player.getX(), player.getY() + 10, player.getZ() - 6, fws.get(new Random().nextInt(fws.size())));
+                f1.noPhysics = true;
+                f2.noPhysics = true;
+                player.level().addFreshEntity(f1);
+                player.level().addFreshEntity(f2);
                 solJoined = -100;
             }
         } else {
@@ -302,14 +304,14 @@ public class SolExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onPlayerJoined(ServerPlayerEntity player) {
-        if (!player.getUuidAsString().equals(SOL_UUID)) {
+    public void onPlayerJoined(ServerPlayer player) {
+        if (!player.getStringUUID().equals(SOL_UUID)) {
             return;
         }
-        if (player.getServer() == null) {
+        if (player.level().getServer() == null) {
             return;
         }
-        solJoined = player.getServer().getTicks() + (20 * 20);
+        solJoined = player.level().getServer().getTickCount() + (20 * 20);
     }
 
     @Override
@@ -318,29 +320,26 @@ public class SolExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onRegisterCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public void onRegisterCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
         new SolCommand().register(dispatcher, this);
     }
 
     private static ItemStack createFirework(FireworkHelper... fireworksConfigs) {
         ItemStack firework = new ItemStack(Items.FIREWORK_ROCKET, 1);
-        ItemStack star = new ItemStack(Items.FIREWORK_STAR);
-        NbtList explosions = new NbtList();
+        List<FireworkExplosion> explosions = new ArrayList<>();
         for (FireworkHelper config : fireworksConfigs) {
-            NbtCompound explosion = star.getOrCreateSubNbt(FireworkRocketItem.EXPLOSION_KEY).copy();
-            explosion.putIntArray(FireworkRocketItem.COLORS_KEY, config.getColors());
-            explosion.putByte(FireworkRocketItem.TYPE_KEY, (byte) config.getType());
-            explosion.putByte(FireworkRocketItem.FLICKER_KEY, (byte) config.getFlicker());
-            explosion.putByte(FireworkRocketItem.TRAIL_KEY, (byte) config.getTrail());
-            if (config.getFadeColors().length != 0) {
-                explosion.putIntArray(FireworkRocketItem.FADE_COLORS_KEY, config.getFadeColors());
-            }
-            explosions.add(explosion);
+            explosions.add(new FireworkExplosion(
+                    FireworkExplosion.Shape.byId(config.getType()),
+                    IntList.of(config.getColors()),
+                    IntList.of(config.getFadeColors()),
+                    config.getTrail() != 0,
+                    config.getFlicker() != 0
+            ));
         }
-        NbtCompound fireworks = firework.getOrCreateSubNbt(FireworkRocketItem.FIREWORKS_KEY);
-        fireworks.putByte(FireworkRocketItem.FLIGHT_KEY, (byte) 1);
-        fireworks.put(FireworkRocketItem.EXPLOSIONS_KEY, explosions);
-        firework.getOrCreateNbt().putBoolean("Sol", true);
+        firework.set(DataComponents.FIREWORKS, new Fireworks(1, explosions));
+        CompoundTag tag = new CompoundTag();
+        tag.putBoolean("Sol", true);
+        firework.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
         return firework;
     }
 

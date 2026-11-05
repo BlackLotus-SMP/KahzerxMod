@@ -13,7 +13,7 @@ import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 
 import javax.security.auth.login.LoginException;
@@ -143,7 +143,7 @@ public class DiscordBot extends ListenerAdapter implements DiscordBotInterface {
         }
     }
 
-    public void sendChatMessage(ServerPlayerEntity player, String msg, String prefix) {
+    public void sendChatMessage(ServerPlayer player, String msg, String prefix) {
         if (!this.isReady()) {
             return;
         }
@@ -154,7 +154,7 @@ public class DiscordBot extends ListenerAdapter implements DiscordBotInterface {
         } else {
             builder.setUsername(String.format("[%s] %s", prefix, playerName));
         }
-        String uuid = player.getUuid().toString();
+        String uuid = player.getUUID().toString();
         builder.setAvatarUrl(String.format("https://crafatar.com/avatars/%s?overlay", uuid));
         builder.setContent(msg);
         this.whc.send(builder.build());

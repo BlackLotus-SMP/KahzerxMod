@@ -4,11 +4,10 @@ import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-
+import net.minecraft.server.level.ServerPlayer;
 import java.sql.*;
 import java.util.HashMap;
 
@@ -45,7 +44,7 @@ public class PrankExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onExtensionDisabled(ServerCommandSource source) {
+    public void onExtensionDisabled(CommandSourceStack source) {
         Extensions.super.onExtensionDisabled(source);
         playerLevel.clear();
         isExtensionEnabled = false;
@@ -53,9 +52,9 @@ public class PrankExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onExtensionEnabled(ServerCommandSource source) {
+    public void onExtensionEnabled(CommandSourceStack source) {
         Extensions.super.onExtensionEnabled(source);
-        for (ServerPlayerEntity player : this.server.getPlayerManager().getPlayerList()) {
+        for (ServerPlayer player : this.server.getPlayerList().getPlayers()) {
             this.onPlayerJoined(player);
         }
         isExtensionEnabled = true;
@@ -63,20 +62,20 @@ public class PrankExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onPlayerJoined(ServerPlayerEntity player) {
-        String playerUUID = player.getUuidAsString();
+    public void onPlayerJoined(ServerPlayer player) {
+        String playerUUID = player.getStringUUID();
         playerLevel.remove(playerUUID);
         playerLevel.put(playerUUID, getPlayerLevel(player));
     }
 
     @Override
-    public void onPlayerLeft(ServerPlayerEntity player) {
-        String playerUUID = player.getUuidAsString();
+    public void onPlayerLeft(ServerPlayer player) {
+        String playerUUID = player.getStringUUID();
         playerLevel.remove(playerUUID);
     }
 
     @Override
-    public void onRegisterCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public void onRegisterCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
         new PrankCommand().register(dispatcher, this);
     }
 
@@ -85,11 +84,11 @@ public class PrankExtension extends GenericExtension implements Extensions {
         return this.getSettings();
     }
 
-    private PrankLevel getPlayerLevel(ServerPlayerEntity player) {
+    private PrankLevel getPlayerLevel(ServerPlayer player) {
         try {
             String query = "SELECT id FROM prank WHERE uuid = ?";
             PreparedStatement ps = conn.prepareStatement(query);
-            ps.setString(1, player.getUuidAsString());
+            ps.setString(1, player.getStringUUID());
             ResultSet rs = ps.executeQuery();
             int level = rs.getInt("id");
             rs.close();
@@ -100,14 +99,14 @@ public class PrankExtension extends GenericExtension implements Extensions {
         }
     }
 
-    public void updateLevel(ServerPlayerEntity player, PrankLevel level) {
+    public void updateLevel(ServerPlayer player, PrankLevel level) {
         try {
             String q = "INSERT INTO `prank` (uuid, id)" +
                     "VALUES (?, ?)" +
                     "ON CONFLICT (uuid)" +
                     "DO UPDATE SET id = ?;";
             PreparedStatement ps = conn.prepareStatement(q);
-            ps.setString(1, player.getUuidAsString());
+            ps.setString(1, player.getStringUUID());
             ps.setInt(2, level.getID());
             ps.setInt(3, level.getID());
             ps.executeUpdate();
@@ -122,8 +121,8 @@ public class PrankExtension extends GenericExtension implements Extensions {
     private void updatePlayerList() {
         // TODO wut
 //        Collection<ServerPlayerEntity> players = server.getPlayerManager().getPlayerList();
-        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-            server.getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.UPDATE_DISPLAY_NAME, player));
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            server.getPlayerList().broadcastAll(new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME, player));
         }
 //        server.getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.UPDATE_DISPLAY_NAME, players));
     }

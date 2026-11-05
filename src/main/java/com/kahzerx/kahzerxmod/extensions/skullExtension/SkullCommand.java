@@ -1,39 +1,38 @@
 package com.kahzerx.kahzerxmod.extensions.skullExtension;
 
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.ResolvableProfile;
+import net.minecraft.server.players.NameAndId;
 import com.kahzerx.kahzerxmod.utils.MarkEnum;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.ItemScatterer;
-
 import java.util.Optional;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Containers;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.literal;
 
 public class SkullCommand {
-    public void register(CommandDispatcher<ServerCommandSource> dispatcher, SkullExtension skull) {
+    public void register(CommandDispatcher<CommandSourceStack> dispatcher, SkullExtension skull) {
         dispatcher.register(literal("skull").
                 requires(isEnabled -> skull.extensionSettings().isEnabled()).
-                then(CommandManager.argument("playerName", StringArgumentType.word()).
+                then(Commands.argument("playerName", StringArgumentType.word()).
                         executes(context -> {
-                            Optional<GameProfile> profile = context.getSource().getServer().getUserCache().findByName(StringArgumentType.getString(context, "playerName"));
+                            Optional<NameAndId> profile = context.getSource().getServer().services().nameToIdCache().get(StringArgumentType.getString(context, "playerName"));
                             if (profile.isEmpty()) {
-                                context.getSource().sendFeedback(MarkEnum.CROSS.appendMessage("Not premium!"), false);
+                                context.getSource().sendSuccess(MarkEnum.CROSS.appendMessage("Not premium!"), false);
                                 return 1;
                             }
                             ItemStack stack = new ItemStack(Items.PLAYER_HEAD);
-                            NbtCompound compound = stack.getOrCreateNbt();
-                            compound.putString("SkullOwner", profile.get().getName());
-                            stack.writeNbt(compound);
-                            ServerPlayerEntity sourcePlayer = context.getSource().getPlayer();
-                            if (!sourcePlayer.giveItemStack(stack)) {
-                                ItemScatterer.spawn(sourcePlayer.getWorld(), sourcePlayer.getX(), sourcePlayer.getY(), sourcePlayer.getZ(), stack);
+                            stack.set(DataComponents.PROFILE, ResolvableProfile.createUnresolved(profile.get().name()));
+                            ServerPlayer sourcePlayer = context.getSource().getPlayer();
+                            if (!sourcePlayer.addItem(stack)) {
+                                Containers.dropItemStack(sourcePlayer.level(), sourcePlayer.getX(), sourcePlayer.getY(), sourcePlayer.getZ(), stack);
                             }
                             return 1;
                         })));

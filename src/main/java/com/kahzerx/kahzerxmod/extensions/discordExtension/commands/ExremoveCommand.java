@@ -1,5 +1,6 @@
 package com.kahzerx.kahzerxmod.extensions.discordExtension.commands;
 
+import net.minecraft.server.players.NameAndId;
 import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.DiscordPermission;
 import com.kahzerx.kahzerxmod.extensions.discordExtension.discordAdminToolsExtension.DiscordAdminToolsExtension;
@@ -9,12 +10,11 @@ import com.kahzerx.kahzerxmod.extensions.discordExtension.utils.DiscordChatUtils
 import com.mojang.authlib.GameProfile;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.Whitelist;
-import net.minecraft.server.WhitelistEntry;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.UserWhiteList;
+import net.minecraft.server.players.UserWhiteListEntry;
 import java.awt.*;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -38,7 +38,7 @@ public class ExremoveCommand extends GenericCommand {
             this.sendHelpCommand(serverPrefix, event.getChannel(), feedback);
             return;
         }
-        Optional<GameProfile> profile = server.getUserCache().findByName(playerName);
+        Optional<NameAndId> profile = server.services().nameToIdCache().get(playerName);
         if (profile.isEmpty()) {
             EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**Not premium.**"}, serverPrefix, true, Color.RED, true, feedback);
             if (embed != null) {
@@ -46,29 +46,29 @@ public class ExremoveCommand extends GenericCommand {
             }
             return;
         }
-        if (!discordWhitelistExtension.canRemove(69420L, profile.get().getId().toString())) {
-            EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**You can't remove " + profile.get().getName() + ".**"}, serverPrefix, true, Color.RED, true, feedback);
+        if (!discordWhitelistExtension.canRemove(69420L, profile.get().id().toString())) {
+            EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**You can't remove " + profile.get().name() + ".**"}, serverPrefix, true, Color.RED, true, feedback);
             if (embed != null) {
                 event.getChannel().sendMessageEmbeds(embed.build()).queue();
             }
             return;
         }
-        Whitelist whitelist = server.getPlayerManager().getWhitelist();
-        if (!whitelist.isAllowed(profile.get())) {
+        UserWhiteList whitelist = server.getPlayerList().getWhiteList();
+        if (!whitelist.isWhiteListed(profile.get())) {
             EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**" + playerName + " is not whitelisted.**"}, serverPrefix, true, Color.YELLOW, true, feedback);
             if (embed != null) {
                 event.getChannel().sendMessageEmbeds(embed.build()).queue();
             }
             return;
         }
-        WhitelistEntry whitelistEntry = new WhitelistEntry(profile.get());
-        discordWhitelistExtension.deletePlayer(69420L, profile.get().getId().toString());
+        UserWhiteListEntry whitelistEntry = new UserWhiteListEntry(profile.get());
+        discordWhitelistExtension.deletePlayer(69420L, profile.get().id().toString());
         whitelist.remove(whitelistEntry);
-        ServerPlayerEntity player = server.getPlayerManager().getPlayer(profile.get().getId());
+        ServerPlayer player = server.getPlayerList().getPlayer(profile.get().id());
         if (player != null) {
-            player.networkHandler.disconnect(Text.literal("Byee~"));
+            player.connection.disconnect(Component.literal("Byee~"));
         }
-        EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**" + profile.get().getName() + " removed D:**"}, serverPrefix, true, Color.GREEN, true, feedback);
+        EmbedBuilder embed = DiscordChatUtils.generateEmbed(new String[]{"**" + profile.get().name() + " removed D:**"}, serverPrefix, true, Color.GREEN, true, feedback);
         if (embed != null) {
             event.getChannel().sendMessageEmbeds(embed.build()).queue();
         }

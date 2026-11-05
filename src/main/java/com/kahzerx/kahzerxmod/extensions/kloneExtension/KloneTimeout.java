@@ -2,6 +2,7 @@ package com.kahzerx.kahzerxmod.extensions.kloneExtension;
 
 import com.kahzerx.kahzerxmod.klone.KlonePlayerEntity;
 
+import java.util.ArrayList;
 import java.util.TimerTask;
 
 public class KloneTimeout extends TimerTask {
@@ -12,9 +13,10 @@ public class KloneTimeout extends TimerTask {
 
     @Override
     public void run() {
-        for (KlonePlayerEntity kp : this.kloneExtension.getKlones()) {
+        // Copia de la lista (kill() la modifica) y el kill en el hilo del servidor: esto corre en un Timer.
+        for (KlonePlayerEntity kp : new ArrayList<>(this.kloneExtension.getKlones())) {
             if (kp.isTimeout()) {
-                kp.kill();
+                kp.level().getServer().execute(kp::kill);
             }
         }
     }

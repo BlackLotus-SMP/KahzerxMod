@@ -1,14 +1,15 @@
 package com.kahzerx.kahzerxmod.extensions.sitExtension;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.decoration.ArmorStandEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
-public class SitEntity extends ArmorStandEntity implements SitEntityInterface {
+public class SitEntity extends ArmorStand implements SitEntityInterface {
     private boolean sitEntity = false;
-    public SitEntity(World world, double x, double y, double z) {
+    public SitEntity(Level world, double x, double y, double z) {
         super(world, x, y, z);
     }
 
@@ -24,32 +25,33 @@ public class SitEntity extends ArmorStandEntity implements SitEntityInterface {
     @Override
     public void setSitEntity(boolean sitEntity) {
         this.sitEntity = sitEntity;
-        this.dataTracker.set(ARMOR_STAND_FLAGS, this.setBitField((Byte)this.dataTracker.get(ARMOR_STAND_FLAGS), sitEntity));
+        this.entityData.set(DATA_CLIENT_FLAGS, this.setBitField((Byte)this.entityData.get(DATA_CLIENT_FLAGS), sitEntity));
         this.setInvisible(sitEntity);
     }
 
     @Override
     protected void removePassenger(Entity passenger) {
         if (this.isSitEntity()) {
-            this.setPosition(this.getX(), this.getY() + 0.16, this.getZ());
-            this.kill();
+            this.setPos(this.getX(), this.getY() + 0.16, this.getZ());
+            if (this.level() instanceof ServerLevel serverLevel) {
+                // ArmorStand#kill(level, null) la quita sin soltar el item (como el antiguo kill()).
+                this.kill(serverLevel, null);
+            }
         }
         super.removePassenger(passenger);
     }
 
     @Override
-    public void writeCustomDataToNbt(NbtCompound nbt) {
-        super.writeCustomDataToNbt(nbt);
+    protected void addAdditionalSaveData(ValueOutput output) {
+        super.addAdditionalSaveData(output);
         if (this.sitEntity) {
-            nbt.putBoolean("SitEntity", true);
+            output.putBoolean("SitEntity", true);
         }
     }
 
     @Override
-    public void readCustomDataFromNbt(NbtCompound nbt) {
-        super.readCustomDataFromNbt(nbt);
-        if (nbt.contains("SitEntity", NbtElement.BYTE_TYPE)) {
-            this.sitEntity = nbt.getBoolean("SitEntity");
-        }
+    protected void readAdditionalSaveData(ValueInput input) {
+        super.readAdditionalSaveData(input);
+        this.sitEntity = input.getBooleanOr("SitEntity", false);
     }
 }

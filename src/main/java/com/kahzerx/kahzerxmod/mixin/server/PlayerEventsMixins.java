@@ -1,26 +1,6 @@
 package com.kahzerx.kahzerxmod.mixin.server;
 
 import com.kahzerx.kahzerxmod.KahzerxServer;
-import net.minecraft.advancement.Advancement;
-import net.minecraft.advancement.AdvancementDisplay;
-import net.minecraft.advancement.AdvancementEntry;
-import net.minecraft.advancement.PlayerAdvancementTracker;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.ClientConnection;
-import net.minecraft.server.PlayerManager;
-import net.minecraft.server.network.ConnectedClientData;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.network.ServerPlayerInteractionManager;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -31,84 +11,116 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Objects;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.DisplayInfo;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.Connection;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.PlayerAdvancements;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerPlayerGameMode;
+import net.minecraft.server.network.CommonListenerCookie;
+import net.minecraft.server.players.PlayerList;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.SwingAnimation;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class PlayerEventsMixins {
-    @Mixin(PlayerManager.class)
+    @Mixin(PlayerList.class)
     public static class PlayerConn {
         @Inject(method = "remove", at = @At("RETURN"))
-        private void onPlayerLeft(ServerPlayerEntity player, CallbackInfo ci) {
+        private void onPlayerLeft(ServerPlayer player, CallbackInfo ci) {
             KahzerxServer.onPlayerLeft(player);
         }
 
-        @Inject(method = "onPlayerConnect", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;loadPlayerData(Lnet/minecraft/server/network/ServerPlayerEntity;)Lnet/minecraft/nbt/NbtCompound;", shift = At.Shift.AFTER))
-        private void onPlayerJoined(ClientConnection connection, ServerPlayerEntity player, ConnectedClientData clientData, CallbackInfo ci) {
+        // En 26.x los datos del jugador ya vienen cargados al entrar en placeNewPlayer (antes: justo tras PlayerList#load).
+        @Inject(method = "placeNewPlayer", at = @At("HEAD"))
+        private void onPlayerJoined(Connection connection, ServerPlayer player, CommonListenerCookie clientData, CallbackInfo ci) {
             KahzerxServer.onPlayerJoined(player);
         }
 
-        @Inject(method = "onPlayerConnect", at = @At("TAIL"))
-        private void onPlayerConnected(ClientConnection connection, ServerPlayerEntity player, ConnectedClientData clientData, CallbackInfo ci) {
+        @Inject(method = "placeNewPlayer", at = @At("TAIL"))
+        private void onPlayerConnected(Connection connection, ServerPlayer player, CommonListenerCookie clientData, CallbackInfo ci) {
             KahzerxServer.onPlayerConnected(player);
         }
     }
 
-    @Mixin(ServerPlayerInteractionManager.class)
+    @Mixin(ServerPlayerGameMode.class)
     public static class PlayerBreak {
-        @Shadow @Final protected ServerPlayerEntity player;
+        @Shadow @Final protected ServerPlayer player;
 
-        @Shadow protected ServerWorld world;
+        @Shadow protected ServerLevel level;
 
-        @Inject(method = "tryBreakBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onBroken(Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V", shift = At.Shift.BEFORE))
+        @Inject(method = "destroyBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;destroy(Lnet/minecraft/world/level/LevelAccessor;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V", shift = At.Shift.BEFORE))
         private void onBroken(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-            KahzerxServer.onPlayerBreakBlock(player, world, pos);
+            KahzerxServer.onPlayerBreakBlock(player, level, pos);
         }
     }
 
     @Mixin(BlockItem.class)
     public static class PlayerPlace {
-        @Redirect(method = "place(Lnet/minecraft/item/ItemPlacementContext;)Lnet/minecraft/util/ActionResult;", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onPlaced(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/item/ItemStack;)V"))
-        private void onPlaced(Block instance, World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack) {
-            instance.onPlaced(world, pos, state, placer, itemStack);
-            if (placer instanceof ServerPlayerEntity) {
-                KahzerxServer.onPlayerPlaceBlock((ServerPlayerEntity) placer, world, pos);
+        @Redirect(method = "place(Lnet/minecraft/world/item/context/BlockPlaceContext;)Lnet/minecraft/world/InteractionResult;", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;setPlacedBy(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;)V"))
+        private void onPlaced(Block instance, Level world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack) {
+            instance.setPlacedBy(world, pos, state, placer, itemStack);
+            if (placer instanceof ServerPlayer) {
+                KahzerxServer.onPlayerPlaceBlock((ServerPlayer) placer, world, pos);
             }
         }
     }
 
-    @Mixin(ServerPlayerEntity.class)
+    @Mixin(ServerPlayer.class)
     public static class PlayerDied {
-        @Inject(method = "onDeath", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/damage/DamageTracker;getDeathMessage()Lnet/minecraft/text/Text;"))
+        @Inject(method = "die", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/CombatTracker;getDeathMessage()Lnet/minecraft/network/chat/Component;"))
         private void onPlayerDied(DamageSource source, CallbackInfo ci) {
-            KahzerxServer.onPlayerDied((ServerPlayerEntity) (Object) this);
+            KahzerxServer.onPlayerDied((ServerPlayer) (Object) this);
         }
 
-        @Inject(method = "swingHand", at = @At("RETURN"))
-        private void onPlayerClicker(Hand hand, CallbackInfo ci) {
-            KahzerxServer.onClick((ServerPlayerEntity) (Object) this);
+    }
+
+    // En 26.x ServerPlayer ya no sobrescribe swing: tanto handlePunch como swingAndResetAttackStrength acaban aquí.
+    @Mixin(LivingEntity.class)
+    public static class PlayerSwing {
+        @Inject(method = "swing(Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/item/component/SwingAnimation;Z)Z", at = @At("RETURN"))
+        private void onPlayerClicker(InteractionHand hand, SwingAnimation animation, boolean sendToSwingingEntity, CallbackInfoReturnable<Boolean> cir) {
+            if ((Object) this instanceof ServerPlayer player) {
+                KahzerxServer.onClick(player);
+            }
         }
     }
 
-    @Mixin(PlayerAdvancementTracker.class)
+    @Mixin(PlayerAdvancements.class)
     public static class PlayerAdvancement {
-        @Shadow private ServerPlayerEntity owner;
+        @Shadow private ServerPlayer player;
 
-        @Inject(method = "method_53637", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcast(Lnet/minecraft/text/Text;Z)V"))
-        private void onAdvancement(AdvancementEntry advancementEntry, AdvancementDisplay display, CallbackInfo ci) {
-            Text text = Text.translatable("chat.type.advancement." + display.getFrame().getChatAnnouncementText(advancementEntry, owner), owner.getDisplayName(), Advancement.getNameFromIdentity(advancementEntry));
+        // lambda de award(): holder.value().display().ifPresent(display -> ... broadcastSystemMessage(...))
+        @Inject(method = "lambda$award$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Z)V"))
+        private void onAdvancement(AdvancementHolder advancementEntry, DisplayInfo display, CallbackInfo ci) {
+            Component text = display.type().createAnnouncement(advancementEntry, player);
             KahzerxServer.onAdvancement(text.getString().replace("_", "\\_"));
         }
     }
 
-    @Mixin(ServerPlayerEntity.class)
+    @Mixin(ServerPlayer.class)
     public static class PlayerSleeping {
-        @Inject(method = "sleep", at = @At("HEAD"))
-        private void onSleep(BlockPos pos, CallbackInfo ci) {
-            KahzerxServer.onSleep((ServerPlayerEntity) (Object) this);
+        // En 26.x startSleeping devuelve si ha podido dormir; solo se avisa si lo ha hecho.
+        @Inject(method = "startSleeping", at = @At("RETURN"))
+        private void onSleep(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+            if (cir.getReturnValueZ()) {
+                KahzerxServer.onSleep((ServerPlayer) (Object) this);
+            }
         }
 
-        @Inject(method = "wakeUp", at = @At("HEAD"))
+        @Inject(method = "stopSleepInBed", at = @At("HEAD"))
         private void onWakeUp(boolean skipSleepTimer, boolean updateSleepingPlayers, CallbackInfo ci) {
             if (updateSleepingPlayers) {
-                KahzerxServer.onWakeUp((ServerPlayerEntity) (Object) this);
+                KahzerxServer.onWakeUp((ServerPlayer) (Object) this);
             }
         }
     }

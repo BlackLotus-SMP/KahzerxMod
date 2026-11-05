@@ -2,12 +2,12 @@ package com.kahzerx.kahzerxmod.extensions.discordExtension.utils;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -121,40 +121,37 @@ public class DiscordChatUtils {
         }
 
         Matcher m = url_patt.matcher(msg);
-        MutableText finalMsg = Text.literal("");
+        MutableComponent finalMsg = Component.literal("");
         if (fromDiscordUser != null) {
-            finalMsg.append(Text.literal("[Discord]").styled(style -> style.withColor(Formatting.GRAY)));
-            finalMsg.append(Text.literal(" ").styled(style -> style.withColor(Formatting.RESET)));
-            MutableText hover = Text.literal(String.format("Author: %s\n", fromDiscordUser.getAuthor().getName()));
+            finalMsg.append(Component.literal("[Discord]").withStyle(style -> style.withColor(ChatFormatting.GRAY)));
+            finalMsg.append(Component.literal(" ").withStyle(style -> style.withColor(ChatFormatting.RESET)));
+            MutableComponent hover = Component.literal(String.format("Author: %s\n", fromDiscordUser.getAuthor().getName()));
             if (fromDiscordUser.getMember() != null && fromDiscordUser.getMember().getNickname() != null) {
-                hover.append(Text.literal(String.format("NickName: %s\n", fromDiscordUser.getMember().getNickname())));
+                hover.append(Component.literal(String.format("NickName: %s\n", fromDiscordUser.getMember().getNickname())));
             }
-            hover.append(Text.literal(String.format("UserID: %s\n", fromDiscordUser.getAuthor().getId())));
-            hover.append(Text.literal(String.format("MessageID: %s\nChannelID: %s", fromDiscordUser.getMessageId(), fromDiscordUser.getChannel().getId())));
-            finalMsg.append(Text.literal("<" + fromDiscordUser.getAuthor().getName() + ">").styled(style -> style.withHoverEvent(
-                    new HoverEvent(
-                            HoverEvent.Action.SHOW_TEXT,
-                            hover
-                    )
+            hover.append(Component.literal(String.format("UserID: %s\n", fromDiscordUser.getAuthor().getId())));
+            hover.append(Component.literal(String.format("MessageID: %s\nChannelID: %s", fromDiscordUser.getMessageId(), fromDiscordUser.getChannel().getId())));
+            finalMsg.append(Component.literal("<" + fromDiscordUser.getAuthor().getName() + ">").withStyle(style -> style.withHoverEvent(
+                    new HoverEvent.ShowText(hover)
             )));
-            finalMsg.append(Text.literal(" ").styled(style -> style.withColor(Formatting.RESET)));
+            finalMsg.append(Component.literal(" ").withStyle(style -> style.withColor(ChatFormatting.RESET)));
         }
         boolean hasUrl = false;
         int prev = 0;
 
         while (m.find()) {
             hasUrl = true;
-            Text text = Text.literal(m.group(0)).styled((style -> style.withColor(Formatting.GRAY)
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, m.group(0)))
-                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Open URL")))));
-            finalMsg = finalMsg.append(Text.literal(msg.substring(prev, m.start()))).append(text);
+            Component text = Component.literal(m.group(0)).withStyle((style -> style.withColor(ChatFormatting.GRAY)
+                    .withClickEvent(new ClickEvent.OpenUrl(java.net.URI.create(m.group(0))))
+                    .withHoverEvent(new HoverEvent.ShowText(Component.literal("Open URL")))));
+            finalMsg = finalMsg.append(Component.literal(msg.substring(prev, m.start()))).append(text);
             prev = m.end();
         }
-        if (server.getPlayerManager() != null) {
+        if (server.getPlayerList() != null) {
             if (hasUrl) {
-                server.getPlayerManager().broadcast(finalMsg.append(msg.substring(prev)), false);
+                server.getPlayerList().broadcastSystemMessage(finalMsg.append(msg.substring(prev)), false);
             } else {
-                server.getPlayerManager().broadcast(finalMsg.append(Text.literal(msg)), false);
+                server.getPlayerList().broadcastSystemMessage(finalMsg.append(Component.literal(msg)), false);
             }
         } else {
             LOGGER.info(String.format("Server may not be initialized yet...\nError sending %s%n", msg));

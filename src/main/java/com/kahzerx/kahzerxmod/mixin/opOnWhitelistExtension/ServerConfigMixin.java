@@ -1,70 +1,41 @@
 package com.kahzerx.kahzerxmod.mixin.opOnWhitelistExtension;
 
-import com.google.gson.Gson;
 import com.kahzerx.kahzerxmod.extensions.opOnWhitelistExtension.OpOnWhitelistExtension;
-import com.mojang.authlib.GameProfile;
-import net.minecraft.server.ServerConfigEntry;
-import net.minecraft.server.ServerConfigList;
-import net.minecraft.server.WhitelistEntry;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
+import net.minecraft.server.players.NameAndId;
+import net.minecraft.server.players.PlayerList;
+import net.minecraft.server.players.StoredUserEntry;
+import net.minecraft.server.players.StoredUserList;
+import net.minecraft.server.players.UserWhiteList;
+import net.minecraft.server.players.UserWhiteListEntry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-
-@Mixin(ServerConfigList.class)
-public class ServerConfigMixin<K, V extends ServerConfigEntry<K>> {
+@Mixin(StoredUserList.class)
+public class ServerConfigMixin<K, V extends StoredUserEntry<K>> {
+    // UserWhiteList#add(UserWhiteListEntry) llama a super.add, así que pasa por aquí.
     @Inject(method = "add", at = @At("RETURN"))
-    public void onWhitelistAdd(V entry, CallbackInfo ci) {
-        if (OpOnWhitelistExtension.isExtensionEnabled && OpOnWhitelistExtension.server != null && entry instanceof WhitelistEntry) {
-            try {
-                JSONParser parser = new JSONParser();
-                JSONObject obj = (JSONObject) parser.parse(new Gson().toJson(entry));
-                Set<?> keys = obj.keySet();
-                if (keys.isEmpty()) {
-                    return;
-                }
-                Optional<?> k = keys.stream().findFirst();
-                Optional<GameProfile> profile = OpOnWhitelistExtension.server.getUserCache().getByUuid(UUID.fromString((String) ((JSONObject) obj.get(k.get())).get("id")));
-                if (profile.isEmpty()) {
-                    return;
-                }
-                GameProfile gameProfile = profile.get();
-                if (!OpOnWhitelistExtension.server.getPlayerManager().isOperator(gameProfile)) {
-                    OpOnWhitelistExtension.server.getPlayerManager().addToOperators(gameProfile);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+    public void onWhitelistAdd(V entry, CallbackInfoReturnable<Boolean> cir) {
+        if (OpOnWhitelistExtension.isExtensionEnabled && OpOnWhitelistExtension.server != null && entry instanceof UserWhiteListEntry whitelistEntry) {
+            NameAndId user = whitelistEntry.getUser();
+            if (user == null) {
+                return;
+            }
+            PlayerList playerList = OpOnWhitelistExtension.server.getPlayerList();
+            if (!playerList.isOp(user)) {
+                playerList.op(user);
             }
         }
     }
 
-    @Inject(method = "remove(Lnet/minecraft/server/ServerConfigEntry;)V", at = @At("RETURN"))
-    public void onWhitelistRemove(ServerConfigEntry<K> entry, CallbackInfo ci) {
-        if (OpOnWhitelistExtension.isExtensionEnabled && OpOnWhitelistExtension.server != null && entry instanceof WhitelistEntry) {
-            try {
-                JSONParser parser = new JSONParser();
-                JSONObject obj = (JSONObject) parser.parse(new Gson().toJson(entry));
-                Set<?> keys = obj.keySet();
-                if (keys.isEmpty()) {
-                    return;
-                }
-                Optional<?> k = keys.stream().findFirst();
-                Optional<GameProfile> profile = OpOnWhitelistExtension.server.getUserCache().getByUuid(UUID.fromString((String) ((JSONObject) obj.get(k.get())).get("id")));
-                if (profile.isEmpty()) {
-                    return;
-                }
-                GameProfile gameProfile = profile.get();
-                if (OpOnWhitelistExtension.server.getPlayerManager().isOperator(gameProfile)) {
-                    OpOnWhitelistExtension.server.getPlayerManager().removeFromOperators(gameProfile);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+    // Tanto UserWhiteList#remove(NameAndId) como StoredUserList#remove(StoredUserEntry) acaban en remove(K).
+    @Inject(method = "remove(Ljava/lang/Object;)Z", at = @At("RETURN"))
+    public void onWhitelistRemove(K user, CallbackInfoReturnable<Boolean> cir) {
+        if (OpOnWhitelistExtension.isExtensionEnabled && OpOnWhitelistExtension.server != null && (Object) this instanceof UserWhiteList && user instanceof NameAndId nameAndId) {
+            PlayerList playerList = OpOnWhitelistExtension.server.getPlayerList();
+            if (playerList.isOp(nameAndId)) {
+                playerList.deop(nameAndId);
             }
         }
     }

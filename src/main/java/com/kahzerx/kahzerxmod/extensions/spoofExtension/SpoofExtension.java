@@ -1,23 +1,24 @@
 package com.kahzerx.kahzerxmod.extensions.spoofExtension;
 
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.core.NonNullList;
 import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
 import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.inventory.EnderChestInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.GenericContainerScreenHandler;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerListener;
-import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-
 import java.util.HashMap;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.ContainerListener;
+import net.minecraft.world.inventory.PlayerEnderChestContainer;
+import net.minecraft.world.item.ItemStack;
 
 public class SpoofExtension extends GenericExtension implements Extensions {
     public SpoofExtension(HashMap<String, String> fileSettings) {
@@ -25,7 +26,7 @@ public class SpoofExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onRegisterCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public void onRegisterCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
         new SpoofCommand().register(dispatcher, this);
     }
 
@@ -34,66 +35,69 @@ public class SpoofExtension extends GenericExtension implements Extensions {
         return this.getSettings();
     }
 
-    public int spoofEC(ServerCommandSource source, String playerE) throws CommandSyntaxException {
-        ServerPlayerEntity player = source.getPlayer();
-        ServerPlayerEntity player2 = source.getServer().getPlayerManager().getPlayer(playerE);
+    public int spoofEC(CommandSourceStack source, String playerE) throws CommandSyntaxException {
+        ServerPlayer player = source.getPlayer();
+        ServerPlayer player2 = source.getServer().getPlayerList().getPlayerByName(playerE);
         if (player2 != null) {
-            EnderChestInventory enderChestInventory = player2.getEnderChestInventory();
+            PlayerEnderChestContainer enderChestInventory = player2.getEnderChestInventory();
             // Generar la pantalla de enderChest.
-            player.openHandledScreen(new SimpleNamedScreenHandlerFactory((i, playerInventory, playerEntity) ->
-                    GenericContainerScreenHandler.createGeneric9x3(i, playerInventory, enderChestInventory),
-                    Text.literal(String.format("%s stop hax >:(", player.getName().getString()))));
+            player.openMenu(new SimpleMenuProvider((i, playerInventory, playerEntity) ->
+                    ChestMenu.threeRows(i, playerInventory, enderChestInventory),
+                    Component.literal(String.format("%s stop hax >:(", player.getName().getString()))));
         } else {
-            source.sendFeedback(() -> Text.literal("player offline"), false);
+            source.sendSuccess(() -> Component.literal("player offline"), false);
         }
         return 1;
     }
 
-    public int spoofInv(ServerCommandSource source, String playerE) throws CommandSyntaxException {
+    public int spoofInv(CommandSourceStack source, String playerE) throws CommandSyntaxException {
         int invSize = 54;
         int hotBarSize = 9;
         int hotBarStartPos = 27;
         int invStartPos = 9;
-        Inventory inventory = new SimpleInventory(invSize);
-        ServerPlayerEntity player = source.getPlayer();
-        ServerPlayerEntity player2 = source.getServer().getPlayerManager().getPlayer(playerE);
+        Container inventory = new SimpleContainer(invSize);
+        ServerPlayer player = source.getPlayer();
+        ServerPlayer player2 = source.getServer().getPlayerList().getPlayerByName(playerE);
         assert player2 != null;
 
-        for (int i = 0; i < player2.getInventory().main.size(); i++) {
+        NonNullList<ItemStack> items = player2.getInventory().getNonEquipmentItems();
+        for (int i = 0; i < items.size(); i++) {
             if (i < hotBarSize) {
-                inventory.setStack(i + hotBarStartPos, player2.getInventory().main.get(i));
+                inventory.setItem(i + hotBarStartPos, items.get(i));
             } else {
-                inventory.setStack(i - invStartPos, player2.getInventory().main.get(i));
+                inventory.setItem(i - invStartPos, items.get(i));
             }
         }
 
+        // Mismo orden que la antigua lista Inventory#armor: pies, piernas, pecho, cabeza.
         int armorSlotStartPos = 45;
-        for (int j = 0; j < player2.getInventory().armor.size(); j++) {
-            inventory.setStack(j + armorSlotStartPos, player2.getInventory().armor.get(j));
+        EquipmentSlot[] armorSlots = {EquipmentSlot.FEET, EquipmentSlot.LEGS, EquipmentSlot.CHEST, EquipmentSlot.HEAD};
+        for (int j = 0; j < armorSlots.length; j++) {
+            inventory.setItem(j + armorSlotStartPos, player2.getItemBySlot(armorSlots[j]));
         }
 
         int offHandSlotPos = 36;
-        inventory.setStack(offHandSlotPos, player2.getInventory().offHand.get(0));
+        inventory.setItem(offHandSlotPos, player2.getItemBySlot(EquipmentSlot.OFFHAND));
 
-        ScreenHandlerListener listener = new ScreenHandlerListener() {
+        ContainerListener listener = new ContainerListener() {
             @Override
-            public void onSlotUpdate(ScreenHandler handler, int slotId, ItemStack stack) {
+            public void slotChanged(AbstractContainerMenu handler, int slotId, ItemStack stack) {
                 // source.getServer().getPlayerManager().saveAllPlayerData();
             }
 
             @Override
-            public void onPropertyUpdate(ScreenHandler handler, int property, int value) {
+            public void dataChanged(AbstractContainerMenu handler, int property, int value) {
 
             }
         };
 
-        player.openHandledScreen(
-                new SimpleNamedScreenHandlerFactory(
+        player.openMenu(
+                new SimpleMenuProvider(
                         (i, playerInventory, playerEntity) -> {
-                            GenericContainerScreenHandler invCont = GenericContainerScreenHandler.createGeneric9x6(i, playerInventory, inventory);
-                            invCont.addListener(listener);
+                            ChestMenu invCont = ChestMenu.sixRows(i, playerInventory, inventory);
+                            invCont.addSlotListener(listener);
                             return invCont;
-                        }, Text.literal(String.format("%s stop hax >:(", player.getName().getString()))));
+                        }, Component.literal(String.format("%s stop hax >:(", player.getName().getString()))));
         return 1;
     }
 }

@@ -1,40 +1,40 @@
 package com.kahzerx.kahzerxmod.mixin.playerDropsSkullExtension;
 
 import com.kahzerx.kahzerxmod.extensions.playerDropsSkullExtension.PlayerDropsSkullExtension;
-import com.mojang.authlib.GameProfile;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.damage.DamageTypes;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.ItemScatterer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Containers;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.ResolvableProfile;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-
-@Mixin(ServerPlayerEntity.class)
-public abstract class PlayerEntityMixin extends PlayerEntity {
-    public PlayerEntityMixin(World world, BlockPos pos, float yaw, GameProfile gameProfile) {
-        super(world, pos, yaw, gameProfile);
-    }
-
-    @Override
-    protected void dropLoot(DamageSource source, boolean causedByPlayer) {
-        super.dropLoot(source, causedByPlayer);
-        if (PlayerDropsSkullExtension.isExtensionEnabled && source.isOf(DamageTypes.LIGHTNING_BOLT)) {
-            if ((causedByPlayer && random.nextDouble() < 0.12D) || (!causedByPlayer && random.nextDouble() < 0.30D)) {
+@Mixin(LivingEntity.class)
+public abstract class PlayerEntityMixin {
+    @Inject(method = "dropFromLootTable(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;Z)V", at = @At("TAIL"))
+    private void onDropFromLootTable(ServerLevel level, DamageSource source, boolean causedByPlayer, CallbackInfo ci) {
+        if (!((Object) this instanceof ServerPlayer player)) {
+            return;
+        }
+        if (PlayerDropsSkullExtension.isExtensionEnabled && source.is(DamageTypes.LIGHTNING_BOLT)) {
+            if ((causedByPlayer && player.getRandom().nextDouble() < 0.12D) || (!causedByPlayer && player.getRandom().nextDouble() < 0.30D)) {
                 ItemStack stack = new ItemStack(Items.PLAYER_HEAD);
-                NbtCompound compound = stack.getOrCreateNbt();
-                compound.putString("SkullOwner", this.getName().getString());
-                stack.writeNbt(compound);
+                stack.set(DataComponents.PROFILE, ResolvableProfile.createUnresolved(player.getName().getString()));
+                double x = player.getX();
+                double y = player.getY();
+                double z = player.getZ();
+                // Se suelta con retraso para que el propio rayo no queme la cabeza; el drop se hace en el hilo del servidor.
                 new Thread(() -> {
                     try {
                         Thread.sleep(500L);
-                        ItemScatterer.spawn(this.getWorld(), this.getX(), this.getY(), this.getZ(), stack);
+                        level.getServer().execute(() -> Containers.dropItemStack(level, x, y, z, stack));
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

@@ -1,30 +1,30 @@
 package com.kahzerx.kahzerxmod.extensions.sitExtension;
 
 import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.network.packet.s2c.play.EntityTrackerUpdateS2CPacket;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import net.minecraft.server.level.ServerPlayer;
 
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.literal;
 
 public class SitCommand {
-    public void register(CommandDispatcher<ServerCommandSource> dispatcher, SitExtension extension) {
+    public void register(CommandDispatcher<CommandSourceStack> dispatcher, SitExtension extension) {
         dispatcher.register(literal("sit").
                 requires(server -> extension.extensionSettings().isEnabled()).
                 executes(context -> {
-                    ServerPlayerEntity player = context.getSource().getPlayer();
+                    ServerPlayer player = context.getSource().getPlayer();
                     if (player == null) {
                         return 1;
                     }
-                    SitEntity sitEntity = new SitEntity(player.getWorld(), player.getX(), player.getY() - 0.16, player.getZ());
-                    if (!player.isOnGround()) {
+                    SitEntity sitEntity = new SitEntity(player.level(), player.getX(), player.getY() - 0.16, player.getZ());
+                    if (!player.onGround()) {
                         return 1;
                     }
                     sitEntity.setSitEntity(true);
-                    player.getWorld().spawnEntity(sitEntity);
-                    player.setSneaking(false);
+                    player.level().addFreshEntity(sitEntity);
+                    player.setShiftKeyDown(false);
                     player.startRiding(sitEntity);
-                    player.networkHandler.sendPacket(new EntityTrackerUpdateS2CPacket(player.getId(), player.getDataTracker().getChangedEntries()));
+                    player.connection.send(new ClientboundSetEntityDataPacket(player.getId(), player.getEntityData().getNonDefaultValues()));
                     return 1;
                 }));
     }

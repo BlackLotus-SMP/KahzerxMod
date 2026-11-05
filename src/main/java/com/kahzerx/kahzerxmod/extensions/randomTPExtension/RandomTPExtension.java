@@ -1,5 +1,7 @@
 package com.kahzerx.kahzerxmod.extensions.randomTPExtension;
 
+import net.minecraft.world.level.storage.LevelData;
+import com.kahzerx.kahzerxmod.utils.PlayerUtils;
 import com.kahzerx.kahzerxmod.ExtensionManager;
 import com.kahzerx.kahzerxmod.Extensions;
 import com.kahzerx.kahzerxmod.extensions.ExtensionSettings;
@@ -7,15 +9,14 @@ import com.kahzerx.kahzerxmod.extensions.GenericExtension;
 import com.kahzerx.kahzerxmod.extensions.permsExtension.PermsExtension;
 import com.kahzerx.kahzerxmod.utils.MarkEnum;
 import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.block.Blocks;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.Heightmap;
-import net.minecraft.world.World;
-
 import java.util.HashMap;
 import java.util.Random;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.Heightmap;
 
 public class RandomTPExtension extends GenericExtension implements Extensions {
     private PermsExtension permsExtension;
@@ -30,7 +31,7 @@ public class RandomTPExtension extends GenericExtension implements Extensions {
     }
 
     @Override
-    public void onRegisterCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public void onRegisterCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
         new RandomTPCommand().register(dispatcher, this);
     }
 
@@ -43,13 +44,13 @@ public class RandomTPExtension extends GenericExtension implements Extensions {
         return this.getSettings();
     }
 
-    public int tpAndSpawnPoint(ServerCommandSource source) {
-        ServerPlayerEntity player = source.getPlayer();
+    public int tpAndSpawnPoint(CommandSourceStack source) {
+        ServerPlayer player = source.getPlayer();
         if (player == null) {
             return 1;
         }
-        if (player.getEntityWorld().getRegistryKey() != World.OVERWORLD) {
-            source.sendFeedback(MarkEnum.CROSS.appendMessage("You can only run this command in the overworld"), false);
+        if (player.level().dimension() != Level.OVERWORLD) {
+            source.sendSuccess(MarkEnum.CROSS.appendMessage("You can only run this command in the overworld"), false);
             return 1;
         }
         final int min = -10000;
@@ -60,18 +61,15 @@ public class RandomTPExtension extends GenericExtension implements Extensions {
         double z = min + (max + max) * rand.nextDouble();
         final double y = 255;
 
-        player.teleport(x, y, z);
-        BlockPos pos1 = source.getWorld().getTopPosition(Heightmap.Type.WORLD_SURFACE, new BlockPos((int) x, (int) y, (int) z));
+        PlayerUtils.teleportToWithTicket(player, x, y, z);
+        BlockPos pos1 = source.getLevel().getHeightmapPos(Heightmap.Types.WORLD_SURFACE, new BlockPos((int) x, (int) y, (int) z));
         BlockPos posBelow = new BlockPos(pos1.getX(), pos1.getY() - 1, pos1.getZ());
-        if (source.getWorld().getBlockState(posBelow).getBlock().equals(Blocks.WATER) || source.getWorld().getBlockState(posBelow).getBlock().equals(Blocks.LAVA)) {
+        if (source.getLevel().getBlockState(posBelow).getBlock().equals(Blocks.WATER) || source.getLevel().getBlockState(posBelow).getBlock().equals(Blocks.LAVA)) {
             tpAndSpawnPoint(source);
         } else {
-            player.teleport(x, pos1.getY(), z);
-            player.setSpawnPoint(
-                    player.getEntityWorld().getRegistryKey(),
-                    player.getBlockPos(),
-                    0.0F,
-                    true,
+            PlayerUtils.teleportToWithTicket(player, x, pos1.getY(), z);
+            player.setRespawnPosition(
+                    new ServerPlayer.RespawnConfig(LevelData.RespawnData.of(player.level().dimension(), player.blockPosition(), 0.0F, 0.0F), true),
                     false
             );
         }
