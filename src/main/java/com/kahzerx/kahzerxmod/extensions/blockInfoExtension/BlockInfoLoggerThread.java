@@ -2,10 +2,13 @@ package com.kahzerx.kahzerxmod.extensions.blockInfoExtension;
 
 import com.kahzerx.kahzerxmod.extensions.blockInfoExtension.helpers.BlockActionLog;
 
+import java.util.concurrent.TimeUnit;
+
 public class BlockInfoLoggerThread extends Thread {
-    private boolean running = true;
+    // Set from the server thread, read here: volatile, or this thread may never see the change.
+    private volatile boolean running = true;
     private final BlockInfoExtension extension;
-    private boolean shouldClear = false;
+    private volatile boolean shouldClear = false;
 
     public BlockInfoLoggerThread(String name, BlockInfoExtension extension) {
         super(name);
@@ -19,12 +22,11 @@ public class BlockInfoLoggerThread extends Thread {
                 extension.db.getQuery().clearLogTable();
                 shouldClear = false;
             }
-            if (BlockInfoExtension.queue.isEmpty()) {
-                continue;
-            }
             try {
-                BlockActionLog action = BlockInfoExtension.queue.take();
-                if (this.extension.getSettings().isEnabled()) {
+                // Sleeps until an action arrives instead of spinning on isEmpty(), which kept a
+                // whole core busy. The timeout bounds how long a stop or a clear waits.
+                BlockActionLog action = BlockInfoExtension.queue.poll(1, TimeUnit.SECONDS);
+                if (action != null && this.extension.getSettings().isEnabled()) {
                     extension.db.getQuery().logAction(action);
                 }
             } catch (InterruptedException e) {
