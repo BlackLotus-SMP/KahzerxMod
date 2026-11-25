@@ -43,6 +43,7 @@ import com.kahzerx.kahzerxmod.extensions.spoofExtension.SpoofExtension;
 import com.kahzerx.kahzerxmod.extensions.survivalExtension.SurvivalExtension;
 import com.kahzerx.kahzerxmod.extensions.totopoExtension.TotopoExtension;
 import com.kahzerx.kahzerxmod.extensions.villagersFollowEmeraldExtension.VillagersFollowEmeraldExtension;
+import com.kahzerx.kahzerxmod.extensions.lobotomizeVillagersExtension.LobotomizeVillagersExtension;
 import com.kahzerx.kahzerxmod.extensions.whereExtension.WhereExtension;
 import com.kahzerx.kahzerxmod.utils.FileUtils;
 import org.apache.logging.log4j.LogManager;
@@ -149,6 +150,7 @@ public class ExtensionManager {
         this.registerExtension(new DeepslateInstaMineExtension(fileSettings));
         this.registerExtension(new RenewableElytraExtension(fileSettings));
         this.registerExtension(new VillagersFollowEmeraldExtension(fileSettings));
+        this.registerExtension(new LobotomizeVillagersExtension(fileSettings));
         this.registerExtension(new SolExtension(fileSettings));
         this.registerExtension(new KloneExtension(fileSettings));
         this.registerExtension(new MaintenanceExtension(fileSettings));

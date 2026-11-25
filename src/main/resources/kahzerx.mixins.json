@@ -18,6 +18,7 @@
     "fbiExtension.PlayerManagerMixin",
     "helperKickExtension.KickCommandExtension",
     "itemFormattedExtension.AnvilScreenHandlerMixin",
+    "lobotomizeVillagersExtension.VillagerLobotomyMixin",
     "kloneExtension.NetworkHandlerMixin",
     "maintenanceExtension.PlayerManagerMixin",
     "noReports.ChatMessagePacketMixin",
