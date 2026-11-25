@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - master
+permissions:
+  contents: write
 jobs:
   build:
     strategy:
@@ -25,11 +27,17 @@ jobs:
         run: chmod +x ./gradlew
       - name: build
         run: ./gradlew build
+      - name: Move tag
+        run: |
+          git tag -f 26.3
+          git push -f origin 26.3
       - name: Upload
-        uses: marvinpinto/action-automatic-releases@latest
+        uses: softprops/action-gh-release@v2
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          tag_name: 26.3
+          name: 26.3
           prerelease: false
-          automatic_release_tag: 26.3
+          make_latest: true
+          fail_on_unmatched_files: true
           files: |
             build/libs/*.jar
